@@ -862,10 +862,10 @@ sync_thread_levels_g(
 {
 	ulint		i;
 
-	for (i = 0; i < arr->n_elems; i++) {
+	for (i = 0; i < arr->size(); i++) {
 		const sync_level_t*	slot;
 
-		slot = &arr->elems[i];
+		slot = (const sync_level_t*)&arr[i];
 
 		if (slot->latch != NULL && slot->level <= limit) {
 			if (warn) {
@@ -897,10 +897,10 @@ sync_thread_levels_contain(
 {
 	ulint		i;
 
-	for (i = 0; i < arr->n_elems; i++) {
+	for (i = 0; i < arr->size(); i++) {
 		const sync_level_t*	slot;
 
-		slot = &arr->elems[i];
+		slot = (const sync_level_t*)&arr[i];
 
 		if (slot->latch != NULL && slot->level == level) {
 
@@ -944,10 +944,10 @@ sync_thread_levels_contains(
 
 	arr = thread_slot->levels;
 
-	for (i = 0; i < arr->n_elems; i++) {
+	for (i = 0; i < arr->size(); i++) {
 		sync_level_t*	slot;
 
-		slot = &arr->elems[i];
+		slot = (sync_level_t*)&arr[i];
 
 		if (slot->latch != NULL && slot->level == level) {
 
@@ -993,10 +993,10 @@ sync_thread_levels_nonempty_gen(
 
 	arr = thread_slot->levels;
 
-	for (i = 0; i < arr->n_elems; ++i) {
+	for (i = 0; i < arr->size(); ++i) {
 		const sync_level_t*	slot;
 
-		slot = &arr->elems[i];
+		slot = (const sync_level_t*)&arr[i];
 
 		if (slot->latch != NULL
 		    && (!dict_mutex_allowed
@@ -1053,10 +1053,10 @@ sync_thread_levels_nonempty_trx(
 
 	arr = thread_slot->levels;
 
-	for (i = 0; i < arr->n_elems; ++i) {
+	for (i = 0; i < arr->size(); ++i) {
 		const sync_level_t*	slot;
 
-		slot = &arr->elems[i];
+		slot = (const sync_level_t*)&arr[i];
 
 		if (slot->latch != NULL
 		    && (!has_search_latch
@@ -1331,7 +1331,7 @@ levels_ok:
 
 	sync_level.latch = latch;
 	sync_level.level = level;
-	array->elems.push_back(sync_level);
+	array->push_back(sync_level);
 
 	mutex_exit(&sync_thread_mutex);
 }
@@ -1377,14 +1377,14 @@ sync_thread_reset_level(
 
 	array = thread_slot->levels;
 
-	for (std::vector<sync_level_t>::iterator it = array->elems.begin(); it != array->elems.end(); ++it) {
+	for (std::vector<sync_level_t>::iterator it = array->begin(); it != array->end(); ++it) {
 		sync_level_t level = *it;
 
 		if (level.latch != latch) {
 			continue;
 		}
 
-		array->elems.erase(it);
+		array->erase(it);
 		mutex_exit(&sync_thread_mutex);
 		return(TRUE);
 	}
@@ -1471,7 +1471,6 @@ sync_thread_level_arrays_free(void)
 
 		/* If this slot was allocated then free the slot memory too. */
 		if (slot->levels != NULL) {
-			slot->levels->elems.erase(slot->levels->elems.begin(),slot->levels->elems.end());
 			delete slot->levels;
 		}
 	}
