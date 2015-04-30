@@ -59,15 +59,16 @@ array->elems.end(); ++it) and runtime check fails on comparison
 it != array->elems.end() that is correct and standard way to do end
 of range comparison.
 Disable this "Checked Iterators" for Windows and Debug if defined.
-*/
+
 #ifdef UNIV_DEBUG
 #ifdef __WIN__
 #ifdef _ITERATOR_DEBUG_LEVEL
 #undef  _ITERATOR_DEBUG_LEVEL
 #define _ITERATOR_DEBUG_LEVEL 0
-#endif /* _ITERATOR_DEBUG_LEVEL */
-#endif /* __WIN__*/
-#endif /* UNIV_DEBUG */
+#endif
+#endif
+#endif
+*/
 
 #include <vector>
 
@@ -251,11 +252,8 @@ UNIV_INTERN ibool	sync_order_checks_on	= FALSE;
 static const ulint SYNC_THREAD_N_LEVELS = 10000;
 
 /** Array for tracking sync levels per thread. */
-struct sync_arr_t {
-	ulint		n_elems;	/*!< Number of elements in the array */
+typedef std::vector<sync_level_t> sync_arr_t;
 
-	std::vector<sync_level_t>	elems;		/*!< Vector of elements */
-};
 
 /** Mutexes or rw-locks held by a thread */
 struct sync_thread_t{
@@ -1226,7 +1224,7 @@ sync_thread_add_level(
 	if (thread_slot == NULL) {
 
 		/* We have to allocate the level array for a new thread */
-		array = static_cast<sync_arr_t*>(calloc(1, sizeof(sync_arr_t)));
+		array = new sync_arr_t();
 		ut_a(array != NULL);
 		thread_slot = sync_thread_level_arrays_find_free();
 		thread_slot->levels = array;
@@ -1456,7 +1454,6 @@ sync_thread_add_level(
 
 levels_ok:
 
-	array->n_elems++;
 	sync_level.latch = latch;
 	sync_level.level = level;
 	array->elems.push_back(sync_level);
@@ -1513,7 +1510,6 @@ sync_thread_reset_level(
 		}
 
 		array->elems.erase(it);
-		array->n_elems--;
 		mutex_exit(&sync_thread_mutex);
 		return(TRUE);
 	}
@@ -1602,8 +1598,7 @@ sync_thread_level_arrays_free(void)
 		/* If this slot was allocated then free the slot memory too. */
 		if (slot->levels != NULL) {
 			slot->levels->elems.erase(slot->levels->elems.begin(),slot->levels->elems.end());
-			free(slot->levels);
-			slot->levels = NULL;
+			delete slot->levels;
 		}
 	}
 
