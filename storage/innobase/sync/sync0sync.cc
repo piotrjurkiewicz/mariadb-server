@@ -865,7 +865,7 @@ sync_thread_levels_g(
 	for (i = 0; i < arr->size(); i++) {
 		const sync_level_t*	slot;
 
-		slot = (const sync_level_t*)&arr[i];
+		slot = (const sync_level_t*)&(arr->at(i));
 
 		if (slot->latch != NULL && slot->level <= limit) {
 			if (warn) {
@@ -900,7 +900,7 @@ sync_thread_levels_contain(
 	for (i = 0; i < arr->size(); i++) {
 		const sync_level_t*	slot;
 
-		slot = (const sync_level_t*)&arr[i];
+		slot = (const sync_level_t*)&(arr->at(i));
 
 		if (slot->latch != NULL && slot->level == level) {
 
@@ -947,7 +947,7 @@ sync_thread_levels_contains(
 	for (i = 0; i < arr->size(); i++) {
 		sync_level_t*	slot;
 
-		slot = (sync_level_t*)&arr[i];
+		slot = (sync_level_t*)&(arr->at(i));
 
 		if (slot->latch != NULL && slot->level == level) {
 
@@ -996,7 +996,7 @@ sync_thread_levels_nonempty_gen(
 	for (i = 0; i < arr->size(); ++i) {
 		const sync_level_t*	slot;
 
-		slot = (const sync_level_t*)&arr[i];
+		slot = (const sync_level_t*)&(arr->at(i));
 
 		if (slot->latch != NULL
 		    && (!dict_mutex_allowed
@@ -1056,7 +1056,7 @@ sync_thread_levels_nonempty_trx(
 	for (i = 0; i < arr->size(); ++i) {
 		const sync_level_t*	slot;
 
-		slot = (const sync_level_t*)&arr[i];
+		slot = (const sync_level_t*)&(arr->at(i));
 
 		if (slot->latch != NULL
 		    && (!has_search_latch
