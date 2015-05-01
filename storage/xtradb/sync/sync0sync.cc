@@ -50,28 +50,6 @@ Created 9/5/1995 Heikki Tuuri
 
 #include <vector>
 
-/* There is a bug in Visual Studio 2010.
-Visual Studio has a feature "Checked Iterators". In a debug build, every
-iterator operation is checked at runtime for errors, e.g., out of range.
-Because of bug there is runtime error on following code
-for (std::vector<sync_level_t>::iterator it = array->elems.begin(); it !=
-array->elems.end(); ++it) and runtime check fails on comparison
-it != array->elems.end() that is correct and standard way to do end
-of range comparison.
-Disable this "Checked Iterators" for Windows and Debug if defined.
-
-#ifdef UNIV_DEBUG
-#ifdef __WIN__
-#ifdef _ITERATOR_DEBUG_LEVEL
-#undef  _ITERATOR_DEBUG_LEVEL
-#define _ITERATOR_DEBUG_LEVEL 0
-#endif
-#endif
-#endif
-*/
-
-#include <vector>
-
 /*
 	REASONS FOR IMPLEMENTING THE SPIN LOCK MUTEX
 	============================================
