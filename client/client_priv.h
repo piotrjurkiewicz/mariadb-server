@@ -94,6 +94,7 @@ enum options_client
   OPT_SSL_CRL, OPT_SSL_CRLPATH,
   OPT_USE_GTID,
   OPT_GALERA_SST_MODE,
+  OPT_INNODB_OPTIMIZE_KEYS, /* mysqldump */
   OPT_MAX_CLIENT_OPTION /* should be always the last */
 };
 
