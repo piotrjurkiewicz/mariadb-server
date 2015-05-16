@@ -3370,6 +3370,7 @@ bool sys_var_pluginvar::session_is_default(THD *thd)
     return getopt_ulonglong2double(option.def_value) == *(double*)value;
   default:
     DBUG_ASSERT(0);
+    return 0;                                /* Keep compiler happy */
   }
 }
 

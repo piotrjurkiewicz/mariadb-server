@@ -105,7 +105,7 @@ static const char *operator_names[] = {
 const char *
 grn_operator_to_string(grn_operator op)
 {
-  if (GRN_OP_PUSH <= op && op <= GRN_OP_GET_MEMBER) {
+  if (op <= GRN_OP_GET_MEMBER) {
     return operator_names[op];
   } else {
     return "unknown";
@@ -336,7 +336,7 @@ grn_operator_exec_equal(grn_ctx *ctx, grn_obj *x, grn_obj *y)
 grn_bool
 grn_operator_exec_not_equal(grn_ctx *ctx, grn_obj *x, grn_obj *y)
 {
-  grn_bool r;
+  grn_bool r= 0;
   GRN_API_ENTER;
   DO_EQ(x, y, r);
   GRN_API_RETURN(!r);

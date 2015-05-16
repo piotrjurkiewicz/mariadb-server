@@ -338,8 +338,8 @@ fil_compress_page(
 
 	/* Actual write needs to be alligned on block size */
 	if (write_size % block_size) {
-		size_t tmp = write_size;
 #ifdef UNIV_DEBUG
+		size_t tmp = write_size;
 		ut_a(block_size > 0);
 #endif
 		write_size =  (size_t)ut_uint64_align_up((ib_uint64_t)write_size, block_size);
