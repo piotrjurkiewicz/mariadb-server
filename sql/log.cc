@@ -6694,7 +6694,6 @@ int MYSQL_BIN_LOG::write_cache(THD *thd, IO_CACHE *cache)
         return ER_ERROR_ON_WRITE;
     status_var_add(thd->status_var.binlog_bytes_written, length);
 
-    cache->read_pos=cache->read_end;		// Mark buffer used up
   } while ((length= my_b_fill(cache)));
 
   DBUG_ASSERT(carry == 0);
