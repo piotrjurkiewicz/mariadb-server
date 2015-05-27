@@ -50,7 +50,11 @@ static MYSQL_SYSVAR_STR(filekey, filekey,
 
 static MYSQL_SYSVAR_ENUM(encryption_algorithm, encryption_algorithm,
   PLUGIN_VAR_RQCMDARG | PLUGIN_VAR_READONLY,
-  "Encryption algorithm to use, aes_ctr is the recommended one.",
+  "Encryption algorithm to use"
+#ifdef HAVE_EncryptAes128Ctr
+  ", aes_ctr is the recommended one."
+#endif
+  ,
   NULL, NULL, 0, &encryption_algorithm_typelib);
 
 static struct st_mysql_sys_var* settings[] = {
