@@ -30,7 +30,7 @@ Created 3/14/2011 Jimmy Yang
 #include <mysql_version.h>
 #include <mysql/plugin.h>
 #include <my_dir.h>
-#include "my_thread.h"
+#include "my_pthread.h"
 #include "my_sys.h"
 #include "m_string.h"
 #include "sql_plugin.h"
@@ -42,7 +42,6 @@ Created 3/14/2011 Jimmy Yang
 #include "transaction.h"
 #include "sql_handler.h"
 #include "handler.h"
-#include "mysqld_thd_manager.h"
 
 #include "log_event.h"
 #include "innodb_config.h"
@@ -86,8 +85,8 @@ handler_create_thd(
 		return(NULL);
 	}
 
-	thd->get_protocol_classic()->init_net((st_vio *) 0);
-	thd->set_new_thread_id();
+	my_net_init(&thd->net,(st_vio*) 0, 0);
+	thd->thread_id= thd->variables.pseudo_thread_id= thread_id++;
 	thd->thread_stack = reinterpret_cast<char*>(&thd);
 	thd->store_globals();
 
@@ -113,13 +112,13 @@ handler_thd_attach(
 	THD*	thd = static_cast<THD*>(my_thd);
 
 	if (original_thd) {
-          *original_thd = static_cast<THD*>(my_get_thread_local(THR_THD));
+          *original_thd = my_pthread_getspecific(THD*, THR_THD);
 		assert(thd->mysys_var);
 	}
 
-	my_set_thread_local(THR_THD, thd);
-	my_set_thread_local(THR_MALLOC, &thd->mem_root);
-	set_mysys_thread_var(thd->mysys_var);
+	my_pthread_setspecific_ptr(THR_THD, thd);
+	my_pthread_setspecific_ptr(THR_MALLOC, &thd->mem_root);
+	set_mysys_var(thd->mysys_var);
 }
 
 /**********************************************************************//**
@@ -372,8 +371,8 @@ handler_close_thd(
 	THD* thd= static_cast<THD*>(my_thd);
 
 	/* destructor will not free it, because net.vio is 0. */
-	thd->get_protocol_classic()->end_net();
-	thd->release_resources();
+	net_end(&thd->net);
+	thd->cleanup();
 	delete (thd);
 }
 
