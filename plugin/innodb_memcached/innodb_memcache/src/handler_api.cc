@@ -45,22 +45,39 @@ Created 3/14/2011 Jimmy Yang
 
 #include "log_event.h"
 #include "innodb_config.h"
-#include "binlog.h"
+#include "log.h"
 
 /** Some handler functions defined in sql/sql_table.cc and sql/handler.cc etc.
 and being used here */
+
+/** function, defined in sql/handler.cc */
 extern int write_bin_log(THD *thd, bool clear_error,
 			 const char *query, size_t query_length,
 			 bool is_trans= false);
 
+/** Log_func function type, defined in sql/handler.cc */
+typedef bool Log_func(THD*, TABLE*, bool, MY_BITMAP*,
+                      uint, const uchar*, const uchar*);
+
 /** function to close a connection and thd, defined in sql/handler.cc */
 extern void ha_close_connection(THD* thd);
 
-/** binlog a row operation */
+/** binlog a row operation, defined in sql/handler.cc */
 extern int binlog_log_row(TABLE*          table,
 			  const uchar     *before_record,
 			  const uchar     *after_record,
 			  Log_func*       log_func);
+
+/** binlog handlerton global variable, defined in sql/log.cc */
+extern handlerton *binlog_hton;
+
+/**
+ Check whether binlog_hton has valid slot and enabled
+*/
+static bool binlog_enabled()
+{
+	return(binlog_hton && binlog_hton->slot != HA_SLOT_UNDEF);
+}
 
 /**********************************************************************//**
 Create a THD object.
@@ -216,8 +233,8 @@ handler_binlog_commit(
 {
 	THD*		thd = static_cast<THD*>(my_thd);
 
-	if (tc_log) {
-		tc_log->commit(thd, true);
+	if (binlog_hton) {
+		binlog_hton->commit(binlog_hton, thd, true);
 	}
 	trans_commit_stmt(thd);
 }
@@ -237,8 +254,8 @@ handler_binlog_rollback(
 	  on deadlocks. So no special handling for this flag is needed.
 	*/
 	assert(! thd->transaction_rollback_request);
-	if (tc_log) {
-		tc_log->rollback(thd, true);
+	if (binlog_hton) {
+		binlog_hton->rollback(binlog_hton, thd, true);
 	}
 	trans_rollback_stmt(thd);
 }
