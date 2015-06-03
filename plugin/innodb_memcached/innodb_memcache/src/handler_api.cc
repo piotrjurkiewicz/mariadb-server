@@ -163,11 +163,11 @@ handler_open_table(
 
 	/* For flush, we need to request exclusive mdl lock. */
 	if (lock_type == HDL_FLUSH) {
-		MDL_REQUEST_INIT(&tables.mdl_request,
+		tables.mdl_request.init(
 				 MDL_key::TABLE, db_name, table_name,
 				 MDL_EXCLUSIVE, MDL_TRANSACTION);
 	} else {
-		MDL_REQUEST_INIT(&tables.mdl_request,
+		tables.mdl_request.init(
 				 MDL_key::TABLE, db_name, table_name,
 				 (lock_mode > TL_READ)
 				 ? MDL_SHARED_WRITE : MDL_SHARED_READ,
