@@ -1903,6 +1903,33 @@ error:
   DBUG_RETURN(TRUE);
 }
 
+/*
+  Shutdown memcached plugin before binlog shuts down
+*/
+void memcached_shutdown(void)
+{
+  struct st_plugin_int *plugin;
+  if (initialized)
+  {
+
+    for (uint i= 0; i < plugin_array.elements; i++)
+    {
+      plugin= *dynamic_element(&plugin_array, i, struct st_plugin_int **);
+
+      if (plugin->state == PLUGIN_IS_READY
+	  && strcmp(plugin->name.str, "daemon_memcached") == 0)
+      {
+	plugin_deinitialize(plugin, true);
+
+        mysql_mutex_lock(&LOCK_plugin);
+	plugin->state= PLUGIN_IS_DYING;
+	plugin_del(plugin);
+        mysql_mutex_unlock(&LOCK_plugin);
+      }
+    }
+
+  }
+}
 
 void plugin_shutdown(void)
 {
