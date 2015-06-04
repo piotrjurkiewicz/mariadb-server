@@ -3159,6 +3159,8 @@ innobase_init(
 
 	innobase_hton->table_options = innodb_table_option_list;
 
+	innobase_hton->data = &innodb_api_cb;
+
 	innodb_remember_check_sysvar_funcs();
 
 	ut_a(DATA_MYSQL_TRUE_VARCHAR == (ulint)MYSQL_TYPE_VARCHAR);

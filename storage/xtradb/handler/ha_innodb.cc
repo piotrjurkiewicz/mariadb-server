@@ -3527,6 +3527,8 @@ innobase_init(
         innobase_hton->fake_trx_id=wsrep_fake_trx_id;
 #endif /* WITH_WSREP */
 
+	innobase_hton->data = &innodb_api_cb;
+
 	innodb_remember_check_sysvar_funcs();
 
 	ut_a(DATA_MYSQL_TRUE_VARCHAR == (ulint)MYSQL_TYPE_VARCHAR);
