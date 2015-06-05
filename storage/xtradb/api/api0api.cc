@@ -625,6 +625,19 @@ ib_trx_begin(
 }
 
 /*****************************************************************//**
+Check if transaction is read_only
+@return transaction read_only status */
+ib_u32_t
+ib_trx_read_only(
+/*=============*/
+	ib_trx_t	ib_trx)		/*!< in: trx handle */
+{
+	trx_t*		trx = (trx_t*) ib_trx;
+
+	return(trx->read_only);
+}
+
+/*****************************************************************//**
 Get the transaction's state.
 @return	transaction state */
 UNIV_INTERN
@@ -4022,6 +4035,19 @@ ib_cfg_get_cfg()
 	}
 
 	return(cfg_status);
+}
+
+/*****************************************************************//**
+Wrapper of ut_strerr() which converts an InnoDB error number to a
+human readable text message.
+@return string, describing the error */
+
+const char*
+ib_ut_strerr(
+/*=========*/
+	ib_err_t	num)	/*!< in: error number */
+{
+	return(ut_strerr(num));
 }
 
 /*****************************************************************//**

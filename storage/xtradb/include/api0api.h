@@ -495,6 +495,13 @@ ib_trx_state(
 	ib_trx_t	ib_trx);	/*!< in: trx handle */
 
 /*****************************************************************//**
+Check if the transaction is read_only */
+ib_u32_t
+ib_trx_read_only(
+/*=============*/
+        ib_trx_t        ib_trx);         /*!< in: trx handle */
+
+/*****************************************************************//**
 Release the resources of the transaction. If the transaction was
 selected as a victim by InnoDB and rolled back then use this function
 to free the transaction handle.
@@ -1300,5 +1307,15 @@ ib_u64_t
 ib_trx_get_start_time(
 /*==================*/
 	ib_trx_t	ib_trx);	/*!< in: transaction */
+
+/*****************************************************************//**
+Wrapper of ut_strerr() which converts an InnoDB error number to a
+human readable text message.
+@return string, describing the error */
+
+const char*
+ib_ut_strerr(
+/*=========*/
+	ib_err_t	num);		/*!< in: error number */
 
 #endif /* api0api_h */
