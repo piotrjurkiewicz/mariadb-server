@@ -53,7 +53,7 @@ and being used here */
 /** function, defined in sql/handler.cc */
 extern int write_bin_log(THD *thd, bool clear_error,
 			 const char *query, size_t query_length,
-			 bool is_trans= false);
+			 bool is_trans /*= false*/);
 
 /** Log_func function type, defined in sql/handler.cc */
 typedef bool Log_func(THD*, TABLE*, bool, MY_BITMAP*,
