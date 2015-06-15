@@ -230,7 +230,7 @@ alter table test.t2 change c2 c_new int;
 show create table test.t2;
 Table	Create Table
 t2	CREATE TABLE `t2` (
-  `c1` varchar(32) NOT NULL,
+  `c1` varchar(32) NOT NULL DEFAULT '',
   `c_new` int(11) DEFAULT NULL,
   `c3` int(11) DEFAULT NULL,
   `c4` bigint(20) unsigned DEFAULT NULL,

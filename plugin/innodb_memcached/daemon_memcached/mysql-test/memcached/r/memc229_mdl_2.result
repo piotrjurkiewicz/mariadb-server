@@ -57,7 +57,7 @@ Here the memcached results after replace Sachsenhausen:
 SHOW CREATE TABLE t1;
 Table	Create Table
 t1	CREATE TABLE `t1` (
-  `c1` varchar(32) NOT NULL,
+  `c1` varchar(32) NOT NULL DEFAULT '',
   `c2` varchar(1024) DEFAULT NULL,
   `c3` int(11) DEFAULT NULL,
   `c4` bigint(20) unsigned DEFAULT NULL,
