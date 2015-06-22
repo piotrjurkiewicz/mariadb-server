@@ -17,9 +17,6 @@ INSERT INTO t1 VALUES ('B', 'Berlin', 'Mitte', 0, 0, 0);
 INSERT INTO t1 VALUES ('C', 'Cottbus', 'West', 0, 0 ,0);
 INSERT INTO t1 VALUES ('H', 'Hamburg', 'Norderstedt', 0, 0, 0);
 INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
-show variables like 'daemon_memcached_option';
-Variable_name	Value
-daemon_memcached_option	-m128 -p11212
 SELECT c1,c2,c21 FROM t1;
 c1	c2	c21
 B	Berlin	Mitte

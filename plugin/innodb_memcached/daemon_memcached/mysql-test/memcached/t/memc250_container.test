@@ -55,7 +55,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11250" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -73,7 +73,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11250" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -94,7 +94,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11250" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -111,7 +111,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11250" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -166,7 +166,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11250" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -185,7 +185,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11250" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -206,7 +206,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11250" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -223,7 +223,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11250" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -275,7 +275,7 @@ use DBI;
 use Cache::Memcached;
 print " This will fail, since memcached not initialized \n";
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11250" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -320,7 +320,7 @@ use DBI;
 use Cache::Memcached;
 print " This will success, since memcached support int as key \n";
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11250" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -355,7 +355,7 @@ use DBI;
 use Cache::Memcached;
 print " This will fail, since memcached not initialized \n";
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11250" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -402,7 +402,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11250" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -424,7 +424,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11250" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -459,7 +459,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11250" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -480,7 +480,7 @@ use DBI;
 use Cache::Memcached;
 print " Should not find B|Berlin, since it is expired \n";
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11250" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -493,7 +493,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11250" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -510,7 +510,7 @@ use DBI;
 use Cache::Memcached;
 print " Should be able to find  C|Cottbus, assume it does not take 100s to get here \n";
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11250" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -525,7 +525,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11250" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -544,7 +544,7 @@ use DBI;
 use Cache::Memcached;
 print " Should not find  J|Jilin, it should be expired \n";
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11250" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -596,7 +596,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11250" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -623,7 +623,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11250" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -646,7 +646,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11250" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -663,7 +663,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11250" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };

@@ -61,7 +61,7 @@ use DBI;
 use Cache::Memcached;
 print "----- Test get (cache_only) -----\n";
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11247" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -84,7 +84,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11247" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -101,7 +101,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11247" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -141,7 +141,7 @@ use Cache::Memcached;
 print "----- Test get (caching) -----\n";
 
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11247" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -184,7 +184,7 @@ use Cache::Memcached;
 print "----- Test insert (cache_only) -----\n";
 
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11247" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -206,7 +206,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11247" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -220,7 +220,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11247" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -264,7 +264,7 @@ use Cache::Memcached;
 print "----- Test insert (caching) -----\n";
 
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11247" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -286,7 +286,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11247" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -301,7 +301,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11247" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -322,7 +322,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11247" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -360,7 +360,7 @@ use Cache::Memcached;
 print "----- Test delete (cache_only) -----\n";
 
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11247" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -382,7 +382,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11247" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -397,7 +397,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11247" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -418,7 +418,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11247" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -457,7 +457,7 @@ use Cache::Memcached;
 print "----- Test delete (caching) -----\n";
 
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11247" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -479,7 +479,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11247" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -494,7 +494,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11247" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -515,7 +515,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11247" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -555,7 +555,7 @@ use Cache::Memcached;
 print "----- Test flush (cache_only) -----\n";
 
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11247" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -577,7 +577,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11247" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -594,7 +594,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11247" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -613,7 +613,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11247" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -653,7 +653,7 @@ use Cache::Memcached;
 print "----- Test flush (cache_only) -----\n";
 
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11247" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -675,7 +675,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11247" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -692,7 +692,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11247" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -711,7 +711,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11247" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -762,7 +762,7 @@ use Cache::Memcached;
 print "----- Test all operations disabled -----\n";
 
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11247" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -784,7 +784,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11247" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -801,7 +801,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11247" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -820,7 +820,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11247" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -855,7 +855,7 @@ use Cache::Memcached;
 print "----- Test with wrong policy name -----\n";
 
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11247" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -877,7 +877,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11247" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -894,7 +894,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11247" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -913,7 +913,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:11247" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
