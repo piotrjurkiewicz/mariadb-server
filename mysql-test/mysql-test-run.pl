@@ -5172,6 +5172,11 @@ sub server_need_restart {
     return 0;
   }
 
+  if ( $tinfo->{'force_restart'} ) {
+    mtr_verbose_restart($server, "forced in .opt file");
+    return 1;
+  }
+
   if ( $opt_force_restart ) {
     mtr_verbose_restart($server, "forced restart turned on");
     return 1;
