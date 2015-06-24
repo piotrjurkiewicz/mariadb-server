@@ -6765,7 +6765,7 @@ bool shutdown_complete(void)
 
 bool init_complete(void)
 {
-    return(memcached_initialized == 1);
+    return(memcached_initialized != 0);
 }
 #endif
 
