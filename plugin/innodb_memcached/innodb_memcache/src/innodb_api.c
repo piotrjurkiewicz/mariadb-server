@@ -288,7 +288,7 @@ innodb_api_read_uint64(
 	uint64_t	value64;
 
 	assert (m_col->type == IB_INT && m_col->type_len == sizeof(uint64_t)
-		&& m_col->attr == IB_COL_UNSIGNED);
+		&& m_col->attr & IB_COL_UNSIGNED);
 
 	ib_cb_tuple_read_u64(read_tpl, i, &value64);
 
@@ -315,7 +315,7 @@ innodb_api_read_int(
 		|| m_col->type_len == sizeof(uint16_t)
 		|| m_col->type_len == sizeof(uint8_t));
 
-	if (m_col->attr == IB_COL_UNSIGNED) {
+	if (m_col->attr & IB_COL_UNSIGNED) {
 		if (m_col->type_len == sizeof(uint64_t)) {
 			/* We handle uint64 in innodb_api_read_uint64 */
 			assert(0);
@@ -377,7 +377,7 @@ innodb_api_write_int(
 	ib_cb_col_get_meta(tpl, field, m_col);
 
 	assert(m_col->type == IB_INT);
-	assert(!(m_col->attr == IB_COL_UNSIGNED));
+	assert(!(m_col->attr & IB_COL_UNSIGNED));
 	assert(m_col->type_len == 8 || m_col->type_len == 4
 	       || m_col->type_len == 2 || m_col->type_len == 1);
 
@@ -443,7 +443,7 @@ innodb_api_write_uint(
 	ib_cb_col_get_meta(tpl, field, m_col);
 
 	assert(m_col->type == IB_INT);
-	assert(m_col->attr == IB_COL_UNSIGNED);
+	assert(m_col->attr & IB_COL_UNSIGNED);
 	assert(m_col->type_len == 8 || m_col->type_len == 4
 	       || m_col->type_len == 2 || m_col->type_len == 1);
 
@@ -521,7 +521,7 @@ innodb_api_setup_field_value(
 		memcpy(val_buf, value, val_len);
 		val_buf[val_len] = 0;
 
-		if (col_info->col_meta.attr == IB_COL_UNSIGNED) {
+		if (col_info->col_meta.attr & IB_COL_UNSIGNED) {
 			uint64_t int_value = 0;
 
 			int_value = strtoull(val_buf, &end_ptr, 10);
@@ -589,7 +589,7 @@ innodb_api_fill_mci(
 		mci_item->is_str = true;
 	} else {
 		if (col_meta.type == IB_INT) {
-			if (col_meta.attr == IB_COL_UNSIGNED
+			if (col_meta.attr & IB_COL_UNSIGNED
 			    && data_len == 8) {
 				mci_item->value_int =
 					innodb_api_read_uint64(&col_meta,
@@ -605,7 +605,7 @@ innodb_api_fill_mci(
 			mci_item->value_str = NULL;
 			mci_item->value_len = data_len;
 			mci_item->is_str = false;
-			mci_item->is_unsigned = (col_meta.attr == IB_COL_UNSIGNED);
+			mci_item->is_unsigned = (col_meta.attr & IB_COL_UNSIGNED);
 		} else {
 
 			mci_item->value_str = (char*)ib_cb_col_get_value(
@@ -829,7 +829,7 @@ innodb_api_search(
 				if (data_len == IB_SQL_NULL) {
 					col_value->is_null = true;
 				} else {
-					if (col_meta->attr == IB_COL_UNSIGNED
+					if (col_meta->attr & IB_COL_UNSIGNED
 					    && data_len == 8) {
 						col_value->value_int =
 							innodb_api_read_uint64(col_meta,
@@ -855,7 +855,7 @@ innodb_api_search(
 				if (data_len == IB_SQL_NULL) {
 					col_value->is_null = true;
 				} else {
-					if (col_meta->attr == IB_COL_UNSIGNED
+					if (col_meta->attr & IB_COL_UNSIGNED
 					   && data_len == 8) {
 						col_value->value_int =
 							innodb_api_read_uint64(col_meta,
@@ -884,7 +884,7 @@ innodb_api_search(
 				if (data_len == IB_SQL_NULL) {
 					col_value->is_null = true;
 				} else {
-					if (col_meta->attr == IB_COL_UNSIGNED
+					if (col_meta->attr & IB_COL_UNSIGNED
 					    && data_len == 8) {
 						col_value->value_int =
 							innodb_api_read_uint64(col_meta,
@@ -1149,7 +1149,7 @@ innodb_api_set_tpl(
 	}
 
 	if (meta_info->cas_enabled) {
-		err = col_info[CONTAINER_CAS].col_meta.attr == IB_COL_UNSIGNED ?
+		err = col_info[CONTAINER_CAS].col_meta.attr & IB_COL_UNSIGNED ?
 		      innodb_api_write_uint(tpl, col_info[CONTAINER_CAS].field_id, cas, table) :
 		      innodb_api_write_int(tpl, col_info[CONTAINER_CAS].field_id, cas, table);
 		if (err != DB_SUCCESS) {
@@ -1158,7 +1158,7 @@ innodb_api_set_tpl(
 	}
 
 	if (meta_info->exp_enabled) {
-		err = col_info[CONTAINER_EXP].col_meta.attr == IB_COL_UNSIGNED ?
+		err = col_info[CONTAINER_EXP].col_meta.attr & IB_COL_UNSIGNED ?
 		      innodb_api_write_uint(tpl, col_info[CONTAINER_EXP].field_id, exp, table) :
 		      innodb_api_write_int(tpl, col_info[CONTAINER_EXP].field_id, exp, table);
 		if (err != DB_SUCCESS) {
@@ -1167,7 +1167,7 @@ innodb_api_set_tpl(
 	}
 
 	if (meta_info->flag_enabled) {
-		err = col_info[CONTAINER_FLAG].col_meta.attr == IB_COL_UNSIGNED ?
+		err = col_info[CONTAINER_FLAG].col_meta.attr & IB_COL_UNSIGNED ?
 		      innodb_api_write_uint(tpl, col_info[CONTAINER_FLAG].field_id, flag, table) :
 		      innodb_api_write_int(tpl, col_info[CONTAINER_FLAG].field_id, flag, table);
 		if (err != DB_SUCCESS) {
