@@ -208,8 +208,9 @@ innodb_arithmetic(
 	const rel_time_t exptime,	/*!< in: expiration time */
 	uint64_t*	cas,		/*!< out: new cas value */
 	uint64_t*	result,		/*!< out: result out */
-	uint16_t	vbucket);	/*!< in: bucket, used by default
+	uint16_t	vbucket,	/*!< in: bucket, used by default
 					engine only */
+	char*		result_str);	/*!< out: result value as string */
 
 /*******************************************************************//**
 Support memcached "FLUSH_ALL" command, clean up storage (trunate InnoDB Table)

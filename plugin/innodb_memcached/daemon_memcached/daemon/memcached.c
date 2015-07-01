@@ -1519,6 +1519,9 @@ static void complete_incr_bin(conn *c) {
     bool incr = (c->cmd == PROTOCOL_BINARY_CMD_INCREMENT ||
                  c->cmd == PROTOCOL_BINARY_CMD_INCREMENTQ);
 
+    char result_str[INCR_MAX_STORAGE_LEN];
+    memset(result_str, 0, INCR_MAX_STORAGE_LEN);
+
     if (settings.verbose > 1) {
         char buffer[1024];
         ssize_t nw;
@@ -1543,7 +1546,8 @@ static void complete_incr_bin(conn *c) {
                                              delta, initial, expiration,
                                              &c->cas,
                                              &rsp->message.body.value,
-                                             c->binary_header.request.vbucket);
+                                             c->binary_header.request.vbucket,
+                                             result_str);
     }
 
     switch (ret) {
@@ -4351,13 +4355,14 @@ static char* process_arithmetic_command(conn *c, token_t *tokens, const size_t n
     c->aiostat = ENGINE_SUCCESS;
     uint64_t cas;
     uint64_t result;
+    char result_str[INCR_MAX_STORAGE_LEN];
+    memset(result_str, 0, INCR_MAX_STORAGE_LEN);
     if (ret == ENGINE_SUCCESS) {
         ret = settings.engine.v1->arithmetic(settings.engine.v0, c, key, nkey,
                                              incr, false, delta, 0, 0, &cas,
-                                             &result, 0);
+                                             &result, 0, result_str);
     }
 
-    char temp[INCR_MAX_STORAGE_LEN];
     switch (ret) {
     case ENGINE_SUCCESS:
         if (incr) {
@@ -4365,8 +4370,7 @@ static char* process_arithmetic_command(conn *c, token_t *tokens, const size_t n
         } else {
             STATS_INCR(c, decr_hits, key, nkey);
         }
-        snprintf(temp, sizeof(temp), "%"PRIu64, result);
-        out_string(c, temp);
+        out_string(c, result_str);
         break;
     case ENGINE_KEY_ENOENT:
         if (incr) {

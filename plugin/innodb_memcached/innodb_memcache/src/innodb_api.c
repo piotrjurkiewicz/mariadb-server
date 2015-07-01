@@ -370,88 +370,48 @@ innodb_api_write_int(
 	ib_col_meta_t*	m_col = &col_meta;
 	void*		src = NULL;
 	int64_t		value_i64;
-	uint32_t	value_u32;
 	int32_t		value_i32;
-	uint16_t	value_u16;
 	int16_t		value_i16;
-	uint8_t		value_u8;
 	int8_t		value_i8;
 
 	ib_cb_col_get_meta(tpl, field, m_col);
 
 	assert(m_col->type == IB_INT);
+	assert(!(m_col->attr == IB_COL_UNSIGNED));
 	assert(m_col->type_len == 8 || m_col->type_len == 4
 	       || m_col->type_len == 2 || m_col->type_len == 1);
 
-	if (m_col->attr == IB_COL_UNSIGNED) {
-		if (m_col->type_len == 8) {
-			src = &value;
+	if (m_col->type_len == 8) {
+		value_i64 = (int64_t) value;
 
-			/* If table is non-NULL, set up corresponding
-			TABLE->record[0] field for replication */
-			if (table) {
-				handler_rec_setup_uint64(
-					table, field, value, true,
-					false);
-			}
-		} else if (m_col->type_len == 4) {
-			value_u32 = (uint32_t) value;
-
-			src = &value_u32;
-			if (table) {
-				handler_rec_setup_int(
-					table, field, value_u32, true, false);
-			}
-		} else if (m_col->type_len == 2) {
-			value_u16 = (uint16_t) value;
-
-			src = &value_u16;
-			if (table) {
-				handler_rec_setup_int(
-					table, field, value_u16, true, false);
-			}
-		} else if (m_col->type_len == 1) {
-			value_u8 = (uint8_t) value;
-
-			src = &value_u8;
-			if (table) {
-				handler_rec_setup_int(
-					table, field, value_u8, true, false);
-			}
+		src= &value_i64;
+		if (table) {
+			handler_rec_setup_int(
+				table, field, value_i64, false, false);
 		}
-	} else {
-		if (m_col->type_len == 8) {
-			value_i64 = (int64_t) value;
+	} else if (m_col->type_len == 4) {
+		value_i32 = (int32_t) value;
 
-			src= &value_i64;
-			if (table) {
-				handler_rec_setup_int(
-					table, field, value_i64, false, false);
-			}
-		} else if (m_col->type_len == 4) {
-			value_i32 = (int32_t) value;
+		src = &value_i32;
+		if (table) {
+			handler_rec_setup_int(
+				table, field, value_i32, false, false);
+		}
+	} else if (m_col->type_len == 2) {
+		value_i16 = (int16_t) value;
 
-			src = &value_i32;
-			if (table) {
-				handler_rec_setup_int(
-					table, field, value_i32, false, false);
-			}
-		} else if (m_col->type_len == 2) {
-			value_i16 = (int16_t) value;
+		src = &value_i16;
+		if (table) {
+			handler_rec_setup_int(
+				table, field, value_i16, false, false);
+		}
+	} else if (m_col->type_len == 1) {
+		value_i8 = (int8_t) value;
 
-			src = &value_i16;
-			if (table) {
-				handler_rec_setup_int(
-					table, field, value_i16, false, false);
-			}
-		} else if (m_col->type_len == 1) {
-			value_i8 = (int8_t) value;
-
-			src = &value_i8;
-			if (table) {
-				handler_rec_setup_int(
-					table, field, value_i8, false, false);
-			}
+		src = &value_i8;
+		if (table) {
+			handler_rec_setup_int(
+				table, field, value_i8, false, false);
 		}
 	}
 
@@ -460,11 +420,11 @@ innodb_api_write_int(
 }
 
 /*************************************************************//**
-set up an unsigned int64 type tuple field for write
+set up an unsigned integer type tuple field for write
 @return DB_SUCCESS if successful otherwise, error code */
 static
 ib_err_t
-innodb_api_write_uint64(
+innodb_api_write_uint(
 /*====================*/
 	ib_tpl_t        tpl,		/*!< in/out: tuple to set */
 	int		field,		/*!< in: field to set */
@@ -475,19 +435,51 @@ innodb_api_write_uint64(
 	ib_col_meta_t   col_meta;
 	ib_col_meta_t*	m_col = &col_meta;
 	void*		src = NULL;
+	uint64_t	value_u64;
+	uint32_t	value_u32;
+	uint16_t	value_u16;
+	uint8_t		value_u8;
 
 	ib_cb_col_get_meta(tpl, field, m_col);
 
-	assert(m_col->type == IB_INT && m_col->type_len == 8
-	       && m_col->attr == IB_COL_UNSIGNED);
+	assert(m_col->type == IB_INT);
+	assert(m_col->attr == IB_COL_UNSIGNED);
+	assert(m_col->type_len == 8 || m_col->type_len == 4
+	       || m_col->type_len == 2 || m_col->type_len == 1);
 
-	src = &value;
+	if (m_col->type_len == 8) {
+		value_u64 = (uint64_t) value;
 
-	/* If table is non-NULL, set up corresponding
-	TABLE->record[0] field for replication */
-	if (table) {
-		handler_rec_setup_uint64(
-			table, field, value, true, false);
+		src= &value_u64;
+
+		if (table) {
+			handler_rec_setup_uint64(
+				table, field, value_u64, true, false);
+		}
+	} else if (m_col->type_len == 4) {
+		value_u32 = (uint32_t) value;
+
+		src = &value_u32;
+		if (table) {
+			handler_rec_setup_int(
+				table, field, value_u32, true, false);
+		}
+	} else if (m_col->type_len == 2) {
+		value_u16 = (uint16_t) value;
+
+		src = &value_u16;
+		if (table) {
+			handler_rec_setup_int(
+				table, field, value_u16, true, false);
+		}
+	} else if (m_col->type_len == 1) {
+		value_u8 = (uint8_t) value;
+
+		src = &value_u8;
+		if (table) {
+			handler_rec_setup_int(
+				table, field, value_u8, true, false);
+		}
 	}
 
 	ib_cb_col_set_value(tpl, field, src, m_col->type_len, true);
@@ -543,7 +535,7 @@ innodb_api_setup_field_value(
 				return(DB_ERROR);
 			}
 
-			err = innodb_api_write_uint64(tpl, field_id,
+			err = innodb_api_write_uint(tpl, field_id,
 						   int_value, table);
 		} else {
 			int64_t	int_value = 0;
@@ -611,7 +603,7 @@ innodb_api_fill_mci(
 			}
 
 			mci_item->value_str = NULL;
-			mci_item->value_len = sizeof(mci_item->value_int);
+			mci_item->value_len = data_len;
 			mci_item->is_str = false;
 			mci_item->is_unsigned = (col_meta.attr == IB_COL_UNSIGNED);
 		} else {
@@ -1157,24 +1149,27 @@ innodb_api_set_tpl(
 	}
 
 	if (meta_info->cas_enabled) {
-		err = innodb_api_write_int(
-			tpl, col_info[CONTAINER_CAS].field_id, cas, table);
+		err = col_info[CONTAINER_CAS].col_meta.attr == IB_COL_UNSIGNED ?
+		      innodb_api_write_uint(tpl, col_info[CONTAINER_CAS].field_id, cas, table) :
+		      innodb_api_write_int(tpl, col_info[CONTAINER_CAS].field_id, cas, table);
 		if (err != DB_SUCCESS) {
 			return(err);
 		}
 	}
 
 	if (meta_info->exp_enabled) {
-		err = innodb_api_write_int(
-			tpl, col_info[CONTAINER_EXP].field_id, exp, table);
+		err = col_info[CONTAINER_EXP].col_meta.attr == IB_COL_UNSIGNED ?
+		      innodb_api_write_uint(tpl, col_info[CONTAINER_EXP].field_id, exp, table) :
+		      innodb_api_write_int(tpl, col_info[CONTAINER_EXP].field_id, exp, table);
 		if (err != DB_SUCCESS) {
 			return(err);
 		}
 	}
 
 	if (meta_info->flag_enabled) {
-		err = innodb_api_write_int(
-			tpl, col_info[CONTAINER_FLAG].field_id, flag, table);
+		err = col_info[CONTAINER_FLAG].col_meta.attr == IB_COL_UNSIGNED ?
+		      innodb_api_write_uint(tpl, col_info[CONTAINER_FLAG].field_id, flag, table) :
+		      innodb_api_write_int(tpl, col_info[CONTAINER_FLAG].field_id, flag, table);
 		if (err != DB_SUCCESS) {
 			return(err);
 		}
@@ -1501,7 +1496,7 @@ innodb_api_arithmetic(
 	innodb_conn_data_t*     cursor_data,/*!< in/out: cursor info */
 	const char*		key,	/*!< in: key value */
 	int			len,	/*!< in: key length */
-	int			delta,	/*!< in: value to add or subtract */
+	uint64_t		delta,	/*!< in: value to add or subtract */
 	bool			increment, /*!< in: increment or decrement */
 	uint64_t*		cas,	/*!< out: cas */
 	rel_time_t		exp_time __attribute__((unused)),
@@ -1509,43 +1504,47 @@ innodb_api_arithmetic(
 	bool			create,	/*!< in: whether to create new entry
 					if not found */
 	uint64_t		initial,/*!< in: initialize value */
-	uint64_t*		out_result) /*!< in: arithmetic result */
+	uint64_t*		result,	/*!< out: arithmetic result */
+	char*			result_str)	/*!< out: result value as string */
 {
 
 	ib_err_t	err = DB_SUCCESS;
-	char		value_buf[128];
-	mci_item_t	result;
+	mci_item_t	item;
 	ib_tpl_t	old_tpl;
 	ib_tpl_t	new_tpl;
-	uint64_t	value = 0;
 	bool		create_new = false;
-	char*		end_ptr;
 	meta_cfg_info_t* meta_info = cursor_data->conn_meta;
 	meta_column_t*	col_info = meta_info->col_info;
 	ib_crsr_t       srch_crsr = cursor_data->crsr;
-	char*		before_val;
-	unsigned int	before_len;
 	int		column_used = 0;
+	mci_column_t*	column_ptr;
 	ENGINE_ERROR_CODE ret = ENGINE_SUCCESS;
 
+	uint64_t	value_u64;
+	uint32_t	value_u32;
+	uint16_t	value_u16;
+	uint8_t		value_u8;
+	int64_t		value_i64;
+	int32_t		value_i32;
+	int16_t		value_i16;
+	int8_t		value_i8;
+
 	err = innodb_api_search(cursor_data, &srch_crsr, key, len,
-				&result, &old_tpl, false);
+				&item, &old_tpl, false);
 
 	/* If the return message is not success or record not found, just
 	exit */
 	if (err != DB_SUCCESS && err != DB_RECORD_NOT_FOUND) {
-		*out_result = 0;
 		goto func_exit;
 	}
-
-	memset(value_buf, 0, 128);
 
 	/* Can't find the row, decide whether to insert a new row */
 	if (err != DB_SUCCESS) {
 		/* If create is true, insert a new row */
 		if (create) {
-			snprintf(value_buf, sizeof(value_buf),
+			snprintf(result_str, 24,
 				 "%" PRIu64, initial);
+			*result = initial;
 			create_new = true;
 			goto create_new_value;
 		} else {
@@ -1557,7 +1556,7 @@ innodb_api_arithmetic(
 
 	/* Save the original value, this would be an update */
 	if (engine->enable_binlog) {
-		innodb_api_setup_hdl_rec(&result, col_info,
+		innodb_api_setup_hdl_rec(&item, col_info,
 					 cursor_data->mysql_tbl);
 		handler_store_record(cursor_data->mysql_tbl);
 	}
@@ -1567,7 +1566,7 @@ innodb_api_arithmetic(
 	as an indication on which column to apply the operation. Otherwise,
 	the first column will be appended / prepended */
 	if (meta_info->n_extra_col > 0) {
-		uint64_t flags = result.col_value[MCI_COL_FLAG].value_int;
+		uint64_t flags = item.col_value[MCI_COL_FLAG].value_int;
 
 		if (flags < (uint64_t) meta_info->n_extra_col) {
 			column_used = flags;
@@ -1575,51 +1574,92 @@ innodb_api_arithmetic(
 			column_used = 0;
 		}
 
-		before_len = result.extra_col_value[column_used].value_len;
-		if (result.extra_col_value[column_used].is_str) {
-			before_val = result.extra_col_value[column_used].value_str;
-			if (before_val) {
-				value = strtoull(before_val, &end_ptr, 10);
-			}
-		} else {
-			value = result.extra_col_value[column_used].value_int;
-		}
+		column_ptr = &item.extra_col_value[column_used];
+
 	} else {
-		before_len = result.col_value[MCI_COL_VALUE].value_len;
-		if (result.col_value[MCI_COL_VALUE].is_str) {
-			before_val = result.col_value[MCI_COL_VALUE].value_str;
-			if (before_val) {
-				value = strtoull(before_val, &end_ptr, 10);
-			}
-		} else {
-			value = result.col_value[MCI_COL_VALUE].value_int;
-		}
+
 		column_used = UPDATE_ALL_VAL_COL;
+		column_ptr = &item.col_value[MCI_COL_VALUE];
 	}
 
-	if (before_len >= (sizeof(value_buf) - 1)) {
-		ret = ENGINE_EINVAL;
-		goto func_exit;
-	}
-
-	errno = 0;
-
-	if (errno == ERANGE) {
-		ret = ENGINE_EINVAL;
-		goto func_exit;
-	}
-
-	if (increment) {
-		value += delta;
+	if (column_ptr->is_str) {
+		if (!column_ptr->value_str || column_ptr->value_len > 24) {
+			ret = ENGINE_EINVAL;
+			goto func_exit;
+		}
+		/* Need this memcpy to strip the junk */
+		memcpy(result_str, column_ptr->value_str, column_ptr->value_len);
+		result_str[column_ptr->value_len] = 0;
+		if (!safe_strtoull(result_str, &value_u64)) {
+			ret = ENGINE_EINVAL;
+			goto func_exit;
+		}
+		value_u64 = increment ? value_u64 + delta :
+					delta > value_u64 ? 0 : value_u64 - delta;
+		*result = value_u64;
+		snprintf(result_str, 24, "%" PRIu64, value_u64);
 	} else {
-		if (delta > (int) value) {
-			value = 0;
+		if (column_ptr->value_len == 8) {
+			if (column_ptr->is_unsigned) {
+				value_u64 = column_ptr->value_int;
+				value_u64 = increment ? value_u64 + delta :
+					    delta > value_u64 ? 0 : value_u64 - delta;
+				*result = value_u64;
+				snprintf(result_str, 24, "%" PRIu64, value_u64);
+			} else {
+				value_i64 = column_ptr->value_int;
+				value_i64 = increment ? value_i64 + delta :
+					    delta > (uint64_t) value_i64 ? 0 : value_i64 - delta;
+				*result = value_i64;
+				snprintf(result_str, 24, "%" PRIi64, value_i64);
+			}
+		} else if (column_ptr->value_len == 4) {
+			if (column_ptr->is_unsigned) {
+				value_u32 = column_ptr->value_int;
+				value_u32 = increment ? value_u32 + delta :
+					    delta > value_u32 ? 0 : value_u32 - delta;
+				*result = value_u32;
+				snprintf(result_str, 24, "%" PRIu32, value_u32);
+			} else {
+				value_i32 = column_ptr->value_int;
+				value_i32 = increment ? value_i32 + delta :
+					    delta > (uint32_t) value_i32 ? 0 : value_i32 - delta;
+				*result = value_i32;
+				snprintf(result_str, 24, "%" PRIi32, value_i32);
+			}
+		} else if (column_ptr->value_len == 2) {
+			if (column_ptr->is_unsigned) {
+				value_u16 = column_ptr->value_int;
+				value_u16 = increment ? value_u16 + delta :
+					    delta > value_u16 ? 0 : value_u16 - delta;
+				*result = value_u16;
+				snprintf(result_str, 24, "%" PRIu16, value_u16);
+			} else {
+				value_i16 = column_ptr->value_int;
+				value_i16 = increment ? value_i16 + delta :
+					    delta > (uint16_t) value_i16 ? 0 : value_i16 - delta;
+				*result = value_i16;
+				snprintf(result_str, 24, "%" PRIi16, value_i16);
+			}
+		} else if (column_ptr->value_len == 1) {
+			if (column_ptr->is_unsigned) {
+				value_u8 = column_ptr->value_int;
+				value_u8 = increment ? value_u8 + delta :
+					   delta > value_u8 ? 0 : value_u8 - delta;
+				*result = value_u8;
+				snprintf(result_str, 24, "%" PRIu8, value_u8);
+			} else {
+				value_i8 = column_ptr->value_int;
+				value_i8 = increment ? value_i8 + delta :
+					   delta > (uint8_t) value_i8 ? 0 : value_i8 - delta;
+				*result = value_i8;
+				snprintf(result_str, 24, "%" PRIi8, value_i8);
+			}
 		} else {
-			value -= delta;
+			assert(0);
 		}
 	}
 
-	snprintf(value_buf, sizeof(value_buf), "%" PRIu64, value);
 create_new_value:
 	*cas = mci_get_cas(engine);
 
@@ -1631,10 +1671,10 @@ create_new_value:
 	/* The cas, exp and flags field are not changing, so use the
 	data from result */
 	err = innodb_api_set_tpl(new_tpl, meta_info, col_info,
-				 key, len, value_buf, strlen(value_buf),
+				 key, len, result_str, strlen(result_str),
 				 *cas,
-				 result.col_value[MCI_COL_EXP].value_int,
-				 result.col_value[MCI_COL_FLAG].value_int,
+				 item.col_value[MCI_COL_EXP].value_int,
+				 item.col_value[MCI_COL_FLAG].value_int,
 				 column_used,
 				 engine->enable_binlog
 				 ? cursor_data->mysql_tbl : NULL,
@@ -1647,7 +1687,6 @@ create_new_value:
 
 	if (create_new) {
 		err = ib_cb_insert_row(cursor_data->crsr, new_tpl);
-		*out_result = initial;
 
 		if (engine->enable_binlog) {
 			handler_binlog_row(cursor_data->thd,
@@ -1655,7 +1694,6 @@ create_new_value:
 		}
 	} else {
 		err = ib_cb_update_row(srch_crsr, old_tpl, new_tpl);
-		*out_result = value;
 
 		if (engine->enable_binlog) {
 			handler_binlog_row(cursor_data->thd,
@@ -1667,12 +1705,12 @@ create_new_value:
 
 func_exit:
 	/* Free memory of result. */
-	if (result.extra_col_value) {
-		free(result.extra_col_value);
+	if (item.extra_col_value) {
+		free(item.extra_col_value);
 	} else {
-		if (result.col_value[MCI_COL_VALUE].allocated) {
-			free(result.col_value[MCI_COL_VALUE].value_str);
-			result.col_value[MCI_COL_VALUE].allocated = false;
+		if (item.col_value[MCI_COL_VALUE].allocated) {
+			free(item.col_value[MCI_COL_VALUE].value_str);
+			item.col_value[MCI_COL_VALUE].allocated = false;
 		}
 	}
 

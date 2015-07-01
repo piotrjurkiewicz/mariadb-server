@@ -174,14 +174,15 @@ innodb_api_arithmetic(
 	innodb_conn_data_t*	cursor_data,/*!< in/out: cursor info */
 	const char*		key,	/*!< in: key values */
 	int			len,	/*!< in: key length */
-	int			delta,	/*!< in: value to add or subtract */
+	uint64_t		delta,	/*!< in: value to add or subtract */
 	bool			increment,/*!< in: increment or decrement */
 	uint64_t*		cas,	/*!< out: cas */
 	rel_time_t		exp_time, /*!< in: expire time */
 	bool			create,	/*!< in: whether to create new entry
 					if not found */
 	uint64_t		initial,/*!< in: initialize value */
-	uint64_t*		result);/*!< out: result value */
+	uint64_t*		result, /*!< out: result value */
+	char*			result_str); /*!< out: result value as string */
 
 /*************************************************************//**
 This is the interface to following commands:

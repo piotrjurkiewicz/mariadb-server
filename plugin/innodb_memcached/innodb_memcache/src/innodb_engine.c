@@ -1965,8 +1965,9 @@ innodb_arithmetic(
 	const rel_time_t exptime,	/*!< in: expiration time */
 	uint64_t*	cas,		/*!< out: new cas value */
 	uint64_t*	result,		/*!< out: result value */
-	uint16_t	vbucket)	/*!< in: bucket, used by default
+	uint16_t	vbucket,	/*!< in: bucket, used by default
 					engine only */
+	char*		result_str)	/*!< out: result value as string */
 {
 	struct innodb_engine*	innodb_eng = innodb_handle(handle);
 	struct default_engine*	def_eng = default_handle(innodb_eng);
@@ -1985,7 +1986,7 @@ innodb_arithmetic(
 		err_ret = def_eng->engine.arithmetic(
 			innodb_eng->default_engine, cookie, key, nkey,
 			increment, create, delta, initial, exptime, cas,
-			result, vbucket);
+			result, vbucket, result_str);
 
 		if (meta_info->set_option == META_CACHE_OPT_DEFAULT) {
 			return(err_ret);
@@ -2001,7 +2002,7 @@ innodb_arithmetic(
 
 	err_ret = innodb_api_arithmetic(innodb_eng, conn_data, key, nkey,
 					delta, increment, cas, exptime,
-					create, initial, result);
+					create, initial, result, result_str);
 
 	innodb_api_cursor_reset(innodb_eng, conn_data, CONN_OP_WRITE,
 				true);

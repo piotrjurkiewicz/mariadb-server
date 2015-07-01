@@ -382,7 +382,8 @@ extern "C" {
                                         const rel_time_t exptime,
                                         uint64_t *cas,
                                         uint64_t *result,
-                                        uint16_t vbucket);
+                                        uint16_t vbucket,
+                                        char* result_str);
 
         /**
          * Flush the cache.
