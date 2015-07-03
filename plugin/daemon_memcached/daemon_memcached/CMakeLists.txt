@@ -22,13 +22,13 @@ INCLUDE_DIRECTORIES(${LIBEVENT_INCLUDE_DIR}
 		    ${CMAKE_SOURCE_DIR}/libevent
 		    ${CMAKE_SOURCE_DIR}/include/mysql
 		    ${CMAKE_C_IMPLICIT_LINK_DIRECTORIES}
-		    ${CMAKE_SOURCE_DIR}/plugin/innodb_memcached/daemon_memcached/include
-		    ${CMAKE_SOURCE_DIR}/plugin/innodb_memcached/daemon_memcached/include/memcached
-		    ${CMAKE_SOURCE_DIR}/plugin/innodb_memcached/daemon_memcached
+		    ${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached/include
+		    ${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached/include/memcached
+		    ${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached
 
 		)
 
-SET(CMAKE_CPP_FLAGS "${CMAKE_CPP_FLAGS} ${CMAKE_SHARED_LIBRARY_C_FLAGS} -I${CMAKE_SOURCE_DIR}/plugin/innodb_memcached/daemon_memcached/utilities")
+SET(CMAKE_CPP_FLAGS "${CMAKE_CPP_FLAGS} ${CMAKE_SHARED_LIBRARY_C_FLAGS} -I${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached/utilities")
 
 # If current CMAKE_C_FLAGS is with Werror, turn it off to compile successfully
 IF(CMAKE_C_FLAGS MATCHES "-Werror")
@@ -53,7 +53,7 @@ SET(LIBMEMCACHED_UTILITIES_SOURCES
 
 ADD_LIBRARY(memcached_utilities STATIC ${LIBMEMCACHED_UTILITIES_SOURCES})
 
-SET(CMAKE_CPP_FLAGS "${CMAKE_CPP_FLAGS} ${CMAKE_SHARED_LIBRARY_C_FLAGS} -I${CMAKE_SOURCE_DIR}/plugin/innodb_memcached/daemon_memcached/daemon")
+SET(CMAKE_CPP_FLAGS "${CMAKE_CPP_FLAGS} ${CMAKE_SHARED_LIBRARY_C_FLAGS} -I${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached/daemon")
 
 SET(MEMCACHED_SOURCES
 		daemon/memcached_mysql.h

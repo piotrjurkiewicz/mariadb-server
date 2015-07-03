@@ -122,7 +122,7 @@ EOF
 # delete - innodb_only
 # ----------------------------------------------------------------
 
-# Stop plugin before innodb_memcached configuration
+# Stop plugin before daemon_memcached configuration
 UNINSTALL PLUGIN daemon_memcached;
 
 use innodb_memcache;
@@ -165,7 +165,7 @@ EOF
 # set - cache_only
 # delete - innodb_only
 # ----------------------------------------------------------------
-# Stop plugin before innodb_memcached configuration
+# Stop plugin before daemon_memcached configuration
 
 UNINSTALL PLUGIN daemon_memcached;
 
@@ -243,7 +243,7 @@ EOF
 # set - caching
 # delete - innodb_only
 # ----------------------------------------------------------------
-# Stop plugin before innodb_memcached configuration
+# Stop plugin before daemon_memcached configuration
 
 UNINSTALL PLUGIN daemon_memcached;
 
@@ -339,7 +339,7 @@ EOF
 # set - caching
 # delete - cache_only
 # ----------------------------------------------------------------
-# Stop plugin before innodb_memcached configuration
+# Stop plugin before daemon_memcached configuration
 
 UNINSTALL PLUGIN daemon_memcached;
 
@@ -436,7 +436,7 @@ EOF
 # set - caching
 # delete - caching
 # ----------------------------------------------------------------
-# Stop plugin before innodb_memcached configuration
+# Stop plugin before daemon_memcached configuration
 
 UNINSTALL PLUGIN daemon_memcached;
 
@@ -534,7 +534,7 @@ EOF
 # delete - caching
 # flush - cache_only
 # ----------------------------------------------------------------
-# Stop plugin before innodb_memcached configuration
+# Stop plugin before daemon_memcached configuration
 
 UNINSTALL PLUGIN daemon_memcached;
 
@@ -632,7 +632,7 @@ EOF
 # delete - caching
 # flush - caching
 # ----------------------------------------------------------------
-# Stop plugin before innodb_memcached configuration
+# Stop plugin before daemon_memcached configuration
 
 UNINSTALL PLUGIN daemon_memcached;
 
@@ -730,7 +730,7 @@ EOF
 # delete - disabled
 # flush - disabled
 # ----------------------------------------------------------------
-# Stop plugin before innodb_memcached configuration
+# Stop plugin before daemon_memcached configuration
 
 UNINSTALL PLUGIN daemon_memcached;
 
@@ -834,7 +834,7 @@ EOF
 # Negative test, insert "junk" value to cache_policies
 #
 # ----------------------------------------------------------------
-# Stop plugin before innodb_memcached configuration
+# Stop plugin before daemon_memcached configuration
 
 UNINSTALL PLUGIN daemon_memcached;
 

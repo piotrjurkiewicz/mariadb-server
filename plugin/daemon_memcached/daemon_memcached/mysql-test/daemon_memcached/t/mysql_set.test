@@ -1,7 +1,3 @@
-#
-# Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved.
-#
-
 source include/not_valgrind.inc;
 source include/have_memcached_plugin.inc;
 source include/not_windows.inc;
@@ -42,6 +38,9 @@ CREATE TABLE t1        (c1 VARCHAR(32),
 ENGINE = INNODB;
 
 INSERT INTO t1 VALUES ('D', 'Darmstadt', 0, 0, 0);
+INSERT INTO t1 VALUES ('B', 'Berlin', 0, 0, 0);
+INSERT INTO t1 VALUES ('C', 'Cottbus', 0, 0 ,0);
+INSERT INTO t1 VALUES ('H', 'Hamburg', 0, 0, 0);
 
 # Tables must exist before plugin can be started!
 INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
@@ -60,21 +59,10 @@ my $memd = new Cache::Memcached {
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
-print "Set E|Essen with negative expire time:\n";
-if (!$memd->set("E","Essen","-60")) {
+print "Set E|Essen:\n";
+if (!$memd->set("E","Essen")) {
   print "Error: E|Essen cannot be inserted.\n";
 }
-
-print "Set B|Berlin with expire time as INT_MAX32:\n";
-if (!$memd->set("B","Berlin","2147483647")) {
-  print "Error: B|Berlin cannot be inserted.\n";
-}
-
-print "Set P|paris with expire time greater than INT_MAX32:\n";
-if (!$memd->set("B","Berlin","2147483648")) {
-  print "Error: P|paris cannot be inserted.\n";
-}
-
 $memd->disconnect_all;
 EOF
 
@@ -95,10 +83,29 @@ if ($val) { print "$val\n"; }
 $memd->disconnect_all;
 EOF
 
+--sorted_result
+SELECT c1,c2 FROM t1;
+
+perl;
+use DBI;
+use Cache::Memcached;
+my $memd = new Cache::Memcached {
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
+  'connect_timeout' => 20,
+  'select_timeout' => 20
+};
+print "Here the memcached results with E,H:\n";
+$val = $memd->get("E");
+if ($val) { print "$val\n"; }
+$val = $memd->get("H");
+if ($val) { print "$val\n"; }
+$memd->disconnect_all;
+EOF
+
 DROP TABLE t1;
 
-# Stop plugin befor innodb_memcached configuration
+# Stop plugin befor daemon_memcached configuration
 UNINSTALL PLUGIN daemon_memcached;
 DROP DATABASE innodb_memcache;
-
+ 
 SET @@global.tx_isolation= @tx_isolation;

@@ -17,6 +17,6 @@ IF(WITH_INNODB_MEMCACHED AND UNIX)
   ADD_SUBDIRECTORY(innodb_memcache)
 ENDIF()
 
-INSTALL(FILES "${CMAKE_SOURCE_DIR}/plugin/innodb_memcached/innodb_memcache/scripts/innodb_memcached_config.sql"
+INSTALL(FILES "${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/innodb_memcache/scripts/innodb_memcached_config.sql"
  DESTINATION ${INSTALL_MYSQLSHAREDIR} COMPONENT Server
  PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)

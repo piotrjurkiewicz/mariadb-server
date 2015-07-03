@@ -14,15 +14,15 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
 # Common defines and includes
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/plugin/innodb_memcached/innodb_memcache
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/innodb_memcache
 		    ${CMAKE_SOURCE_DIR}/include
 		    ${CMAKE_SOURCE_DIR}/sql
 		    ${CMAKE_SOURCE_DIR}/bld/include
 		    ${CMAKE_SOURCE_DIR}/regex
 		    ${CMAKE_SOURCE_DIR}/storage/innobase/include
-		    ${CMAKE_SOURCE_DIR}/plugin/innodb_memcached/innodb_memcache/include
-		    ${CMAKE_SOURCE_DIR}/plugin/innodb_memcached/innodb_memcache/cache-src
-		    ${CMAKE_SOURCE_DIR}/plugin/innodb_memcached/daemon_memcached/include)
+		    ${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/innodb_memcache/include
+		    ${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/innodb_memcache/cache-src
+		    ${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached/include)
 
 # If current CMAKE_C_FLAGS is with Werror, turn it off to compile successfully
 IF(CMAKE_C_FLAGS MATCHES "-Werror")
@@ -40,8 +40,8 @@ SET(MCD__UTILITITY_SOURCES
 ADD_LIBRARY(libmcd_util STATIC ${MCD__UTILITITY_SOURCES})
 
 SET(CMAKE_CPP_FLAGS "${CMAKE_CPP_FLAGS}
-                     -I${CMAKE_SOURCE_DIR}/plugin/innodb_memcached/innodb_memcache/include
-                     -I${CMAKE_SOURCE_DIR}/plugin/innodb_memcached/innodb_memcache/cache-src")
+                     -I${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/innodb_memcache/include
+                     -I${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/innodb_memcache/cache-src")
 
 SET(INNODB_ENGINE_SOURCES
 		src/innodb_config.c

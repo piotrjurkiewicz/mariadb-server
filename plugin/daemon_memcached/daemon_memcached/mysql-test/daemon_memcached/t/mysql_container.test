@@ -127,7 +127,7 @@ EOF
 # Switch to a different table
 #----------------------------------------------------------------
 
-# Stop plugin before innodb_memcached configuration
+# Stop plugin before daemon_memcached configuration
 UNINSTALL PLUGIN daemon_memcached;
 
 use innodb_memcache;
@@ -239,7 +239,7 @@ EOF
 # Schema name as NULL
 #----------------------------------------------------------------
 
-# Stop plugin before innodb_memcached configuration
+# Stop plugin before daemon_memcached configuration
 UNINSTALL PLUGIN daemon_memcached;
 
 use innodb_memcache;
@@ -257,7 +257,7 @@ INSERT INTO containers VALUES ("desc_t2", "test", "t2",
 #----------------------------------------------------------------
 # Non-existing Schema
 #----------------------------------------------------------------
-# Stop plugin before innodb_memcached configuration
+# Stop plugin before daemon_memcached configuration
 
 DELETE FROM containers;
 
@@ -289,7 +289,7 @@ EOF
 #----------------------------------------------------------------
 # Test different column types
 #----------------------------------------------------------------
-# Stop plugin before innodb_memcached configuration
+# Stop plugin before daemon_memcached configuration
 UNINSTALL PLUGIN daemon_memcached;
 
 DELETE FROM containers;
@@ -368,7 +368,7 @@ EOF
 # Test CAS
 #----------------------------------------------------------------
 
-# Stop plugin before innodb_memcached configuration
+# Stop plugin before daemon_memcached configuration
 UNINSTALL PLUGIN daemon_memcached;
 
 use innodb_memcache;
@@ -557,7 +557,7 @@ EOF
 # Alter mapped column type
 #----------------------------------------------------------------
 
-# Stop plugin before innodb_memcached configuration
+# Stop plugin before daemon_memcached configuration
 UNINSTALL PLUGIN daemon_memcached;
 
 use innodb_memcache;
