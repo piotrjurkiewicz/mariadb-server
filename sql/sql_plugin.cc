@@ -156,7 +156,7 @@ static int min_maria_plugin_interface_version=
                    MARIA_PLUGIN_INTERFACE_VERSION & ~0xFF;
 #endif
 
-static void*	innodb_callback_data;
+static void *innodb_callback_data;
 
 /* Note that 'int version' must be the first field of every plugin
    sub-structure (plugin->info).
@@ -1411,14 +1411,16 @@ static int plugin_initialize(MEM_ROOT *tmp_root, struct st_plugin_int *plugin,
 
     /* FIXME: Need better solution to transfer the callback function
     array to memcached */
-    if (strcmp(plugin->name.str, "InnoDB") == 0) {
+    if (strcmp(plugin->name.str, "InnoDB") == 0)
+    {
       innodb_callback_data = ((handlerton*)plugin->data)->data;
     }
   }
   else if (plugin->plugin->init)
   {
-    if (strcmp(plugin->name.str, "daemon_memcached") == 0) {
-       plugin->data = (void*)innodb_callback_data;
+    if (strcmp(plugin->name.str, "daemon_memcached") == 0)
+    {
+      plugin->data = (void*)innodb_callback_data;
     }
 
     if (plugin->plugin->init(plugin))
@@ -1952,13 +1954,13 @@ void memcached_shutdown(void)
       plugin= *dynamic_element(&plugin_array, i, struct st_plugin_int **);
 
       if (plugin->state == PLUGIN_IS_READY
-	  && strcmp(plugin->name.str, "daemon_memcached") == 0)
+          && strcmp(plugin->name.str, "daemon_memcached") == 0)
       {
-	plugin_deinitialize(plugin, true);
+        plugin_deinitialize(plugin, true);
 
         mysql_mutex_lock(&LOCK_plugin);
-	plugin->state= PLUGIN_IS_DYING;
-	plugin_del(plugin);
+        plugin->state= PLUGIN_IS_DYING;
+        plugin_del(plugin);
         mysql_mutex_unlock(&LOCK_plugin);
       }
     }

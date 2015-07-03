@@ -57,7 +57,7 @@ extern int write_bin_log(THD *thd, bool clear_error,
 
 /** Log_func function type, defined in sql/handler.cc */
 typedef bool Log_func(THD*, TABLE*, bool, MY_BITMAP*,
-                      uint, const uchar*, const uchar*);
+		      uint, const uchar*, const uchar*);
 
 /** function to close a connection and thd, defined in sql/handler.cc */
 extern void ha_close_connection(THD* thd);

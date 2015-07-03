@@ -2623,9 +2623,9 @@ sub setup_vardir() {
   else
   {
     $plugindir= $mysqld_variables{'plugin-dir'} ||
-    mtr_path_exists("$bindir/lib64/mysql/plugin",
-                    "$bindir/lib/mysql/plugin",
-                    "$bindir/lib/plugin");
+                mtr_path_exists("$bindir/lib64/mysql/plugin",
+                                "$bindir/lib/mysql/plugin",
+                                "$bindir/lib/plugin");
     # hm, what paths work for debs and for rpms ?
     for (<$bindir/lib64/mysql/plugin/*.so>,
          <$bindir/lib/mysql/plugin/*.so>,

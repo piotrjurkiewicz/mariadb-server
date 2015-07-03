@@ -499,7 +499,7 @@ Check if the transaction is read_only */
 ib_u32_t
 ib_trx_read_only(
 /*=============*/
-        ib_trx_t        ib_trx);         /*!< in: trx handle */
+	ib_trx_t	ib_trx);	/*!< in: trx handle */
 
 /*****************************************************************//**
 Release the resources of the transaction. If the transaction was
