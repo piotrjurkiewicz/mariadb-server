@@ -1,6 +1,6 @@
-create database innodb_memcache;
+create database daemon_memcached;
 
-use innodb_memcache;
+use daemon_memcached;
 
 
 -- ------------------------------------------------------------------------

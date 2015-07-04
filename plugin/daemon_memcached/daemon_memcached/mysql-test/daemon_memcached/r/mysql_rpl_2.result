@@ -219,5 +219,5 @@ connection server_1;
 connection server_1;
 connection default;
 UNINSTALL PLUGIN daemon_memcached;
-DROP DATABASE innodb_memcache;
+DROP DATABASE daemon_memcached;
 SET @@global.tx_isolation= @tx_isolation;

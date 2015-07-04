@@ -208,5 +208,5 @@ O	Oldenburg	Mitte	87654	Bäder
 S	Stuttgart	Nord	65432	Fernsehturm
 DROP TABLE t1,t2,t3,t4,t5;
 UNINSTALL PLUGIN daemon_memcached;
-DROP DATABASE innodb_memcache;
+DROP DATABASE daemon_memcached;
 SET @@global.tx_isolation= @tx_isolation;

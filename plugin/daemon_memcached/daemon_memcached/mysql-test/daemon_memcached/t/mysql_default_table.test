@@ -263,8 +263,8 @@ SELECT c1,c2,c21,c22 FROM t4;
 SELECT c1,c2,c21,c22,c23 FROM t5;
 
 UNINSTALL PLUGIN daemon_memcached;
-UPDATE innodb_memcache.containers SET name='desct3' WHERE name='default';
-UPDATE innodb_memcache.containers SET name='default' WHERE name='desct4';
+UPDATE daemon_memcached.containers SET name='desct3' WHERE name='default';
+UPDATE daemon_memcached.containers SET name='default' WHERE name='desct4';
 INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 
 --sorted_result
@@ -317,9 +317,9 @@ SELECT c1,c2,c21,c22,c23 FROM t5;
 UNINSTALL PLUGIN daemon_memcached;
 # Have after UPDATE 2 defaults, t3 and t4.
 --error ER_DUP_ENTRY
-UPDATE innodb_memcache.containers SET name='default' WHERE name='desct3';
+UPDATE daemon_memcached.containers SET name='default' WHERE name='desct3';
 # Decription of t4 will be deleted and t1 will become default.
-DELETE FROM innodb_memcache.containers WHERE name='default';
+DELETE FROM daemon_memcached.containers WHERE name='default';
 INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 
 --sorted_result
@@ -364,7 +364,7 @@ SELECT c1,c2,c21,c22 FROM t4;
 
 UNINSTALL PLUGIN daemon_memcached;
 #Delete first row in container, so 2nd must become default.
-DELETE FROM innodb_memcache.containers WHERE name='desct1';
+DELETE FROM daemon_memcached.containers WHERE name='desct1';
 INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 
 --sorted_result
@@ -408,6 +408,6 @@ SELECT c1,c2 FROM t2;
 DROP TABLE t1,t2,t3,t4,t5;
 
 UNINSTALL PLUGIN daemon_memcached;
-DROP DATABASE innodb_memcache;
+DROP DATABASE daemon_memcached;
  
 SET @@global.tx_isolation= @tx_isolation;

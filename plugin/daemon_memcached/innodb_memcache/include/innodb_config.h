@@ -40,7 +40,7 @@ There are 3 "system tables":
 2) cache_policies - decide whether to use "Memcached Default Engine" or "InnoDB
 		    Memcached Engine" to handler the requests
 3) config_options - for miscellaneous configuration options */
-#define MCI_CFG_DB_NAME			"innodb_memcache"
+#define MCI_CFG_DB_NAME			"daemon_memcached"
 #define MCI_CFG_CONTAINER_TABLE		"containers"
 #define MCI_CFG_CACHE_POLICIES		"cache_policies"
 #define MCI_CFG_CONFIG_OPTIONS		"config_options"

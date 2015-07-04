@@ -41,7 +41,7 @@ D	Darmstadt
 H	Hamburg
 Here the memcached results with D,H:
 UNINSTALL PLUGIN daemon_memcached;
-use innodb_memcache;
+use daemon_memcached;
 DELETE FROM cache_policies;
 INSERT INTO cache_policies VALUES("cache_policy", "caching",
 "innodb_only", "innodb_only", "innodb_only");
@@ -53,7 +53,7 @@ Berlin
 Hamburg
 Cottbus
 UNINSTALL PLUGIN daemon_memcached;
-use innodb_memcache;
+use daemon_memcached;
 DELETE FROM cache_policies;
 INSERT INTO cache_policies VALUES("cache_policy", "cache_only",
 "cache_only", "innodb_only", "innodb_only");
@@ -75,7 +75,7 @@ Ok.
 Here the memcached results with P:
 Paris
 UNINSTALL PLUGIN daemon_memcached;
-use innodb_memcache;
+use daemon_memcached;
 DELETE FROM cache_policies;
 INSERT INTO cache_policies VALUES("cache_policy", "caching",
 "caching", "innodb_only", "innodb_only");
@@ -107,7 +107,7 @@ H	Hamburg
 Here the memcached results with G:
 Gossen
 UNINSTALL PLUGIN daemon_memcached;
-use innodb_memcache;
+use daemon_memcached;
 DELETE FROM cache_policies;
 INSERT INTO cache_policies VALUES("cache_policy", "caching",
 "caching", "cache_only", "innodb_only");
@@ -136,7 +136,7 @@ D	Darmstadt
 H	Hamburg
 Here the memcached results with E:
 UNINSTALL PLUGIN daemon_memcached;
-use innodb_memcache;
+use daemon_memcached;
 DELETE FROM cache_policies;
 INSERT INTO cache_policies VALUES("cache_policy", "caching",
 "caching", "caching", "innodb_only");
@@ -167,7 +167,7 @@ D	Darmstadt
 H	Hamburg
 Here the memcached results with G:
 UNINSTALL PLUGIN daemon_memcached;
-use innodb_memcache;
+use daemon_memcached;
 DELETE FROM cache_policies;
 INSERT INTO cache_policies VALUES("cache_policy", "cache_only",
 "caching", "cache_only", "cache_only");
@@ -205,7 +205,7 @@ G	Gossen
 H	Hamburg
 Here the memcached results with G:
 UNINSTALL PLUGIN daemon_memcached;
-use innodb_memcache;
+use daemon_memcached;
 DELETE FROM cache_policies;
 INSERT INTO cache_policies VALUES("cache_policy", "caching",
 "caching", "caching", "caching");
@@ -238,7 +238,7 @@ SELECT c1,c2 FROM test.t1;
 c1	c2
 Here the memcached results with G:
 UNINSTALL PLUGIN daemon_memcached;
-use innodb_memcache;
+use daemon_memcached;
 DELETE FROM cache_policies;
 INSERT INTO cache_policies VALUES("cache_policy", "caching",
 "disabled", "disabled", "disabled");
@@ -278,7 +278,7 @@ D	Darmstadt
 H	Hamburg
 Here the memcached results with G:
 UNINSTALL PLUGIN daemon_memcached;
-use innodb_memcache;
+use daemon_memcached;
 DELETE FROM cache_policies;
 INSERT IGNORE INTO cache_policies VALUES("junk", "junk",
 "caching", "cache_only", "disabled");
@@ -322,5 +322,5 @@ Gossen
 USE test;
 DROP TABLE t1;
 UNINSTALL PLUGIN daemon_memcached;
-DROP DATABASE innodb_memcache;
+DROP DATABASE daemon_memcached;
 SET @@global.tx_isolation= @tx_isolation;

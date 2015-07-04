@@ -130,7 +130,7 @@ EOF
 # Stop plugin before daemon_memcached configuration
 UNINSTALL PLUGIN daemon_memcached;
 
-use innodb_memcache;
+use daemon_memcached;
 
 DELETE FROM containers;
 
@@ -242,7 +242,7 @@ EOF
 # Stop plugin before daemon_memcached configuration
 UNINSTALL PLUGIN daemon_memcached;
 
-use innodb_memcache;
+use daemon_memcached;
 
 DELETE FROM containers;
 
@@ -371,7 +371,7 @@ EOF
 # Stop plugin before daemon_memcached configuration
 UNINSTALL PLUGIN daemon_memcached;
 
-use innodb_memcache;
+use daemon_memcached;
 
 DELETE FROM containers;
 
@@ -560,7 +560,7 @@ EOF
 # Stop plugin before daemon_memcached configuration
 UNINSTALL PLUGIN daemon_memcached;
 
-use innodb_memcache;
+use daemon_memcached;
 
 DELETE FROM containers;
 
@@ -691,6 +691,6 @@ INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 DROP TABLE t2;
 
 UNINSTALL PLUGIN daemon_memcached;
-DROP DATABASE innodb_memcache;
+DROP DATABASE daemon_memcached;
  
 SET @@global.tx_isolation= @tx_isolation;

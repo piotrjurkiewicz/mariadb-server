@@ -254,8 +254,8 @@ connection default;
 # Stop plugin before daemon_memcached configuration
 UNINSTALL PLUGIN daemon_memcached;
 ALTER TABLE test.t1 DROP COLUMN c1;
-# Need to add index on column c11 and also update the innodb_memcache.containers
-UPDATE innodb_memcache.containers set key_columns = "c11", unique_idx_name_on_key="idx";
+# Need to add index on column c11 and also update the daemon_memcached.containers
+UPDATE daemon_memcached.containers set key_columns = "c11", unique_idx_name_on_key="idx";
 create unique index idx on test.t1(c11);
 INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 
@@ -288,7 +288,7 @@ connection default;
 disconnect mysqltest1;
 
 UNINSTALL PLUGIN daemon_memcached;
-DROP DATABASE innodb_memcache;
+DROP DATABASE daemon_memcached;
 DROP USER mysqltest1@localhost;
  
 SET @@global.tx_isolation= @tx_isolation;

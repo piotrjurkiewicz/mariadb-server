@@ -19,5 +19,5 @@ INSERT INTO t1 VALUES ('C', 'Cottbus', 'West', 0, 0 ,0);
 INSERT INTO t1 VALUES ('H', 'Hamburg', 'Norderstedt', 0, 0, 0);
 Testing install/uninstall 10 times.
 DROP TABLE t1;
-DROP DATABASE innodb_memcache;
+DROP DATABASE daemon_memcached;
 SET @@global.tx_isolation= @tx_isolation;

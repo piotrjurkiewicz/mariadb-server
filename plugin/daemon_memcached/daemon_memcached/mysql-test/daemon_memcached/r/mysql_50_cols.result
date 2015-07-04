@@ -182,5 +182,5 @@ c1	c200	c201	c202	c203	c204	c205	c206	c207	c208	c209	c210	c211	c212	c213	c214	c2
 DROP TABLE t1;
 SET sql_mode=default;
 UNINSTALL PLUGIN daemon_memcached;
-DROP DATABASE innodb_memcache;
+DROP DATABASE daemon_memcached;
 SET @@global.tx_isolation= @tx_isolation;

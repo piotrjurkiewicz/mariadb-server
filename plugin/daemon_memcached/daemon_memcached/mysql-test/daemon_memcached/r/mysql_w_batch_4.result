@@ -138,7 +138,7 @@ COMMIT;
 connection default;
 disconnect mysqltest1;
 UNINSTALL PLUGIN daemon_memcached;
-DROP DATABASE innodb_memcache;
+DROP DATABASE daemon_memcached;
 DROP USER mysqltest1@localhost;
 SET @@global.tx_isolation= @tx_isolation;
 SET  @@global.autocommit=@auto_commit;

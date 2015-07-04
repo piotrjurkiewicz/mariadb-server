@@ -125,7 +125,7 @@ EOF
 # Stop plugin before daemon_memcached configuration
 UNINSTALL PLUGIN daemon_memcached;
 
-use innodb_memcache;
+use daemon_memcached;
 
 DELETE FROM cache_policies;
 
@@ -169,7 +169,7 @@ EOF
 
 UNINSTALL PLUGIN daemon_memcached;
 
-use innodb_memcache;
+use daemon_memcached;
 
 DELETE FROM cache_policies;
 
@@ -247,7 +247,7 @@ EOF
 
 UNINSTALL PLUGIN daemon_memcached;
 
-use innodb_memcache;
+use daemon_memcached;
 
 DELETE FROM cache_policies;
 
@@ -343,7 +343,7 @@ EOF
 
 UNINSTALL PLUGIN daemon_memcached;
 
-use innodb_memcache;
+use daemon_memcached;
 
 DELETE FROM cache_policies;
 
@@ -440,7 +440,7 @@ EOF
 
 UNINSTALL PLUGIN daemon_memcached;
 
-use innodb_memcache;
+use daemon_memcached;
 
 DELETE FROM cache_policies;
 
@@ -538,7 +538,7 @@ EOF
 
 UNINSTALL PLUGIN daemon_memcached;
 
-use innodb_memcache;
+use daemon_memcached;
 
 DELETE FROM cache_policies;
 
@@ -636,7 +636,7 @@ EOF
 
 UNINSTALL PLUGIN daemon_memcached;
 
-use innodb_memcache;
+use daemon_memcached;
 
 DELETE FROM cache_policies;
 
@@ -734,7 +734,7 @@ EOF
 
 UNINSTALL PLUGIN daemon_memcached;
 
-use innodb_memcache;
+use daemon_memcached;
 
 DELETE FROM cache_policies;
 
@@ -838,7 +838,7 @@ EOF
 
 UNINSTALL PLUGIN daemon_memcached;
 
-use innodb_memcache;
+use daemon_memcached;
 
 DELETE FROM cache_policies;
 
@@ -927,6 +927,6 @@ USE test;
 DROP TABLE t1;
 
 UNINSTALL PLUGIN daemon_memcached;
-DROP DATABASE innodb_memcache;
+DROP DATABASE daemon_memcached;
  
 SET @@global.tx_isolation= @tx_isolation;

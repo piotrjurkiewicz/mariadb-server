@@ -147,7 +147,7 @@ H	H	Hamburg	Norderstedt
 connection default;
 UNINSTALL PLUGIN daemon_memcached;
 ALTER TABLE test.t1 DROP COLUMN c1;
-UPDATE innodb_memcache.containers set key_columns = "c11", unique_idx_name_on_key="idx";
+UPDATE daemon_memcached.containers set key_columns = "c11", unique_idx_name_on_key="idx";
 create unique index idx on test.t1(c11);
 INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 connection mysqltest1;
@@ -169,6 +169,6 @@ DROP TABLE t1;
 connection default;
 disconnect mysqltest1;
 UNINSTALL PLUGIN daemon_memcached;
-DROP DATABASE innodb_memcache;
+DROP DATABASE daemon_memcached;
 DROP USER mysqltest1@localhost;
 SET @@global.tx_isolation= @tx_isolation;

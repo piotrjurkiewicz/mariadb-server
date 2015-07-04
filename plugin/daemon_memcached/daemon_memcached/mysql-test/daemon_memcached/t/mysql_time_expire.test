@@ -87,6 +87,6 @@ DROP TABLE t1;
 DROP TABLE demo;
 
 UNINSTALL PLUGIN daemon_memcached;
-DROP DATABASE innodb_memcache;
+DROP DATABASE daemon_memcached;
 
 SET @@global.tx_isolation= @tx_isolation;
