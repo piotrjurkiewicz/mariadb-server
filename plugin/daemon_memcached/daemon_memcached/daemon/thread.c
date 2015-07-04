@@ -17,7 +17,7 @@
 
 #define ITEMS_PER_ALLOC 64
 
-#define INNODB_MEMCACHED
+#define DAEMON_MEMCACHED
 
 static char devnull[8192];
 extern volatile sig_atomic_t memcached_shutdown;
@@ -304,7 +304,7 @@ static void *worker_libevent(void *arg) {
     pthread_mutex_unlock(&init_lock);
 
     event_base_loop(me->base, 0);
-#ifdef INNODB_MEMCACHED
+#ifdef DAEMON_MEMCACHED
     if (me->base)
         event_base_free(me->base);
 #endif
@@ -875,7 +875,7 @@ void threads_shutdown(void)
         safe_close(threads[ii].notify[1]);
     }
 
-#ifdef INNODB_MEMCACHED
+#ifdef DAEMON_MEMCACHED
     if (dispatcher_thread.notify[0])
         closesocket(dispatcher_thread.notify[0]);
     if (dispatcher_thread.notify[1])

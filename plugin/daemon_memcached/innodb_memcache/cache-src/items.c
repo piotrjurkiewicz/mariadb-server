@@ -11,7 +11,7 @@
 
 #include "default_engine.h"
 
-#define INNODB_MEMCACHED
+#define DAEMON_MEMCACHED
 /* Forward Declarations */
 static void item_link_q(struct default_engine *engine, hash_item *it);
 static void item_unlink_q(struct default_engine *engine, hash_item *it);
@@ -80,7 +80,7 @@ static uint64_t get_cas_id(void) {
 #endif
 
 
-#ifdef INNODB_MEMCACHED /* INNODB_MEMCACHED */
+#ifdef DAEMON_MEMCACHED /* DAEMON_MEMCACHED */
 /*@null@*/
 hash_item *do_item_alloc(struct default_engine *engine,
                          const void *key,
@@ -121,7 +121,7 @@ hash_item *do_item_alloc(struct default_engine *engine,
     return it;
 }
 
-#else /* INNODB_MEMCACHED */
+#else /* DAEMON_MEMCACHED */
 /*@null@*/
 hash_item *do_item_alloc(struct default_engine *engine,
                          const void *key,
@@ -263,7 +263,7 @@ hash_item *do_item_alloc(struct default_engine *engine,
     it->exptime = exptime;
     return it;
 }
-#endif /* INNODB_MEMCACHED */
+#endif /* DAEMON_MEMCACHED */
 
 static void item_free(struct default_engine *engine, hash_item *it) {
     size_t ntotal = ITEM_ntotal(engine, it);
@@ -744,7 +744,7 @@ static ENGINE_ERROR_CODE do_add_delta(struct default_engine *engine,
 }
 
 /********************************* ITEM ACCESS *******************************/
-#ifdef INNODB_MEMCACHED
+#ifdef DAEMON_MEMCACHED
 
 /*
  * Allocates a new item.

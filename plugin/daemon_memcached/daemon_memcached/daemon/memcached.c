@@ -36,7 +36,7 @@
 
 #include "memcached_mysql.h"
 
-#define INNODB_MEMCACHED
+#define DAEMON_MEMCACHED
 
 static inline void item_set_cas(const void *cookie, item *it, uint64_t cas) {
     settings.engine.v1->item_set_cas(settings.engine.v0, cookie, it, cas);
@@ -5438,7 +5438,7 @@ bool conn_nread(conn *c) {
         return true;
     }
 
-#ifdef INNODB_MEMCACHED
+#ifdef DAEMON_MEMCACHED
     /* MEMCACHED_RESOLVE: on solaris platform, when connect through
     telnet and waiting for input from an "add" or "set" command,
     it could have res == -1 and errno == 0. Thus causing early termination
@@ -5446,7 +5446,7 @@ bool conn_nread(conn *c) {
     if (res == -1 && (errno == EAGAIN || errno == EWOULDBLOCK || !errno)) {
 #else
     if (res == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
-#endif /* INNODB_MEMCACHED */
+#endif /* DAEMON_MEMCACHED */
         if (!update_event(c, EV_READ | EV_PERSIST)) {
             if (settings.verbose > 0) {
                 settings.extensions.logger->log(EXTENSION_LOG_INFO, c,
@@ -6741,12 +6741,12 @@ static void* get_extension(extension_type_t type)
     }
 }
 
-#ifdef INNODB_MEMCACHED
+#ifdef DAEMON_MEMCACHED
 void shutdown_server(void) {
 #else
 static void shutdown_server(void) {
-#endif /* INNODB_MEMCACHED */
-#ifdef INNODB_MEMCACHED
+#endif /* DAEMON_MEMCACHED */
+#ifdef DAEMON_MEMCACHED
     int i;
     /* Clean up connections */
     while (listen_conn) {
@@ -6761,7 +6761,7 @@ static void shutdown_server(void) {
     memcached_shutdown = 1;
 }
 
-#ifdef INNODB_MEMCACHED
+#ifdef DAEMON_MEMCACHED
 bool shutdown_complete(void)
 {
     return(memcached_shutdown == 2);
@@ -6981,7 +6981,7 @@ static bool sanitycheck(void) {
     return true;
 }
 
-#ifdef INNODB_MEMCACHED
+#ifdef DAEMON_MEMCACHED
 static
 char*
 my_strdupl(const char* str, int len)
@@ -7042,9 +7042,9 @@ typedef struct eng_config_info {
 	unsigned int    eng_w_batch_size;
 	bool		enable_binlog;
 } eng_config_info_t;
-#endif /* INNODB_MEMCACHED */
+#endif /* DAEMON_MEMCACHED */
 
-#ifdef INNODB_MEMCACHED
+#ifdef DAEMON_MEMCACHED
 void* daemon_memcached_main(void *p) {
 #else
 int main (int argc, char **argv) {
@@ -7069,7 +7069,7 @@ int main (int argc, char **argv) {
     const char *engine_config = NULL;
     char old_options[1024] = { [0] = '\0' };
     char *old_opts = old_options;
-#ifdef INNODB_MEMCACHED
+#ifdef DAEMON_MEMCACHED
     int option_argc = 0;
     char** option_argv = NULL;
     eng_config_info_t my_eng_config;
@@ -7094,7 +7094,7 @@ int main (int argc, char **argv) {
     }
 #else
     engine = "default_engine.so";
-#endif /* INNODB_MEMCACHED */
+#endif /* DAEMON_MEMCACHED */
 
     memcached_shutdown = 0;
     memcached_initialized = 0;
@@ -7127,7 +7127,7 @@ int main (int argc, char **argv) {
 				     &option_argv);
     }
 
-#ifdef INNODB_MEMCACHED
+#ifdef DAEMON_MEMCACHED
 
     if (option_argc > 0 && option_argv) {
 	    /* Always reset the index to 1, since this function can
@@ -7646,7 +7646,7 @@ int main (int argc, char **argv) {
             return 1;
         }
     }
-#endif /* INNODB_MEMCACHED */
+#endif /* DAEMON_MEMCACHED */
 
     if (getenv("MEMCACHED_REQS_TAP_EVENT") != NULL) {
         settings.reqs_per_tap_event = atoi(getenv("MEMCACHED_REQS_TAP_EVENT"));
@@ -7835,12 +7835,12 @@ int main (int argc, char **argv) {
     }
 
     if(!init_engine(engine_handle,engine_config,settings.extensions.logger)) {
-#ifdef INNODB_MEMCACHED
+#ifdef DAEMON_MEMCACHED
         shutdown_server();
         goto func_exit;
 #else
 	return(false);
-#endif /* INNODB_MEMCACHED */
+#endif /* DAEMON_MEMCACHED */
     }
 
     if(settings.verbose > 0) {
@@ -7914,12 +7914,12 @@ int main (int argc, char **argv) {
         if (settings.port && server_sockets(settings.port, tcp_transport,
                                             portnumber_file)) {
 		vperror("failed to listen on TCP port %d", settings.port);
-#ifdef INNODB_MEMCACHED
+#ifdef DAEMON_MEMCACHED
 		shutdown_server();
 		goto func_exit;
 #else
 		exit(EX_OSERR);
-#endif /* INNODB_MEMCACHED */
+#endif /* DAEMON_MEMCACHED */
         }
 
         /*
@@ -7974,7 +7974,7 @@ func_exit:
     if (settings.inter)
       free(settings.inter);
 
-#ifdef INNODB_MEMCACHED
+#ifdef DAEMON_MEMCACHED
     /* free event base */
     if (main_base) {
         event_base_free(main_base);
