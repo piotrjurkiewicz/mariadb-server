@@ -15,7 +15,7 @@ INSERT INTO t1 VALUES ('D', 'Darmstadt', 0, 0, 0);
 INSERT INTO t1 VALUES ('B', 'Berlin', 0, 0, 0);
 INSERT INTO t1 VALUES ('C', 'Cottbus', 0, 0 ,0);
 INSERT INTO t1 VALUES ('H', 'Hamburg', 0, 0, 0);
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 SELECT c1,c2 FROM t1;
 c1	c2
 B	Berlin
@@ -63,7 +63,7 @@ INSERT INTO t2 VALUES ('D', 't2_Darmstadt', 0, 0, 0);
 INSERT INTO t2 VALUES ('B', 't2_Berlin', 0, 0, 0);
 INSERT INTO t2 VALUES ('C', 't2_Cottbus', 0, 0 ,0);
 INSERT INTO t2 VALUES ('H', 't2_Hamburg', 0, 0, 0);
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 SELECT c1,c2 FROM t2;
 c1	c2
 B	t2_Berlin
@@ -108,7 +108,7 @@ ERROR 23000: Column 'key_columns' cannot be null
 DELETE FROM containers;
 INSERT INTO containers VALUES ("desc_t2", "junk", "t2",
 "c1", "c2",  "c3", "c4", "c5", "PRIMARY");
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 SELECT SLEEP(2);
 SLEEP(2)
 0
@@ -124,7 +124,7 @@ c2 VARCHAR(1024),
 c3 INT, c4 BIGINT UNSIGNED, c5 INT, primary key(c1))
 ENGINE = INNODB;
 INSERT INTO t2 VALUES (3, 't2_Hamburg', 0, 0, 0);
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 SELECT SLEEP(2);
 SLEEP(2)
 0
@@ -137,7 +137,7 @@ c2 VARCHAR(1024),
 c3 INT, c4 INT,  c5 INT, primary key(c1));
 INSERT INTO t2 VALUES ('H', 't2_Hamburg', 0, 0, 0);
 UNINSTALL PLUGIN daemon_memcached;
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 SELECT SLEEP(2);
 SLEEP(2)
 0
@@ -153,7 +153,7 @@ CREATE TABLE t2        (c1 VARCHAR(32),
 c2 VARCHAR(1024),
 c3 INT, c4 BIGINT UNSIGNED, c5 INT, primary key(c1))
 ENGINE = INNODB;
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 SELECT c1,c2 FROM t2;
 c1	c2
 SELECT SLEEP(2);
@@ -205,7 +205,7 @@ INSERT INTO t2 VALUES ('D', 't2_Darmstadt', 0, 0, 0);
 INSERT INTO t2 VALUES ('B', 't2_Berlin', 0, 0, 0);
 INSERT INTO t2 VALUES ('C', 't2_Cottbus', 0, 0 ,0);
 INSERT INTO t2 VALUES ('H', 't2_Hamburg', 0, 0, 0);
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 SELECT c1,c2 FROM t2;
 c1	c2
 B	t2_Berlin
@@ -236,7 +236,7 @@ t2	CREATE TABLE `t2` (
   `c5` int(11) DEFAULT NULL,
   PRIMARY KEY (`c1`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 DROP TABLE t2;
 UNINSTALL PLUGIN daemon_memcached;
 DROP DATABASE innodb_memcache;

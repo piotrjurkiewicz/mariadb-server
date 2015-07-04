@@ -48,7 +48,7 @@ INSERT INTO t1 VALUES ('H','H', 'Hamburg', 'Norderstedt', 0, 0, 0);
 
 connection default;
 
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 
 # The following select is writing all to  memcache otherwisw memcache is empty.
 connection mysqltest1;
@@ -194,7 +194,7 @@ connection default;
 UNINSTALL PLUGIN daemon_memcached;
 # We can never drop primary key
 ALTER TABLE test.t1 DROP PRIMARY KEY;
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 
 connection mysqltest1;
 perl;
@@ -221,7 +221,7 @@ connection default;
 # Stop plugin befor daemon_memcached configuration
 UNINSTALL PLUGIN daemon_memcached;
 ALTER TABLE test.t1 ADD CONSTRAINT PRIMARY KEY (c1);
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 
 SHOW CREATE TABLE test.t1;
 
@@ -257,7 +257,7 @@ ALTER TABLE test.t1 DROP COLUMN c1;
 # Need to add index on column c11 and also update the innodb_memcache.containers
 UPDATE innodb_memcache.containers set key_columns = "c11", unique_idx_name_on_key="idx";
 create unique index idx on test.t1(c11);
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 
 connection mysqltest1;
 perl;

@@ -43,7 +43,7 @@ INSERT INTO t1 VALUES ('C', 'Cottbus', 0, 0 ,0);
 INSERT INTO t1 VALUES ('H', 'Hamburg', 0, 0, 0);
 
 # Tables must exist before plugin can be started!
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 
 # The following select is writing all to  memcache otherwisw memcache is empty.
 --sorted_result
@@ -154,7 +154,7 @@ INSERT INTO t2 VALUES ('C', 't2_Cottbus', 0, 0 ,0);
 INSERT INTO t2 VALUES ('H', 't2_Hamburg', 0, 0, 0);
 
 # Tables must exist before plugin can be started!
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 
 # The following select is writing all to  memcache otherwisw memcache is empty.
 --sorted_result
@@ -266,7 +266,7 @@ INSERT INTO containers VALUES ("desc_t2", "junk", "t2",
 			       "c1", "c2",  "c3", "c4", "c5", "PRIMARY");
 
 # even though the plugin can be installed, the initialization will fail
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 
 SELECT SLEEP(2);
 
@@ -311,7 +311,7 @@ ENGINE = INNODB;
 INSERT INTO t2 VALUES (3, 't2_Hamburg', 0, 0, 0);
 
 # Tables must exist before plugin can be started!
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 
 SELECT SLEEP(2);
 
@@ -346,7 +346,7 @@ INSERT INTO t2 VALUES ('H', 't2_Hamburg', 0, 0, 0);
 
 UNINSTALL PLUGIN daemon_memcached;
 
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 
 SELECT SLEEP(2);
 
@@ -390,7 +390,7 @@ CREATE TABLE t2        (c1 VARCHAR(32),
 ENGINE = INNODB;
 
 # Tables must exist before plugin can be started!
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 
 # The following select is writing all to  memcache otherwisw memcache is empty.
 --sorted_result
@@ -584,7 +584,7 @@ INSERT INTO t2 VALUES ('C', 't2_Cottbus', 0, 0 ,0);
 INSERT INTO t2 VALUES ('H', 't2_Hamburg', 0, 0, 0);
 
 # Tables must exist before plugin can be started!
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 
 # The following select is writing all to  memcache otherwisw memcache is empty.
 --sorted_result
@@ -685,7 +685,7 @@ show create table test.t2;
 
 # This install will not initialize the table mapping, due to column
 # type mismatch
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 
 #----------------------------------------------------------------
 DROP TABLE t2;

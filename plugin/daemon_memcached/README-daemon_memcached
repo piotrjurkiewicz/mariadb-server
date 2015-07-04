@@ -2,7 +2,7 @@ Following are simple steps to get everything started:
 
 1) Build MySQL server. Please note libevent 1.4.12 is linked statically into daemon memcached.
 
-2) Start MySQL server. (make sure libmemcached.so and innodb_engine.so are copied to MySQL plugin directory).
+2) Start MySQL server. (make sure daemon_memcached.so and innodb_engine.so are copied to MySQL plugin directory).
 
 3) Create the configure table and a demo table by running daemon_memcached_config.sql
 
@@ -10,7 +10,7 @@ mysql < scripts/daemon_memcached_config.sql
 
 4) Install the memcached daemon plugin:
 
-mysql> install plugin daemon_memcached soname "libmemcached.so";
+mysql> install plugin daemon_memcached soname "daemon_memcached.so";
 
 5) Test it out
 telnet 127.0.0.1 11211

@@ -26,7 +26,7 @@ ENGINE = INNODB;
 INSERT INTO t1 VALUES("Z", REPEAT("a", 15000), REPEAT("b", 1000), 0, 0, 0);
 COMMIT;
 connection default;
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 SELECT @@global.daemon_memcached_w_batch_size;
 @@global.daemon_memcached_w_batch_size
 1048576

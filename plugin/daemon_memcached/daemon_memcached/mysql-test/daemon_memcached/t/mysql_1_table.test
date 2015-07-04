@@ -70,7 +70,7 @@ CREATE UNIQUE INDEX i16 ON t1(c25);
 CREATE UNIQUE INDEX i17 ON t1(c26);
 
 # Tables must exist before plugin can be started!
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 
 # The following selects are writing all to  memcache otherwise memcache is empty.
 --sorted_result

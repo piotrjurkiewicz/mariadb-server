@@ -39,7 +39,7 @@ ENDIF(CMAKE_C_FLAGS MATCHES "-Werror")
 
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_SHARED_LIBRARY_C_FLAGS} -std=gnu99")
 
-SET(LIBMEMCACHED_UTILITIES_SOURCES
+SET(DAEMON_MEMCACHED_UTILITIES_SOURCES
 		include/memcached/config_parser.h
 		include/memcached/genhash.h
 		include/memcached/util.h
@@ -51,11 +51,11 @@ SET(LIBMEMCACHED_UTILITIES_SOURCES
 		utilities/genhash_int.h
 		utilities/util.c)
 
-ADD_LIBRARY(memcached_utilities STATIC ${LIBMEMCACHED_UTILITIES_SOURCES})
+ADD_LIBRARY(daemon_memcached_utilities STATIC ${DAEMON_MEMCACHED_UTILITIES_SOURCES})
 
 SET(CMAKE_CPP_FLAGS "${CMAKE_CPP_FLAGS} ${CMAKE_SHARED_LIBRARY_C_FLAGS} -I${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached/daemon")
 
-SET(MEMCACHED_SOURCES
+SET(DAEMON_MEMCACHED_SOURCES
 		daemon/memcached_mysql.h
 		daemon/memcached_mysql.cc
 		daemon/cache.h
@@ -75,12 +75,12 @@ SET(MEMCACHED_SOURCES
 		daemon/topkeys.h
 		trace.h)
 
-MYSQL_ADD_PLUGIN(libmemcached ${MEMCACHED_SOURCES}
-		MODULE_ONLY MODULE_OUTPUT_NAME "libmemcached")
+MYSQL_ADD_PLUGIN(daemon_memcached ${DAEMON_MEMCACHED_SOURCES}
+		MODULE_ONLY MODULE_OUTPUT_NAME "daemon_memcached")
 
-TARGET_LINK_LIBRARIES(libmemcached ${LIBEVENT_LIBRARY})
-TARGET_LINK_LIBRARIES(libmemcached memcached_utilities)
+TARGET_LINK_LIBRARIES(daemon_memcached ${LIBEVENT_LIBRARY})
+TARGET_LINK_LIBRARIES(daemon_memcached daemon_memcached_utilities)
 
 IF(ENABLE_MEMCACHED_SASL)
-  TARGET_LINK_LIBRARIES(libmemcached sasl2)
+  TARGET_LINK_LIBRARIES(daemon_memcached sasl2)
 ENDIF()

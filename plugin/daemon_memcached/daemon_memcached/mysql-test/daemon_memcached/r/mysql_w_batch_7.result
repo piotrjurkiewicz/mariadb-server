@@ -24,7 +24,7 @@ c3 INT, c4 BIGINT UNSIGNED, c5 INT, primary key(c1))
 ENGINE = INNODB;
 COMMIT;
 connection default;
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 SELECT @@global.daemon_memcached_w_batch_size;
 @@global.daemon_memcached_w_batch_size
 1048576

@@ -65,7 +65,7 @@ CREATE UNIQUE INDEX it1 ON t1(c11);
 # Tables must exist before plugin can be started!
 # This shall fail due to index not qualify
 connection default;
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 
 connection mysqltest1;
 USE test;
@@ -209,7 +209,7 @@ connection default;
 # Stop plugin befor daemon_memcached configuration
 UNINSTALL PLUGIN daemon_memcached;
 ALTER TABLE test.t1 DROP PRIMARY KEY;
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 
 connection mysqltest1;
 perl;
@@ -236,7 +236,7 @@ connection default;
 # Stop plugin befor daemon_memcached configuration
 UNINSTALL PLUGIN daemon_memcached;
 ALTER TABLE test.t1 ADD CONSTRAINT PRIMARY KEY (c11);
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 
 SHOW CREATE TABLE test.t1;
 
@@ -268,7 +268,7 @@ connection default;
 # Stop plugin befor daemon_memcached configuration
 UNINSTALL PLUGIN daemon_memcached;
 ALTER TABLE test.t1 DROP COLUMN c1;
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 
 connection mysqltest1;
 perl;

@@ -104,7 +104,7 @@ CREATE VIEW v1 AS SELECT t1.c1 AS vc1,t1.c2 AS vc2,t3.c21 AS vc21,
                   t1.c3 AS vc3,t1.c4 AS vc4,t1.c5 AS vc5 FROM t1,t3 WHERE t1.c1=t3.c1;
 
 # Tables must exist before plugin can be started!
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 
 # The following selects are writing all to  memcache otherwise memcache is empty.
 --sorted_result

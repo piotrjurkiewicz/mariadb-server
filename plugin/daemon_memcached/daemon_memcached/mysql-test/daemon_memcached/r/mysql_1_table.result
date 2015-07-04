@@ -41,7 +41,7 @@ CREATE UNIQUE INDEX i14 ON t1(c21);
 CREATE UNIQUE INDEX i15 ON t1(c23);
 CREATE UNIQUE INDEX i16 ON t1(c25);
 CREATE UNIQUE INDEX i17 ON t1(c26);
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 SELECT c1,c2,c21,c22,c23,c24,c25,c26,c27 FROM t1;
 c1	c2	c21	c22	c23	c24	c25	c26	c27
 D	Duesseldorf	City	98765	Hafen	1	A	a	Z

@@ -25,7 +25,7 @@ c22 VARCHAR(1024),
 c3 INT(11), c4 BIGINT(20) UNSIGNED, c5 INT(11))
 ENGINE = INNODB;
 INSERT INTO demo VALUES('b','aa','aa',0,2,unix_timestamp()-60);
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 SELECT c1,c2 FROM t1;
 c1	c2
 D	Darmstadt

@@ -53,7 +53,7 @@ COMMIT;
 
 connection default;
 # Tables must exist before plugin can be started!
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 SELECT @@global.daemon_memcached_w_batch_size;
 --error ER_INCORRECT_GLOBAL_LOCAL_VAR
 SET @@global.daemon_memcached_w_batch_size=100;

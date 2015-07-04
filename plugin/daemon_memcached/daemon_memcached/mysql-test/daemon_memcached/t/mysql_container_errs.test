@@ -61,7 +61,7 @@ INSERT INTO t2 VALUES ('C', 'Cottbus', 'West', 0, 0 ,0);
 INSERT INTO t2 VALUES ('H', 'Hamburg', 'Norderstedt', 0, 0, 0);
 
 # Tables must exist before plugin can be started!
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 
 # The following select is writing all to  memcache otherwisw memcache is empty.
 --sorted_result
@@ -137,7 +137,7 @@ INSERT INTO containers VALUES ("desc_t1", "test", "t9",
 			       "c1", "c11,c2,c21", "c3", "c4", "c5", "PRIMARY");
 
 # Tables must exist before plugin can be started!
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 
 USE test;
 # The following select is writing all to  memcache otherwisw memcache is empty.
@@ -212,7 +212,7 @@ INSERT INTO containers VALUES ("desc_t1", "unknown", "t1",
 			       "c1", "c11,c2,c21", "c3", "c4", "c5", "PRIMARY");
 
 # Tables must exist before plugin can be started!
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 
 USE test;
 # The following select is writing all to  memcache otherwisw memcache is empty.
@@ -287,7 +287,7 @@ INSERT INTO containers VALUES ("desc_t1", "test", "t1",
 			       "unknown", "c11,c2,c21", "c3", "c4", "c5", "PRIMARY");
 
 # Tables must exist before plugin can be started!
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 
 USE test;
 # The following select is writing all to  memcache otherwisw memcache is empty.
@@ -362,7 +362,7 @@ INSERT INTO containers VALUES ("desc_t1", "test", "t1",
 			       "c1", "unknown", "c3", "c4", "c5", "PRIMARY");
 
 # Tables must exist before plugin can be started!
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 
 USE test;
 # The following select is writing all to  memcache otherwisw memcache is empty.
@@ -437,7 +437,7 @@ INSERT INTO containers VALUES ("desc_t1", "test", "t1",
 			       "c1", NULL, "c3", "c4", "c5", "PRIMARY");
 
 # Tables must exist before plugin can be started!
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 
 USE test;
 # The following select is writing all to  memcache otherwisw memcache is empty.
@@ -512,7 +512,7 @@ INSERT INTO containers VALUES ("desc_t1", "test", "t1",
 			       "c1", "c11,c2,c21", "unknown", "unknown", "unknown", "PRIMARY");
 
 # Tables must exist before plugin can be started!
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 
 USE test;
 DELETE FROM t1 WHERE c1 IN ('E','F');
@@ -601,7 +601,7 @@ ENGINE = INNODB
 PARTITION BY KEY (c1);
 
 # Tables must exist before plugin can be started!
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 
 USE test;
 DELETE FROM t1 WHERE c1 IN ('E','F');

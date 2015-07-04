@@ -14,7 +14,7 @@ INSERT INTO t1 VALUES ('D', 'Darmstadt', 0, 0, 0);
 INSERT INTO t1 VALUES ('B', 'Berlin', 0, 0, 0);
 INSERT INTO t1 VALUES ('C', 'Cottbus', 0, 0 ,0);
 INSERT INTO t1 VALUES ('H', 'Hamburg', 0, 0, 0);
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 SELECT c1,c2 FROM t1;
 c1	c2
 B	Berlin
@@ -45,7 +45,7 @@ use innodb_memcache;
 DELETE FROM cache_policies;
 INSERT INTO cache_policies VALUES("cache_policy", "caching",
 "innodb_only", "innodb_only", "innodb_only");
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 ----- Test get (caching) -----
 Here the memcached results with D,B,H,C:
 Darmstadt
@@ -57,7 +57,7 @@ use innodb_memcache;
 DELETE FROM cache_policies;
 INSERT INTO cache_policies VALUES("cache_policy", "cache_only",
 "cache_only", "innodb_only", "innodb_only");
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 ----- Test insert (cache_only) -----
 Add E|Essen:
 Ok.
@@ -79,7 +79,7 @@ use innodb_memcache;
 DELETE FROM cache_policies;
 INSERT INTO cache_policies VALUES("cache_policy", "caching",
 "caching", "innodb_only", "innodb_only");
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 SELECT SLEEP(2);
 SLEEP(2)
 0
@@ -111,7 +111,7 @@ use innodb_memcache;
 DELETE FROM cache_policies;
 INSERT INTO cache_policies VALUES("cache_policy", "caching",
 "caching", "cache_only", "innodb_only");
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 SELECT SLEEP(2);
 SLEEP(2)
 0
@@ -140,7 +140,7 @@ use innodb_memcache;
 DELETE FROM cache_policies;
 INSERT INTO cache_policies VALUES("cache_policy", "caching",
 "caching", "caching", "innodb_only");
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 SELECT SLEEP(2);
 SLEEP(2)
 0
@@ -171,7 +171,7 @@ use innodb_memcache;
 DELETE FROM cache_policies;
 INSERT INTO cache_policies VALUES("cache_policy", "cache_only",
 "caching", "cache_only", "cache_only");
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 SELECT SLEEP(2);
 SLEEP(2)
 0
@@ -209,7 +209,7 @@ use innodb_memcache;
 DELETE FROM cache_policies;
 INSERT INTO cache_policies VALUES("cache_policy", "caching",
 "caching", "caching", "caching");
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 SELECT SLEEP(2);
 SLEEP(2)
 0
@@ -242,7 +242,7 @@ use innodb_memcache;
 DELETE FROM cache_policies;
 INSERT INTO cache_policies VALUES("cache_policy", "caching",
 "disabled", "disabled", "disabled");
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 use test;
 delete from t1;
 INSERT INTO t1 VALUES ('D', 'Darmstadt', 0, 0, 0);
@@ -284,7 +284,7 @@ INSERT IGNORE INTO cache_policies VALUES("junk", "junk",
 "caching", "cache_only", "disabled");
 Warnings:
 Warning	1265	Data truncated for column 'get_policy' at row 1
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 SELECT SLEEP(2);
 SLEEP(2)
 0

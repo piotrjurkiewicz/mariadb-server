@@ -64,7 +64,7 @@ CREATE VIEW v1 AS SELECT t1.c1 AS vc1,t1.c2 AS vc2,t2.c21 AS vc21,
 
 # Tables must exist before plugin can be started!
 connection default;
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 
 # The following select is writing all to  memcache otherwisw memcache is empty.
 connection mysqltest1;

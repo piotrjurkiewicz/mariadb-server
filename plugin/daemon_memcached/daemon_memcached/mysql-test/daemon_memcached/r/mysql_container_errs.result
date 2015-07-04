@@ -29,7 +29,7 @@ INSERT INTO t2 VALUES ('D', 'Darmstadt', 'City', 0, 0, 0);
 INSERT INTO t2 VALUES ('B', 'Berlin', 'Mitte', 0, 0, 0);
 INSERT INTO t2 VALUES ('C', 'Cottbus', 'West', 0, 0 ,0);
 INSERT INTO t2 VALUES ('H', 'Hamburg', 'Norderstedt', 0, 0, 0);
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 SELECT c1,c11,c2,c21 FROM t1;
 c1	c11	c2	c21
 B	B	Berlin	Mitte
@@ -72,7 +72,7 @@ INSERT INTO cache_policies VALUES("cache_policy", "innodb_only",
 INSERT INTO config_options VALUES("separator", "|");
 INSERT INTO containers VALUES ("desc_t1", "test", "t9",
 "c1", "c11,c2,c21", "c3", "c4", "c5", "PRIMARY");
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 USE test;
 SELECT c1,c11,c2,c21 FROM t1;
 c1	c11	c2	c21
@@ -106,7 +106,7 @@ INSERT INTO cache_policies VALUES("cache_policy", "innodb_only",
 INSERT INTO config_options VALUES("separator", "|");
 INSERT INTO containers VALUES ("desc_t1", "unknown", "t1",
 "c1", "c11,c2,c21", "c3", "c4", "c5", "PRIMARY");
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 USE test;
 SELECT c1,c11,c2,c21 FROM t1;
 c1	c11	c2	c21
@@ -140,7 +140,7 @@ INSERT INTO cache_policies VALUES("cache_policy", "innodb_only",
 INSERT INTO config_options VALUES("separator", "|");
 INSERT INTO containers VALUES ("desc_t1", "test", "t1",
 "unknown", "c11,c2,c21", "c3", "c4", "c5", "PRIMARY");
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 USE test;
 SELECT c1,c11,c2,c21 FROM t1;
 c1	c11	c2	c21
@@ -174,7 +174,7 @@ INSERT INTO cache_policies VALUES("cache_policy", "innodb_only",
 INSERT INTO config_options VALUES("separator", "|");
 INSERT INTO containers VALUES ("desc_t1", "test", "t1",
 "c1", "unknown", "c3", "c4", "c5", "PRIMARY");
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 USE test;
 SELECT c1,c11,c2,c21 FROM t1;
 c1	c11	c2	c21
@@ -208,7 +208,7 @@ INSERT INTO cache_policies VALUES("cache_policy", "innodb_only",
 INSERT INTO config_options VALUES("separator", "|");
 INSERT INTO containers VALUES ("desc_t1", "test", "t1",
 "c1", NULL, "c3", "c4", "c5", "PRIMARY");
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 USE test;
 SELECT c1,c11,c2,c21 FROM t1;
 c1	c11	c2	c21
@@ -242,7 +242,7 @@ INSERT INTO cache_policies VALUES("cache_policy", "innodb_only",
 INSERT INTO config_options VALUES("separator", "|");
 INSERT INTO containers VALUES ("desc_t1", "test", "t1",
 "c1", "c11,c2,c21", "unknown", "unknown", "unknown", "PRIMARY");
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 USE test;
 DELETE FROM t1 WHERE c1 IN ('E','F');
 SELECT c1,c11,c2,c21 FROM t1;
@@ -293,7 +293,7 @@ c21 VARCHAR(1024),
 c3 INT, c4 BIGINT UNSIGNED, c5 INT, primary key(c1)) 
 ENGINE = INNODB
 PARTITION BY KEY (c1);
-INSTALL PLUGIN daemon_memcached SONAME 'libmemcached.so';
+INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 USE test;
 DELETE FROM t1 WHERE c1 IN ('E','F');
 SELECT c1,c11,c2,c21 FROM t1;
