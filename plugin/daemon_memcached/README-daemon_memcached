@@ -4,9 +4,9 @@ Following are simple steps to get everything started:
 
 2) Start MySQL server. (make sure libmemcached.so and innodb_engine.so are copied to MySQL plugin directory).
 
-3) Create the configure table and a demo table by running innodb_memcached_config.sql
+3) Create the configure table and a demo table by running daemon_memcached_config.sql
 
-mysql < scripts/innodb_memcached_config.sql
+mysql < scripts/daemon_memcached_config.sql
 
 4) Install the memcached daemon plugin:
 
