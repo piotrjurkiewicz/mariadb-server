@@ -25,6 +25,8 @@ Extracted and modified from NDB memcached project
 04/12/2011 Jimmy Yang
 *******************************************************/
 
+#include "config.h"
+
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>

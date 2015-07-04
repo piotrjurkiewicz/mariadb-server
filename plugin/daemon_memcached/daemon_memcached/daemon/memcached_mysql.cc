@@ -24,6 +24,8 @@ InnoDB Memcached Plugin
 Created 04/12/2011 Jimmy Yang
 *******************************************************/
 
+#include "config.h"
+
 #include "memcached_mysql.h"
 #include <stdlib.h>
 #include <ctype.h>

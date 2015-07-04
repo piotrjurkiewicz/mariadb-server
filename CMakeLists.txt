@@ -114,11 +114,8 @@ FOREACH(_base
 ENDFOREACH()
 
 IF(UNIX)
-  OPTION(WITH_INNODB_MEMCACHED "" ON)
   OPTION(ENABLE_MEMCACHED_SASL "Enable SASL on InnoDB Memcached" OFF)
   OPTION(ENABLE_MEMCACHED_SASL_PWDB "Enable SASL on InnoDB Memcached" OFF)
-ELSE()
-  OPTION(WITH_INNODB_MEMCACHED "" OFF)
 ENDIF()
 
 # Following autotools tradition, add preprocessor definitions
@@ -259,7 +256,7 @@ ENDFOREACH()
 
 # Add safemutex for debug configurations, except on Windows
 # (safemutex has never worked on Windows)
-IF(NOT WIN32 AND NOT WITH_INNODB_MEMCACHED)
+IF(NOT WIN32)
   FOREACH(LANG C CXX)
       SET(CMAKE_${LANG}_FLAGS_DEBUG "${CMAKE_${LANG}_FLAGS_DEBUG} -DSAFE_MUTEX")
   ENDFOREACH()

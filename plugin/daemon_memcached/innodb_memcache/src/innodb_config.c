@@ -24,6 +24,8 @@ InnoDB Memcached configurations
 Created 04/12/2011 Jimmy Yang
 *******************************************************/
 
+#include "config.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>

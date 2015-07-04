@@ -24,6 +24,8 @@ Created 03/15/2011	Jimmy Yang (most macros and defines are adopted
 			ut/ut0lst.c, ut0rnd.c and hash0hash.c etc.)
 *******************************************************/
 
+#include "config.h"
+
 #include <stdlib.h>
 #include <string.h>
 #include "innodb_utility.h"
