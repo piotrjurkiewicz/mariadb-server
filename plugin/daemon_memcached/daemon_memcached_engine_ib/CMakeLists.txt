@@ -14,14 +14,14 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
 # Common defines and includes
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/innodb_memcache
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached_engine_ib
 		    ${CMAKE_SOURCE_DIR}/include
 		    ${CMAKE_SOURCE_DIR}/sql
 		    ${CMAKE_SOURCE_DIR}/bld/include
 		    ${CMAKE_SOURCE_DIR}/regex
 		    ${CMAKE_SOURCE_DIR}/storage/innobase/include
-		    ${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/innodb_memcache/include
-		    ${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/innodb_memcache/cache-src
+		    ${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached_engine_ib/include
+		    ${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached_engine_ib/cache-src
 		    ${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached/include)
 
 # If current CMAKE_C_FLAGS is with Werror, turn it off to compile successfully
@@ -40,10 +40,10 @@ SET(MCD__UTILITITY_SOURCES
 ADD_LIBRARY(libmcd_util STATIC ${MCD__UTILITITY_SOURCES})
 
 SET(CMAKE_CPP_FLAGS "${CMAKE_CPP_FLAGS}
-                     -I${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/innodb_memcache/include
-                     -I${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/innodb_memcache/cache-src")
+                     -I${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached_engine_ib/include
+                     -I${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached_engine_ib/cache-src")
 
-SET(INNODB_ENGINE_SOURCES
+SET(DAEMON_MEMCACHED_ENGINE_IB_SOURCES
 		src/innodb_config.c
 		src/innodb_utility.c
 		src/hash_item_util.c
@@ -55,10 +55,10 @@ SET(INNODB_ENGINE_SOURCES
 		cache-src/items.c
 		cache-src/slabs.c)
 
-# ADD_LIBRARY(innodb_engine SHARED ${INNODB_ENGINE_SOURCES})
+# ADD_LIBRARY(daemon_memcached_engine_ib SHARED ${DAEMON_MEMCACHED_ENGINE_IB_SOURCES})
 
-MYSQL_ADD_PLUGIN(innodb_engine ${INNODB_ENGINE_SOURCES}
-		MODULE_ONLY MODULE_OUTPUT_NAME "innodb_engine")
+MYSQL_ADD_PLUGIN(daemon_memcached_engine_ib ${DAEMON_MEMCACHED_ENGINE_IB_SOURCES}
+		MODULE_ONLY MODULE_OUTPUT_NAME "daemon_memcached_engine_ib")
 
-TARGET_LINK_LIBRARIES(innodb_engine libmcd_util)
+TARGET_LINK_LIBRARIES(daemon_memcached_engine_ib libmcd_util)
 

@@ -52,7 +52,7 @@ static my_bool	mci_enable_binlog = false;
 static MYSQL_SYSVAR_STR(engine_lib_name, mci_engine_library,
 			PLUGIN_VAR_READONLY | PLUGIN_VAR_MEMALLOC,
 			"memcached engine library name", NULL, NULL,
-			"innodb_engine.so");
+			"daemon_memcached_engine_ib.so");
 
 static MYSQL_SYSVAR_STR(engine_lib_path, mci_eng_lib_path,
 			PLUGIN_VAR_READONLY | PLUGIN_VAR_MEMALLOC,

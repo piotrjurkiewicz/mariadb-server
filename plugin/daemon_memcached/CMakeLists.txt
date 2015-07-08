@@ -14,7 +14,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 IF(UNIX)
   ADD_SUBDIRECTORY(daemon_memcached)
-  ADD_SUBDIRECTORY(innodb_memcache)
+  ADD_SUBDIRECTORY(daemon_memcached_engine_ib)
 ENDIF()
 
 INSTALL(FILES "${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached/scripts/daemon_memcached_config.sql"
