@@ -7352,14 +7352,14 @@ int main (int argc, char **argv) {
 		    settings.allow_detailed = false;
 		    break;
 		case 'S': /* set Sasl authentication to true. Default is false */
-# ifdef ENABLE_MEMCACHED_SASL
+# ifdef DAEMON_MEMCACHED_ENABLE_SASL
 #  ifndef SASL_ENABLED
 		    settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
 			    "This server is not built with SASL support.\n");
 		    exit(EX_USAGE);
 #  endif /* !SASL_ENABLED */
 		    settings.require_sasl = true;
-# endif /* ENABLE_MEMCACHED_SASL */
+# endif /* DAEMON_MEMCACHED_ENABLE_SASL */
 		    break;
 		case 'X' :
 		    {

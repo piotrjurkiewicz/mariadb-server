@@ -13,6 +13,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
+OPTION(DAEMON_MEMCACHED_ENABLE_SASL "Enable SASL on Daemon Memcached" OFF)
+OPTION(DAEMON_MEMCACHED_ENABLE_SASL_PWDB "Enable SASL on Daemon Memcached" OFF)
+
+CONFIGURE_FILE(include/config_daemon_memcached.h.in include/config_daemon_memcached.h)
+
 # Common defines and includes
 INCLUDE_DIRECTORIES(${LIBEVENT_INCLUDE_DIR}
 		    ${CMAKE_SOURCE_DIR}/include
@@ -23,6 +28,7 @@ INCLUDE_DIRECTORIES(${LIBEVENT_INCLUDE_DIR}
 		    ${CMAKE_SOURCE_DIR}/include/mysql
 		    ${CMAKE_C_IMPLICIT_LINK_DIRECTORIES}
 		    ${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached/include
+		    ${CMAKE_BINARY_DIR}/plugin/daemon_memcached/daemon_memcached/include
 		    ${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached/include/memcached
 		    ${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached
 
@@ -81,6 +87,6 @@ MYSQL_ADD_PLUGIN(daemon_memcached ${DAEMON_MEMCACHED_SOURCES}
 TARGET_LINK_LIBRARIES(daemon_memcached ${LIBEVENT_LIBRARY})
 TARGET_LINK_LIBRARIES(daemon_memcached daemon_memcached_utilities)
 
-IF(ENABLE_MEMCACHED_SASL)
+IF(DAEMON_MEMCACHED_ENABLE_SASL)
   TARGET_LINK_LIBRARIES(daemon_memcached sasl2)
 ENDIF()

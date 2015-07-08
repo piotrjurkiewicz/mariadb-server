@@ -10,6 +10,8 @@
 #include <pthread.h>
 #include <config_static.h>
 
+#include "config_daemon_memcached.h"
+
 #include <memcached/protocol_binary.h>
 #include <memcached/engine.h>
 #include <memcached/extension.h>

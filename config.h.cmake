@@ -110,6 +110,9 @@
 #cmakedefine HAVE_SYS_WAIT_H 1
 #cmakedefine HAVE_SYS_PARAM_H 1
 
+/* For memcached */
+#cmakedefine HAVE_SASL_SASL_H 1
+
 /* Libraries */
 #cmakedefine HAVE_LIBPTHREAD 1
 #cmakedefine HAVE_LIBM 1

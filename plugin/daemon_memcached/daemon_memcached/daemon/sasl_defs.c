@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef ENABLE_MEMCACHED_SASL
+#ifdef DAEMON_MEMCACHED_ENABLE_SASL
 #ifdef HAVE_SASL_CB_GETCONF
 /* The locations we may search for a SASL config file if the user didn't
  * specify one in the environment variable SASL_CONF_PATH
@@ -192,4 +192,4 @@ void init_sasl(void) {
 
     }
 }
-#endif /* ENABLE_MEMCACHED_SASL */
+#endif /* DAEMON_MEMCACHED_ENABLE_SASL */
