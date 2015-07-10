@@ -464,18 +464,19 @@ void enlist_conn(conn *c, conn **list) {
 
 void finalize_list(conn **list, size_t items) {
     for (size_t i = 0; i < items; i++) {
-        list[i]->list_state &= ~LIST_STATE_PROCESSING;
-        if (list[i]->sfd != INVALID_SOCKET) {
-            if (list[i]->list_state & LIST_STATE_REQ_PENDING_IO) {
-                enlist_conn(list[i], &list[i]->thread->pending_io);
-            } else if (list[i]->list_state & LIST_STATE_REQ_PENDING_CLOSE) {
-                enlist_conn(list[i], &list[i]->thread->pending_close);
+        if (list[i] != NULL) {
+            list[i]->list_state &= ~LIST_STATE_PROCESSING;
+            if (list[i]->sfd != INVALID_SOCKET) {
+                if (list[i]->list_state & LIST_STATE_REQ_PENDING_IO) {
+                    enlist_conn(list[i], &list[i]->thread->pending_io);
+                } else if (list[i]->list_state & LIST_STATE_REQ_PENDING_CLOSE) {
+                    enlist_conn(list[i], &list[i]->thread->pending_close);
+                }
             }
+            list[i]->list_state = 0;
         }
-        list[i]->list_state = 0;
     }
 }
-
 
 static void libevent_tap_process(int fd, short which, void *arg) {
     LIBEVENT_THREAD *me = arg;
@@ -495,9 +496,9 @@ static void libevent_tap_process(int fd, short which, void *arg) {
     }
 
     // Do we have pending closes?
-    const size_t max_items = 256;
+    const size_t max_items = MAX_PENDING_CLOSE;
     LOCK_THREAD(me);
-    conn *pending_close[max_items];
+    conn *pending_close[MAX_PENDING_CLOSE];
     size_t n_pending_close = 0;
 
     if (me->pending_close && me->last_checked != current_time) {
@@ -509,7 +510,7 @@ static void libevent_tap_process(int fd, short which, void *arg) {
     }
 
     // Now copy the pending IO buffer and run them...
-    conn *pending_io[max_items];
+    conn *pending_io[256];
     size_t n_items = list_to_array(pending_io, max_items, &me->pending_io);
 
     UNLOCK_THREAD(me);
@@ -524,7 +525,9 @@ static void libevent_tap_process(int fd, short which, void *arg) {
                                         "Processing tap pending_io for %d\n", c->sfd);
 
         UNLOCK_THREAD(me);
-        register_event(c, NULL);
+        if (!c->registered_in_libevent) {
+            register_event(c, NULL);
+        }
         /*
          * We don't want the thread to keep on serving all of the data
          * from the context of the notification pipe, so just let it
@@ -538,20 +541,19 @@ static void libevent_tap_process(int fd, short which, void *arg) {
     }
 
     /* Close any connections pending close */
-    if (n_pending_close > 0) {
-        for (size_t i = 0; i < n_pending_close; ++i) {
-            conn *ce = pending_close[i];
-            if (ce->refcount == 1) {
-                settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
-                                                "OK, time to nuke: %p\n",
-                                                (void*)ce);
-                assert(ce->next == NULL);
-                conn_close(ce);
-            } else {
-                LOCK_THREAD(me);
-                enlist_conn(ce, &me->pending_close);
-                UNLOCK_THREAD(me);
-            }
+    for (size_t i = 0; i < n_pending_close; ++i) {
+        conn *ce = pending_close[i];
+        if (ce->refcount == 1) {
+            settings.extensions.logger->log(EXTENSION_LOG_DEBUG, NULL,
+                                            "OK, time to nuke: %p\n",
+                                            (void*)ce);
+            assert(ce->next == NULL);
+            conn_close(ce);
+            pending_close[i] = NULL;
+        } else {
+            LOCK_THREAD(me);
+            enlist_conn(ce, &me->pending_close);
+            UNLOCK_THREAD(me);
         }
     }
 
@@ -596,16 +598,34 @@ void notify_io_complete(const void *cookie, ENGINE_ERROR_CODE status)
     */
     if (status == ENGINE_DISCONNECT && conn->thread == tap_thread) {
         LOCK_THREAD(conn->thread);
-        if (conn->sfd != INVALID_SOCKET) {
-            unregister_event(conn);
-            safe_close(conn->sfd);
-            conn->sfd = INVALID_SOCKET;
-        }
 
-        settings.extensions.logger->log(EXTENSION_LOG_DEBUG, NULL,
-                                        "Immediate close of %p\n",
-                                        conn);
-        conn_set_state(conn, conn_immediate_close);
+        /** Remove the connection from both of the lists */
+        conn->thread->pending_io = list_remove(conn->thread->pending_io,
+                                               conn);
+        conn->thread->pending_close = list_remove(conn->thread->pending_close,
+                                                  conn);
+
+
+        if (conn->state == conn_pending_close ||
+            conn->state == conn_immediate_close) {
+            if (conn->refcount == 1) {
+                settings.extensions.logger->log(EXTENSION_LOG_DEBUG, NULL,
+                                                "Complete shutdown of %p",
+                                                conn);
+                conn_set_state(conn, conn_immediate_close);
+                enlist_conn(conn, &conn->thread->pending_close);
+            } else {
+                settings.extensions.logger->log(EXTENSION_LOG_DEBUG, NULL,
+                                                "Keep on waiting for shutdown of %p",
+                                                conn);
+            }
+        } else {
+            settings.extensions.logger->log(EXTENSION_LOG_DEBUG, NULL,
+                                            "Engine requested shutdown of %p",
+                                            conn);
+            conn_set_state(conn, conn_closing);
+            enlist_conn(conn, &conn->thread->pending_io);
+        }
 
         if (!is_thread_me(conn->thread)) {
             /* kick the thread in the butt */

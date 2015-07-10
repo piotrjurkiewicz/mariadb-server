@@ -1,7 +1,7 @@
 /* -*- Mode: C; tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (c) <2008>, Sun Microsystems, Inc.
- * Use is subject to license terms
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -79,6 +79,7 @@ extern "C"
         PROTOCOL_BINARY_RESPONSE_NOT_MY_VBUCKET = 0x07,
         PROTOCOL_BINARY_RESPONSE_AUTH_ERROR = 0x20,
         PROTOCOL_BINARY_RESPONSE_AUTH_CONTINUE = 0x21,
+        PROTOCOL_BINARY_RESPONSE_ERANGE = 0x22,
         PROTOCOL_BINARY_RESPONSE_UNKNOWN_COMMAND = 0x81,
         PROTOCOL_BINARY_RESPONSE_ENOMEM = 0x82,
         PROTOCOL_BINARY_RESPONSE_NOT_SUPPORTED = 0x83,

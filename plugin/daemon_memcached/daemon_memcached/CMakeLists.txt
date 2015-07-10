@@ -47,14 +47,11 @@ SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_SHARED_LIBRARY_C_FLAGS} -std=gnu99")
 
 SET(DAEMON_MEMCACHED_UTILITIES_SOURCES
 		include/memcached/config_parser.h
-		include/memcached/genhash.h
 		include/memcached/util.h
 		utilities/config_parser.c
 		utilities/engine_loader.c
 		utilities/engine_loader.h
 		utilities/extension_loggers.c
-		utilities/genhash.c
-		utilities/genhash_int.h
 		utilities/util.c)
 
 ADD_LIBRARY(daemon_memcached_utilities STATIC ${DAEMON_MEMCACHED_UTILITIES_SOURCES})
@@ -77,8 +74,6 @@ SET(DAEMON_MEMCACHED_SOURCES
 		daemon/stats.c
 		daemon/stats.h
 		daemon/thread.c
-		daemon/topkeys.c
-		daemon/topkeys.h
 		trace.h)
 
 MYSQL_ADD_PLUGIN(daemon_memcached ${DAEMON_MEMCACHED_SOURCES}

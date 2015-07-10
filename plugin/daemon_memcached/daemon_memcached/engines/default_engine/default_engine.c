@@ -137,8 +137,8 @@ static bool handled_vbucket(struct default_engine *e, uint16_t vbid) {
 static bool get_item_info(ENGINE_HANDLE *handle, const void *cookie,
                           const item* item, item_info *item_info);
 
-static const char const * vbucket_state_name(vbucket_state_t s) {
-    static const char const * vbucket_states[] = {
+static char const * vbucket_state_name(vbucket_state_t s) {
+    static char const * vbucket_states[] = {
         [vbucket_state_active] = "active",
         [vbucket_state_replica] = "replica",
         [vbucket_state_pending] = "pending",
@@ -551,7 +551,7 @@ static ENGINE_ERROR_CODE initalize_configuration(struct default_engine *se,
        set_vbucket_state(se, 0, vbucket_state_active);
    }
 
-   return ENGINE_SUCCESS;
+   return ret;
 }
 
 static bool set_vbucket(struct default_engine *e,

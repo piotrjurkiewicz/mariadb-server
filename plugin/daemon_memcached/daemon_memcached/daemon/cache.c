@@ -2,15 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <stdbool.h>
 #include <inttypes.h>
 
-#ifndef bool
-#define bool char
-#define false 0
-#define true 1
-#endif
-
-#define NDEBUG	1
 #ifndef NDEBUG
 #include <signal.h>
 #endif
@@ -92,9 +86,7 @@ void* cache_alloc(cache_t *cache) {
     if (cache->freecurr > 0) {
         ret = cache->ptr[--cache->freecurr];
         object = get_object(ret);
-#ifndef NDEBUG
         assert(!inFreeList(cache, ret));
-#endif
     } else {
         object = ret = malloc(cache->bufsize);
         if (ret != NULL) {
@@ -146,14 +138,10 @@ void cache_free(cache_t *cache, void *object) {
     }
     ptr = pre;
 #endif
-#ifndef NDEBUG
     assert(!inFreeList(cache, ptr));
-#endif
     if (cache->freecurr < cache->freetotal) {
         cache->ptr[cache->freecurr++] = ptr;
-#ifndef NDEBUG
         assert(inFreeList(cache, ptr));
-#endif
     } else {
         /* try to enlarge free connections array */
         size_t newtotal = cache->freetotal * 2;
@@ -162,17 +150,13 @@ void cache_free(cache_t *cache, void *object) {
             cache->freetotal = newtotal;
             cache->ptr = new_free;
             cache->ptr[cache->freecurr++] = ptr;
-#ifndef NDEBUG
             assert(inFreeList(cache, ptr));
-#endif
         } else {
             if (cache->destructor) {
                 cache->destructor(ptr, NULL);
             }
             free(ptr);
-#ifndef NDEBUG
             assert(!inFreeList(cache, ptr));
-#endif
         }
     }
     pthread_mutex_unlock(&cache->mutex);

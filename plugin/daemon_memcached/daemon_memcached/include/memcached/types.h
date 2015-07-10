@@ -4,6 +4,10 @@
 #include <sys/types.h>
 #include <stdint.h>
 
+#ifndef __cplusplus
+#include <stdbool.h>
+#endif
+
 #ifdef __WIN32__
 struct iovec {
     size_t iov_len;
@@ -11,12 +15,6 @@ struct iovec {
 };
 #else
 #include <sys/uio.h>
-#endif
-
-#ifndef bool
-#define bool char
-#define false 0
-#define true 1
 #endif
 
 #ifdef __cplusplus
@@ -47,6 +45,7 @@ extern "C" {
         ENGINE_EACCESS     = 0x0b, /**< Access control violations */
         ENGINE_NOT_MY_VBUCKET = 0x0c, /** < This vbucket doesn't belong to me */
         ENGINE_TMPFAIL     = 0x0d, /**< Temporary failure, please try again later */
+        ENGINE_ERANGE      = 0x0e, /**< Value outside legal range */
         ENGINE_FAILED      = 0xff  /**< Generic failue. */
     } ENGINE_ERROR_CODE;
 

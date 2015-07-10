@@ -640,6 +640,14 @@ static void reload_engine(ENGINE_HANDLE **h, ENGINE_HANDLE_V1 **h1,
     *h = handle;
 }
 
+static engine_test_t* current_testcase;
+
+static const engine_test_t* get_current_testcase(void)
+{
+    return current_testcase;
+}
+
+
 static enum test_result run_test(engine_test_t test, const char *engine, const char *default_cfg) {
     enum test_result ret = PENDING;
     if (test.tfun != NULL) {
@@ -647,21 +655,38 @@ static enum test_result run_test(engine_test_t test, const char *engine, const c
         pid_t pid = fork();
         if (pid == 0) {
 #endif
-            /* Start the engines and go */
-            start_your_engines(engine, test.cfg ? test.cfg : default_cfg, true);
-            if (test.test_setup != NULL) {
-                if (!test.test_setup(handle, handle_v1)) {
-                    fprintf(stderr, "Failed to run setup for test %s\n", test.name);
-                    return FAIL;
+            current_testcase = &test;
+            if (test.prepare != NULL) {
+                if ((ret = test.prepare(&test)) == SUCCESS) {
+                    ret = PENDING;
                 }
             }
-            ret = test.tfun(handle, handle_v1);
-            if (test.test_teardown != NULL) {
-                if (!test.test_teardown(handle, handle_v1)) {
-                    fprintf(stderr, "WARNING: Failed to run teardown for test %s\n", test.name);
+
+            if (ret == PENDING) {
+                /* Start the engines and go */
+                start_your_engines(engine, test.cfg ? test.cfg : default_cfg, true);
+                if (test.test_setup != NULL) {
+                    if (!test.test_setup(handle, handle_v1)) {
+                        fprintf(stderr, "Failed to run setup for test %s\n", test.name);
+#if !defined(USE_GCOV) && !defined(WIN32)
+                        exit((int)ret);
+#else
+                        return FAIL;
+#endif
+                    }
+                }
+                ret = test.tfun(handle, handle_v1);
+                if (test.test_teardown != NULL) {
+                    if (!test.test_teardown(handle, handle_v1)) {
+                        fprintf(stderr, "WARNING: Failed to run teardown for test %s\n", test.name);
+                    }
+                }
+                destroy_engine(false);
+
+                if (test.cleanup) {
+                    test.cleanup(&test, ret);
                 }
             }
-            destroy_engine(false);
 #if !defined(USE_GCOV) && !defined(WIN32)
             exit((int)ret);
         } else if (pid == (pid_t)-1) {
@@ -833,7 +858,8 @@ int main(int argc, char **argv) {
                                     .lock_cookie = lock_mock_cookie,
                                     .unlock_cookie = unlock_mock_cookie,
                                     .waitfor_cookie = waitfor_mock_cookie,
-                                    .time_travel = mock_time_travel };
+                                    .time_travel = mock_time_travel,
+                                    .get_current_testcase = get_current_testcase };
     symbol = dlsym(handle, "setup_suite");
     if (symbol != NULL) {
         my_setup_suite.voidptr = symbol;

@@ -17,7 +17,6 @@
 #include <memcached/extension.h>
 
 #include "cache.h"
-#include "topkeys.h"
 
 #include "sasl_defs.h"
 
@@ -65,12 +64,13 @@
 #define DONT_PREALLOC_SLABS
 #define MAX_NUMBER_OF_SLAB_CLASSES (POWER_LARGEST + 1)
 
-
 #define STAT_KEY_LEN 128
 #define STAT_VAL_LEN 128
 
 #define DEFAULT_REQS_PER_EVENT     20
 #define DEFAULT_REQS_PER_TAP_EVENT 50
+
+#define MAX_PENDING_CLOSE 256
 
 /** Append a simple stat with a stat name, value format and value */
 #define APPEND_STAT(name, fmt, val) \
@@ -147,15 +147,6 @@ struct thread_stats {
     struct slab_stats slab_stats[MAX_NUMBER_OF_SLAB_CLASSES];
 };
 
-
-/**
- * The stats structure the engine keeps track of
- */
-struct independent_stats {
-    topkeys_t *topkeys;
-    struct thread_stats thread_stats[];
-};
-
 /**
  * Global stats.
  */
@@ -212,6 +203,7 @@ struct settings {
         EXTENSION_DAEMON_DESCRIPTOR *daemons;
         EXTENSION_LOGGER_DESCRIPTOR *logger;
         EXTENSION_ASCII_PROTOCOL_DESCRIPTOR *ascii;
+        EXTENSION_BINARY_PROTOCOL_DESCRIPTOR *binary;
     } extensions;
 };
 
@@ -279,9 +271,7 @@ struct conn {
     sasl_conn_t *sasl_conn;
     STATE_FUNC   state;
     enum bin_substates substate;
-#ifdef DEBUG
     bool   registered_in_libevent;
-#endif
     struct event event;
     short  ev_flags;
     short  which;   /** which events were just triggered */
@@ -379,7 +369,6 @@ struct conn {
 
     ENGINE_ERROR_CODE aiostat;
     bool ewouldblock;
-    bool tap_nack_mode;
     TAP_ITERATOR tap_iterator;
 };
 
@@ -485,7 +474,7 @@ bool conn_add_tap_client(conn *c);
 bool conn_setup_tap_stream(conn *c);
 
 /* If supported, give compiler hints for branch prediction. */
-#if !defined(__GNUC__) || (__GNUC__ == 2 && __GNUC_MINOR__ < 96)
+#if !defined(__builtin_expect) && (!defined(__GNUC__) || (__GNUC__ == 2 && __GNUC_MINOR__ < 96))
 #define __builtin_expect(x, expected_value) (x)
 #endif
 

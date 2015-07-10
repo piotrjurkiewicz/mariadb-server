@@ -57,15 +57,12 @@ static inline void item_set_cas(const void *cookie, item *it, uint64_t cas) {
     SLAB_GUTS(conn, thread_stats, slab_op, thread_op) \
     THREAD_GUTS(conn, thread_stats, slab_op, thread_op)
 
-#define STATS_INCR1(GUTS, conn, slab_op, thread_op, key, nkey) { \
-    struct independent_stats *independent_stats = get_independent_stats(conn); \
-    struct thread_stats *thread_stats = \
-        &independent_stats->thread_stats[conn->thread->index]; \
-    topkeys_t *topkeys = independent_stats->topkeys; \
+#define STATS_INCR1(GUTS, conn, slab_op, thread_op, key, nkey) \
+{ \
+    struct thread_stats *thread_stats = get_thread_stats(conn);  \
     pthread_mutex_lock(&thread_stats->mutex); \
     GUTS(conn, thread_stats, slab_op, thread_op); \
     pthread_mutex_unlock(&thread_stats->mutex); \
-    TK(topkeys, slab_op, key, nkey, current_time); \
 }
 
 #define STATS_INCR(conn, op, key, nkey) \
@@ -159,11 +156,12 @@ volatile rel_time_t current_time;
  */
 static SOCKET new_socket(struct addrinfo *ai);
 static int try_read_command(conn *c);
-static inline struct independent_stats *get_independent_stats(conn *c);
 static inline struct thread_stats *get_thread_stats(conn *c);
 static void register_callback(ENGINE_HANDLE *eh,
                               ENGINE_EVENT_TYPE type,
                               EVENT_CALLBACK cb, const void *cb_data);
+
+
 enum try_read_result {
     READ_DATA_RECEIVED,
     READ_NO_DATA_RECEIVED,
@@ -192,12 +190,6 @@ static int ensure_iov_space(conn *c);
 static int add_iov(conn *c, const void *buf, int len);
 static int add_msghdr(conn *c);
 
-
-/* time handling */
-static void set_current_time(void);  /* update the global variable holding
-                              global 32-bit seconds-since-start time
-                              (to avoid 64 bit time_t) */
-
 /** exported globals **/
 struct stats stats;
 struct settings settings;
@@ -208,7 +200,7 @@ static conn *listen_conn = NULL;
 static int  udp_socket[100];
 static int  num_udp_socket;
 static struct event_base *main_base;
-static struct independent_stats *default_independent_stats;
+static struct thread_stats *default_thread_stats;
 
 static struct engine_event_handler *engine_event_handlers[MAX_ENGINE_EVENT_TYPE + 1];
 
@@ -281,7 +273,7 @@ static void stats_reset(const void *cookie) {
     stats.total_conns = 0;
     stats_prefix_clear();
     STATS_UNLOCK();
-    threadlocal_stats_reset(get_independent_stats(conn)->thread_stats);
+    threadlocal_stats_reset(get_thread_stats(conn));
     settings.engine.v1->reset_stats(settings.engine.v0, cookie);
 }
 
@@ -309,7 +301,6 @@ static void settings_init(void) {
     settings.backlog = 1024;
     settings.binding_protocol = negotiating_prot;
     settings.item_size_max = 1024 * 1024; /* The famous 1MB upper limit. */
-    settings.topkeys = 0;
     settings.require_sasl = false;
     settings.extensions.logger = get_stderr_logger();
 }
@@ -378,7 +369,7 @@ struct {
     bool disabled;
     ssize_t count;
     uint64_t num_disable;
-} listen_state;
+} listen_state = { .mutex = PTHREAD_MUTEX_INITIALIZER };
 
 static bool is_listen_disabled(void) {
     bool ret;
@@ -611,10 +602,7 @@ conn *conn_new(const SOCKET sfd, STATE_FUNC init_state,
     c->transport = transport;
     c->protocol = settings.binding_protocol;
 
-    /* unix socket mode doesn't need this, so zeroed out.  but why
-     * is this done for every command?  presumably for UDP
-     * mode.  */
-    if (!settings.socketpath) {
+    if (IS_UDP(transport)) {
         c->request_addr_size = sizeof(c->request_addr);
     } else {
         c->request_addr_size = 0;
@@ -726,6 +714,10 @@ static void conn_cleanup(conn *c) {
         c->sasl_conn = NULL;
     }
 
+    if (IS_UDP(c->transport)) {
+        conn_set_state(c, conn_read);
+    }
+
     if (c->engine_storage) {
 	settings.engine.v1->clean_engine(settings.engine.v0, c,
 					 c->engine_storage);
@@ -737,7 +729,6 @@ static void conn_cleanup(conn *c) {
     assert(c->next == NULL);
     c->ascii_cmd = NULL;
     c->sfd = INVALID_SOCKET;
-    c->tap_nack_mode = false;
 }
 
 void conn_close(conn *c) {
@@ -898,11 +889,11 @@ void conn_set_state(conn *c, STATE_FUNC state) {
                                             state_text(state));
         }
 
-        c->state = state;
-
         if (state == conn_write || state == conn_mwrite) {
             MEMCACHED_PROCESS_COMMAND_END(c->sfd, c->wbuf, c->wbytes);
         }
+
+        c->state = state;
     }
 }
 
@@ -1397,6 +1388,8 @@ static protocol_binary_response_status engine_error_2_protocol_error(ENGINE_ERRO
         return PROTOCOL_BINARY_RESPONSE_E2BIG;
     case ENGINE_NOT_MY_VBUCKET:
         return PROTOCOL_BINARY_RESPONSE_NOT_MY_VBUCKET;
+    case ENGINE_ERANGE:
+        return PROTOCOL_BINARY_RESPONSE_ERANGE;
     default:
         ret = PROTOCOL_BINARY_RESPONSE_EINTERNAL;
     }
@@ -1803,13 +1796,14 @@ static void process_bin_get(conn *c) {
     case ENGINE_DISCONNECT:
         c->state = conn_closing;
         break;
-    case ENGINE_TMPFAIL:
-	break;
     case ENGINE_ENOTSUP:
         write_bin_packet(c, PROTOCOL_BINARY_RESPONSE_NOT_SUPPORTED, 0);
         break;
     case ENGINE_NOT_MY_VBUCKET:
         write_bin_packet(c, PROTOCOL_BINARY_RESPONSE_NOT_MY_VBUCKET, 0);
+        break;
+    case ENGINE_TMPFAIL:
+        write_bin_packet(c, PROTOCOL_BINARY_RESPONSE_ETMPFAIL, 0);
         break;
     default:
         /* @todo add proper error handling! */
@@ -1996,14 +1990,6 @@ static void process_bin_stat(conn *c) {
             }
         } else if (strncmp(subcommand, "aggregate", 9) == 0) {
             server_stats(&append_stats, c, true);
-        } else if (strncmp(subcommand, "topkeys", 7) == 0) {
-            topkeys_t *tk = get_independent_stats(c)->topkeys;
-            if (tk != NULL) {
-                topkeys_stats(tk, c, current_time, append_stats);
-            } else {
-                write_bin_packet(c, PROTOCOL_BINARY_RESPONSE_KEY_ENOENT, 0);
-                return;
-            }
         } else {
             ret = settings.engine.v1->get_stats(settings.engine.v0, c,
                                                 subcommand, nkey,
@@ -2632,6 +2618,37 @@ static void ship_tap_log(conn *c) {
     }
 }
 
+
+static ENGINE_ERROR_CODE default_unknown_command(EXTENSION_BINARY_PROTOCOL_DESCRIPTOR *descriptor,
+                                                 ENGINE_HANDLE* handle,
+                                                 const void* cookie,
+                                                 protocol_binary_request_header *request,
+                                                 ADD_RESPONSE response)
+{
+    return settings.engine.v1->unknown_command(handle, cookie, request, response);
+}
+
+struct request_lookup {
+    EXTENSION_BINARY_PROTOCOL_DESCRIPTOR *descriptor;
+    BINARY_COMMAND_CALLBACK callback;
+};
+
+static struct request_lookup request_handlers[0x100];
+
+static void initialize_binary_lookup_map(void) {
+    for (int ii = 0; ii < 0x100; ++ii) {
+        request_handlers[ii].descriptor = NULL;
+        request_handlers[ii].callback = default_unknown_command;
+    }
+}
+
+static void setup_binary_lookup_cmd(EXTENSION_BINARY_PROTOCOL_DESCRIPTOR *descriptor,
+                                    uint8_t cmd,
+                                    BINARY_COMMAND_CALLBACK new_handler) {
+    request_handlers[cmd].descriptor = descriptor;
+    request_handlers[cmd].callback = new_handler;
+}
+
 static void process_bin_unknown_packet(conn *c) {
     void *packet = c->rcurr - (c->binary_header.request.bodylen +
                                sizeof(c->binary_header));
@@ -2641,24 +2658,31 @@ static void process_bin_unknown_packet(conn *c) {
     c->ewouldblock = false;
 
     if (ret == ENGINE_SUCCESS) {
-        ret = settings.engine.v1->unknown_command(settings.engine.v0, c, packet,
-                                                  binary_response_handler);
+        struct request_lookup *rq = request_handlers + c->binary_header.request.opcode;
+        ret = rq->callback(rq->descriptor, settings.engine.v0, c, packet,
+                           binary_response_handler);
     }
 
-    if (ret == ENGINE_SUCCESS) {
+    switch (ret) {
+    case ENGINE_SUCCESS:
         if (c->dynamic_buffer.buffer != NULL) {
             write_and_free(c, c->dynamic_buffer.buffer, c->dynamic_buffer.offset);
             c->dynamic_buffer.buffer = NULL;
         } else {
             conn_set_state(c, conn_new_cmd);
         }
-    } else if (ret == ENGINE_ENOTSUP) {
-        write_bin_packet(c, PROTOCOL_BINARY_RESPONSE_UNKNOWN_COMMAND, 0);
-    } else if (ret == ENGINE_EWOULDBLOCK) {
+        break;
+    case ENGINE_EWOULDBLOCK:
         c->ewouldblock = true;
-    } else {
-        /* FATAL ERROR, shut down connection */
+        break;
+    case ENGINE_DISCONNECT:
         conn_set_state(c, conn_closing);
+        break;
+    default:
+        // Release the dynamic buffer.. it may be partial..
+        free(c->dynamic_buffer.buffer);
+        c->dynamic_buffer.buffer = NULL;
+        write_bin_packet(c, engine_error_2_protocol_error(ret), 0);
     }
 }
 
@@ -2730,7 +2754,6 @@ static void process_bin_tap_packet(tap_event_t event, conn *c) {
     uint16_t tap_flags = ntohs(tap->message.body.tap.flags);
     uint32_t seqno = ntohl(tap->message.header.request.opaque);
     uint8_t ttl = tap->message.body.tap.ttl;
-    assert(ttl > 0);
     char *engine_specific = packet + sizeof(tap->bytes);
     char *key = engine_specific + nengine;
     uint16_t nkey = c->binary_header.request.keylen;
@@ -2738,28 +2761,32 @@ static void process_bin_tap_packet(tap_event_t event, conn *c) {
     uint32_t flags = 0;
     uint32_t exptime = 0;
     uint32_t ndata = c->binary_header.request.bodylen - nengine - nkey - 8;
-
-    if (event == TAP_MUTATION || event == TAP_CHECKPOINT_START ||
-        event == TAP_CHECKPOINT_END) {
-        protocol_binary_request_tap_mutation *mutation = (void*)tap;
-        flags = ntohl(mutation->message.body.item.flags);
-        exptime = ntohl(mutation->message.body.item.expiration);
-        key += 8;
-        data += 8;
-        ndata -= 8;
-    }
-
     ENGINE_ERROR_CODE ret = c->aiostat;
-    if (ret == ENGINE_SUCCESS) {
-        ret = settings.engine.v1->tap_notify(settings.engine.v0, c,
-                                             engine_specific, nengine,
-                                             ttl - 1, tap_flags,
-                                             event, seqno,
-                                             key, nkey,
-                                             flags, exptime,
-                                             ntohll(tap->message.header.request.cas),
-                                             data, ndata,
-                                             c->binary_header.request.vbucket);
+
+    if (ttl == 0) {
+        ret = ENGINE_EINVAL;
+    } else {
+        if (event == TAP_MUTATION || event == TAP_CHECKPOINT_START ||
+            event == TAP_CHECKPOINT_END) {
+            protocol_binary_request_tap_mutation *mutation = (void*)tap;
+            flags = ntohl(mutation->message.body.item.flags);
+            exptime = ntohl(mutation->message.body.item.expiration);
+            key += 8;
+            data += 8;
+            ndata -= 8;
+        }
+
+        if (ret == ENGINE_SUCCESS) {
+            ret = settings.engine.v1->tap_notify(settings.engine.v0, c,
+                                                 engine_specific, nengine,
+                                                 ttl - 1, tap_flags,
+                                                 event, seqno,
+                                                 key, nkey,
+                                                 flags, exptime,
+                                                 ntohll(tap->message.header.request.cas),
+                                                 data, ndata,
+                                                 c->binary_header.request.vbucket);
+        }
     }
 
     switch (ret) {
@@ -2770,9 +2797,7 @@ static void process_bin_tap_packet(tap_event_t event, conn *c) {
         c->ewouldblock = true;
         break;
     default:
-        if ((tap_flags & TAP_FLAG_ACK) ||
-            (ret != ENGINE_SUCCESS && c->tap_nack_mode))
-        {
+        if ((tap_flags & TAP_FLAG_ACK) || (ret != ENGINE_SUCCESS)) {
             write_bin_packet(c, engine_error_2_protocol_error(ret), 0);
         } else {
             conn_set_state(c, conn_new_cmd);
@@ -2883,8 +2908,6 @@ static void process_bin_packet(conn *c) {
         process_bin_unknown_packet(c);
     }
 }
-
-
 
 typedef void (*RESPONSE_HANDLER)(conn*);
 /**
@@ -3685,10 +3708,7 @@ inline static void process_stats_detail(conn *c, const char *command) {
 }
 
 static void aggregate_callback(void *in, void *out) {
-    struct thread_stats *out_thread_stats = out;
-    struct independent_stats *in_independent_stats = in;
-    threadlocal_stats_aggregate(in_independent_stats->thread_stats,
-                                out_thread_stats);
+    threadlocal_stats_aggregate(in, out);
 }
 
 /* return server specific stats only */
@@ -3705,7 +3725,7 @@ static void server_stats(ADD_STAT add_stats, conn *c, bool aggregate) {
                                             aggregate_callback,
                                             &thread_stats);
     } else {
-        threadlocal_stats_aggregate(get_independent_stats(c)->thread_stats,
+        threadlocal_stats_aggregate(get_thread_stats(c),
                                     &thread_stats);
     }
 
@@ -3868,7 +3888,6 @@ static void process_stat_settings(ADD_STAT add_stats, void *c) {
 #endif
     APPEND_STAT("auth_required_sasl", "%s", settings.require_sasl ? "yes" : "no");
     APPEND_STAT("item_size_max", "%d", settings.item_size_max);
-    APPEND_STAT("topkeys", "%d", settings.topkeys);
 
     for (EXTENSION_DAEMON_DESCRIPTOR *ptr = settings.extensions.daemons;
          ptr != NULL;
@@ -3882,6 +3901,12 @@ static void process_stat_settings(ADD_STAT add_stats, void *c) {
          ptr != NULL;
          ptr = ptr->next) {
         APPEND_STAT("ascii_extension", "%s", ptr->get_name(ptr->cookie));
+    }
+
+    for (EXTENSION_BINARY_PROTOCOL_DESCRIPTOR *ptr = settings.extensions.binary;
+         ptr != NULL;
+         ptr = ptr->next) {
+        APPEND_STAT("binary_extension", "%s", ptr->get_name());
     }
 }
 
@@ -3944,14 +3969,6 @@ static char *process_stat(conn *c, token_t *tokens, const size_t ntokens) {
         return NULL;
     } else if (strcmp(subcommand, "aggregate") == 0) {
         server_stats(&append_stats, c, true);
-    } else if (strcmp(subcommand, "topkeys") == 0) {
-        topkeys_t *tk = get_independent_stats(c)->topkeys;
-        if (tk != NULL) {
-            topkeys_stats(tk, c, current_time, append_stats);
-        } else {
-            out_string(c, "ERROR");
-            return NULL;
-        }
     } else {
         /* getting here means that the subcommand is either engine specific or
            is invalid. query the engine and see. */
@@ -4252,15 +4269,14 @@ static void process_update_command(conn *c, token_t *tokens, const size_t ntoken
         return;
     }
 
-    /* Negative expire values not allowed */
-
-    if (exptime_int < 0) {
-        out_string(c, "CLIENT_ERROR Invalid expire time");
-        return;
-    }
-
     /* Ubuntu 8.04 breaks when I pass exptime to safe_strtol */
     exptime = exptime_int;
+
+    /* Negative exptimes can underflow and end up immortal. realtime() will
+       immediately expire values that are greater than REALTIME_MAXDELTA, but less
+       than process_started, so lets aim for that. */
+    if (exptime < 0)
+        exptime = REALTIME_MAXDELTA + 1;
 
     // does cas value exist?
     if (handle_cas) {
@@ -4937,7 +4953,7 @@ static enum try_read_result try_read_udp(conn *c) {
         res -= 8;
         memmove(c->rbuf, c->rbuf + 8, res);
 
-        c->rbytes += res;
+        c->rbytes = res;
         c->rcurr = c->rbuf;
         return READ_DATA_RECEIVED;
     }
@@ -5015,9 +5031,7 @@ static enum try_read_result try_read_network(conn *c) {
 }
 
 bool register_event(conn *c, struct timeval *timeout) {
-#ifdef DEBUG
     assert(!c->registered_in_libevent);
-#endif
 
     if (event_add(&c->event, timeout) == -1) {
         settings.extensions.logger->log(EXTENSION_LOG_WARNING,
@@ -5027,25 +5041,19 @@ bool register_event(conn *c, struct timeval *timeout) {
         return false;
     }
 
-#ifdef DEBUG
     c->registered_in_libevent = true;
-#endif
 
     return true;
 }
 
 bool unregister_event(conn *c) {
-#ifdef DEBUG
     assert(c->registered_in_libevent);
-#endif
 
     if (event_del(&c->event) == -1) {
         return false;
     }
 
-#ifdef DEBUG
     c->registered_in_libevent = false;
-#endif
 
     return true;
 }
@@ -5660,11 +5668,14 @@ void event_handler(const int fd, const short which, void *arg) {
 
     /* sanity */
     if (fd != c->sfd) {
-        if (settings.verbose > 0) {
-            settings.extensions.logger->log(EXTENSION_LOG_WARNING, c,
+        if (c->sfd != INVALID_SOCKET) {
+            settings.extensions.logger->log(EXTENSION_LOG_INFO, c,
                     "Catastrophic: event fd doesn't match conn fd!\n");
         }
-        conn_close(c);
+        unregister_event(c);
+        if (c->sfd != INVALID_SOCKET && c->thread != NULL) {
+            conn_close(c);
+        }
         return;
     }
 
@@ -5678,8 +5689,8 @@ void event_handler(const int fd, const short which, void *arg) {
     LIBEVENT_THREAD *thr = c->thread;
 
     // Do we have pending closes?
-    const size_t max_items = 256;
-    conn *pending_close[max_items];
+    const size_t max_items = MAX_PENDING_CLOSE;
+    conn *pending_close[MAX_PENDING_CLOSE];
     size_t n_pending_close = 0;
     if (thr != NULL) {
         LOCK_THREAD(thr);
@@ -5714,6 +5725,7 @@ void event_handler(const int fd, const short which, void *arg) {
                                                 "OK, time to nuke: %p\n",
                                                 (void*)ce);
                 conn_close(ce);
+                pending_close[i] = NULL;
             } else {
                 LOCK_THREAD(ce->thread);
                 enlist_conn(ce, &ce->thread->pending_close);
@@ -6107,6 +6119,7 @@ static int server_socket_unix(const char *path, int access_mask) {
                  "failed to create listening connection\n");
         exit(EXIT_FAILURE);
     }
+
     STATS_LOCK();
     ++stats.daemon_conns;
     STATS_UNLOCK();
@@ -6116,17 +6129,17 @@ static int server_socket_unix(const char *path, int access_mask) {
 
 static struct event clockevent;
 
-/* time-sensitive callers can call it by hand with this, outside the normal ever-1-second timer */
-static void set_current_time(void) {
-    struct timeval timer;
-
-    gettimeofday(&timer, NULL);
-    current_time = (rel_time_t) (timer.tv_sec - process_started);
-}
-
+/* libevent uses a monotonic clock when available for event scheduling. Aside
+ * from jitter, simply ticking our internal timer here is accurate enough.
+ * Note that users who are setting explicit dates for expiration times *must*
+ * ensure their clocks are correct before starting memcached. */
 static void clock_handler(const int fd, const short which, void *arg) {
     struct timeval t = {.tv_sec = 1, .tv_usec = 0};
     static bool initialized = false;
+#if defined(HAVE_CLOCK_GETTIME) && defined(CLOCK_MONOTONIC)
+    static bool monotonic = false;
+    static time_t monotonic_start;
+#endif
 
     if (memcached_shutdown) {
         event_base_loopbreak(main_base);
@@ -6138,13 +6151,35 @@ static void clock_handler(const int fd, const short which, void *arg) {
         evtimer_del(&clockevent);
     } else {
         initialized = true;
+        /* process_started is initialized to time() - 2. We initialize to 1 so
+         * flush_all won't underflow during tests. */
+#if defined(HAVE_CLOCK_GETTIME) && defined(CLOCK_MONOTONIC)
+        struct timespec ts;
+        if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
+            monotonic = true;
+            monotonic_start = ts.tv_sec - 2;
+        }
+#endif
     }
 
     evtimer_set(&clockevent, clock_handler, 0);
     event_base_set(main_base, &clockevent);
     evtimer_add(&clockevent, &t);
 
-    set_current_time();
+#if defined(HAVE_CLOCK_GETTIME) && defined(CLOCK_MONOTONIC)
+    if (monotonic) {
+        struct timespec ts;
+        if (clock_gettime(CLOCK_MONOTONIC, &ts) == -1)
+            return;
+        current_time = (rel_time_t) (ts.tv_sec - monotonic_start);
+        return;
+    }
+#endif
+    {
+        struct timeval tv;
+        gettimeofday(&tv, NULL);
+        current_time = (rel_time_t) (tv.tv_sec - process_started);
+    }
 }
 
 static void usage(void) {
@@ -6206,9 +6241,9 @@ static void usage(void) {
     printf("-e config     Pass config as configuration options to the storage engine\n");
     printf("\nEnvironment variables:\n"
            "MEMCACHED_PORT_FILENAME   File to write port information to\n"
-           "MEMCACHED_TOP_KEYS        Number of top keys to keep track of\n"
            "MEMCACHED_REQS_TAP_EVENT  Similar to -R but for tap_ship_log\n");
 }
+
 static void usage_license(void) {
     printf(PACKAGE " " VERSION "\n\n");
     printf(
@@ -6412,63 +6447,58 @@ static int get_socket_fd(const void *cookie) {
     return c->sfd;
 }
 
-static void set_tap_nack_mode(const void *cookie, bool enable) {
-    conn *c = (conn *)cookie;
-    c->tap_nack_mode = enable;
-}
-
-static void reserve_cookie(const void *cookie) {
+static ENGINE_ERROR_CODE reserve_cookie(const void *cookie) {
     conn *c = (conn *)cookie;
     ++c->refcount;
+    return ENGINE_SUCCESS;
 }
 
-static void release_cookie(const void *cookie) {
+static ENGINE_ERROR_CODE release_cookie(const void *cookie) {
     conn *c = (conn *)cookie;
     --c->refcount;
+    return ENGINE_SUCCESS;
 }
 
-static int num_independent_stats(void) {
+static inline int num_thread_stats(void) {
     return settings.num_threads + 1;
 }
 
-static void *new_independent_stats(void) {
-    int ii;
-    int nrecords = num_independent_stats();
-    struct independent_stats *independent_stats = calloc(sizeof(independent_stats) + sizeof(struct thread_stats) * nrecords, 1);
-    if (settings.topkeys > 0)
-        independent_stats->topkeys = topkeys_init(settings.topkeys);
-    for (ii = 0; ii < nrecords; ii++)
-        pthread_mutex_init(&independent_stats->thread_stats[ii].mutex, NULL);
-    return independent_stats;
-}
+static void *new_thread_stats(void) {
+    int nrecords = num_thread_stats();
 
-static void release_independent_stats(void *stats) {
-    int ii;
-    int nrecords = num_independent_stats();
-    struct independent_stats *independent_stats = stats;
-    if (independent_stats->topkeys)
-        topkeys_free(independent_stats->topkeys);
-    for (ii = 0; ii < nrecords; ii++)
-        pthread_mutex_destroy(&independent_stats->thread_stats[ii].mutex);
-    free(independent_stats);
-}
-
-static inline struct independent_stats *get_independent_stats(conn *c) {
-    struct independent_stats *independent_stats;
-    if (settings.engine.v1->get_stats_struct != NULL) {
-        independent_stats = settings.engine.v1->get_stats_struct(settings.engine.v0, (const void *)c);
-        if (independent_stats == NULL)
-            independent_stats = default_independent_stats;
-    } else {
-        independent_stats = default_independent_stats;
+    struct thread_stats *ts = calloc(nrecords, sizeof(*ts));
+    if (ts != NULL) {
+        for (int ii = 0; ii < nrecords; ii++) {
+            pthread_mutex_init(&ts[ii].mutex, NULL);
+        }
     }
-    return independent_stats;
+    return ts;
+}
+
+static void release_thread_stats(void *stats) {
+    struct thread_stats *ts = stats;
+    if (ts != NULL) {
+        int nrecords = num_thread_stats();
+        for (int ii = 0; ii < nrecords; ii++) {
+            pthread_mutex_destroy(&ts[ii].mutex);
+        }
+        free(ts);
+    }
 }
 
 static inline struct thread_stats *get_thread_stats(conn *c) {
-    struct independent_stats *independent_stats = get_independent_stats(c);
-    assert(c->thread->index < num_independent_stats());
-    return &independent_stats->thread_stats[c->thread->index];
+    struct thread_stats *ts;
+    if (settings.engine.v1->get_stats_struct != NULL) {
+        ts = settings.engine.v1->get_stats_struct(settings.engine.v0, c);
+        if (ts == NULL) {
+            ts = default_thread_stats;
+        }
+    } else {
+        ts = default_thread_stats;
+    }
+
+    assert(c->thread->index < num_thread_stats());
+    return &ts[c->thread->index];
 }
 
 static void register_callback(ENGINE_HANDLE *eh,
@@ -6490,8 +6520,9 @@ static rel_time_t get_current_time(void)
 }
 
 static void count_eviction(const void *cookie, const void *key, const int nkey) {
-    topkeys_t *tk = get_independent_stats((conn*)cookie)->topkeys;
-    TK(tk, evictions, key, nkey, get_current_time());
+    (void)cookie;
+    (void)key;
+    (void)nkey;
 }
 
 /**
@@ -6653,6 +6684,28 @@ static bool register_extension(extension_type_t type, void *extension)
         }
         return true;
 
+    case EXTENSION_BINARY_PROTOCOL:
+        if (settings.extensions.binary != NULL) {
+            EXTENSION_BINARY_PROTOCOL_DESCRIPTOR *last;
+            for (last = settings.extensions.binary; last->next != NULL;
+                 last = last->next) {
+                if (last == extension) {
+                    return false;
+                }
+            }
+            if (last == extension) {
+                return false;
+            }
+            last->next = extension;
+            last->next->next = NULL;
+        } else {
+            settings.extensions.binary = extension;
+            settings.extensions.binary->next = NULL;
+        }
+
+        ((EXTENSION_BINARY_PROTOCOL_DESCRIPTOR*)extension)->setup(setup_binary_lookup_cmd);
+        return true;
+
     default:
         return false;
     }
@@ -6715,6 +6768,13 @@ static void unregister_extension(extension_type_t type, void *extension)
         }
         break;
 
+
+    case EXTENSION_BINARY_PROTOCOL:
+        settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
+                                        "You can't unregister a binary command handler!");
+        abort();
+        break;
+
     default:
         ;
     }
@@ -6735,6 +6795,9 @@ static void* get_extension(extension_type_t type)
 
     case EXTENSION_ASCII_PROTOCOL:
         return settings.extensions.ascii;
+
+    case EXTENSION_BINARY_PROTOCOL:
+        return settings.extensions.binary;
 
     default:
         return NULL;
@@ -6858,15 +6921,14 @@ static SERVER_HANDLE_V1 *get_server_api(void)
         .store_engine_specific = store_engine_specific,
         .get_engine_specific = get_engine_specific,
         .get_socket_fd = get_socket_fd,
-        .set_tap_nack_mode = set_tap_nack_mode,
         .notify_io_complete = notify_io_complete,
         .reserve = reserve_cookie,
         .release = release_cookie
     };
 
     static SERVER_STAT_API server_stat_api = {
-        .new_stats = new_independent_stats,
-        .release_stats = release_independent_stats,
+        .new_stats = new_thread_stats,
+        .release_stats = release_thread_stats,
         .evicting = count_eviction
     };
 
@@ -6875,6 +6937,7 @@ static SERVER_HANDLE_V1 *get_server_api(void)
         .get_level = get_log_level,
         .set_level = set_log_level
     };
+
     static SERVER_EXTENSION_API extension_api = {
         .register_extension = register_extension,
         .unregister_extension = unregister_extension,
@@ -7052,7 +7115,6 @@ int main (int argc, char **argv) {
     int c;
     bool lock_memory = false;
     bool do_daemonize = false;
-    bool preallocate = false;
     int maxcore = 0;
     char *username = NULL;
     char *pid_file = NULL;
@@ -7099,16 +7161,12 @@ int main (int argc, char **argv) {
     memcached_shutdown = 0;
     memcached_initialized = 0;
 
-    if (!sanitycheck()) {
-        return(NULL);
-    }
-
     /* make the time we started always be 2 seconds before we really
        did, so time(0) - time.started is never zero.  if so, things
        like 'settings.oldest_live' which act as booleans as well as
        values are now false in boolean context... */
     process_started = time(0) - 2;
-    set_current_time();
+    current_time = process_started;
 
     /* Initialize the socket subsystem */
     initialize_sockets();
@@ -7116,9 +7174,15 @@ int main (int argc, char **argv) {
     /* init settings */
     settings_init();
 
+    initialize_binary_lookup_map();
+
     if (memcached_initialize_stderr_logger(get_server_api) != EXTENSION_SUCCESS) {
         fprintf(stderr, "Failed to initialize log system\n");
-        return (NULL);
+        return EX_OSERR;
+    }
+
+    if (!sanitycheck()) {
+        return EX_OSERR;
     }
 
     if (m_config->m_mem_option) {
@@ -7275,7 +7339,6 @@ int main (int argc, char **argv) {
 		    break;
 		case 'L' :
 		    if (enable_large_pages() == 0) {
-			preallocate = true;
 			old_opts += sprintf(old_opts, "preallocate=true;");
 		    }
 		    break;
@@ -7543,7 +7606,6 @@ int main (int argc, char **argv) {
             break;
         case 'L' :
             if (enable_large_pages() == 0) {
-                preallocate = true;
                 old_opts += sprintf(old_opts, "preallocate=true;");
             }
             break;
@@ -7622,8 +7684,9 @@ int main (int argc, char **argv) {
             settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
                     "This server is not built with SASL support.\n");
             exit(EX_USAGE);
-#endif
+#else
             settings.require_sasl = true;
+#endif
             break;
         case 'X' :
             {
@@ -7648,6 +7711,16 @@ int main (int argc, char **argv) {
     }
 #endif /* DAEMON_MEMCACHED */
 
+    /*
+     * Use one workerthread to serve each UDP port if the user specified
+     * multiple ports
+     */
+    if (settings.inter != NULL && strchr(settings.inter, ',')) {
+        settings.num_threads_per_udp = 1;
+    } else {
+        settings.num_threads_per_udp = settings.num_threads;
+    }
+
     if (getenv("MEMCACHED_REQS_TAP_EVENT") != NULL) {
         settings.reqs_per_tap_event = atoi(getenv("MEMCACHED_REQS_TAP_EVENT"));
     }
@@ -7661,14 +7734,6 @@ int main (int argc, char **argv) {
         settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
                                         "Failed to install SIGTERM handler\n");
         exit(EXIT_FAILURE);
-    }
-
-    char *topkeys_env = getenv("MEMCACHED_TOP_KEYS");
-    if (topkeys_env != NULL) {
-        settings.topkeys = atoi(topkeys_env);
-        if (settings.topkeys < 0) {
-            settings.topkeys = 0;
-        }
     }
 
     if (settings.require_sasl) {
@@ -7698,7 +7763,7 @@ int main (int argc, char **argv) {
     if (engine_config != NULL && strlen(old_options) > 0) {
         settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
                 "ERROR: You can't mix -e with the old options\n");
-        return (NULL);
+        return EX_USAGE;
     } else if (engine_config == NULL && strlen(old_options) > 0) {
         engine_config = old_options;
     } */
@@ -7740,16 +7805,31 @@ int main (int argc, char **argv) {
                 "failed to getrlimit number of files\n");
         exit(EX_OSERR);
     } else {
-        int maxfiles = settings.maxconns;
-        if (rlim.rlim_cur < maxfiles)
+        int maxfiles = settings.maxconns + (3 * (settings.num_threads + 2));
+        int syslimit = rlim.rlim_cur;
+        if (rlim.rlim_cur < maxfiles) {
             rlim.rlim_cur = maxfiles;
-        if (rlim.rlim_max < rlim.rlim_cur)
+        }
+        if (rlim.rlim_max < rlim.rlim_cur) {
             rlim.rlim_max = rlim.rlim_cur;
+        }
         if (setrlimit(RLIMIT_NOFILE, &rlim) != 0) {
+            const char *fmt;
+            fmt = "WARNING: maxconns cannot be set to (%d) connections due to "
+                "system\nresouce restrictions. Increase the number of file "
+                "descriptors allowed\nto the memcached user process or start "
+                "memcached as root (remember\nto use the -u parameter).\n"
+                "The maximum number of connections is set to %d.\n";
+            int req = settings.maxconns;
+            settings.maxconns = syslimit - (3 * (settings.num_threads + 2));
+            if (settings.maxconns < 0) {
+                settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
+                         "failed to set rlimit for open files. Try starting as"
+                         " root or requesting smaller maxconns value.\n");
+                exit(EX_OSERR);
+            }
             settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
-                    "failed to set rlimit for open files. Try running as"
-                    " root or requesting smaller maxconns value.\n");
-            exit(EX_OSERR);
+                                            fmt, req, settings.maxconns);
         }
     }
 
@@ -7834,7 +7914,7 @@ int main (int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    if(!init_engine(engine_handle,engine_config,settings.extensions.logger)) {
+    if (!init_engine(engine_handle,engine_config,settings.extensions.logger)) {
 #ifdef DAEMON_MEMCACHED
         shutdown_server();
         goto func_exit;
@@ -7843,7 +7923,7 @@ int main (int argc, char **argv) {
 #endif /* DAEMON_MEMCACHED */
     }
 
-    if(settings.verbose > 0) {
+    if (settings.verbose > 0) {
         log_engine_details(engine_handle,settings.extensions.logger);
     }
     settings.engine.v1 = (ENGINE_HANDLE_V1 *) engine_handle;
@@ -7862,7 +7942,7 @@ int main (int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    default_independent_stats = new_independent_stats();
+    default_thread_stats = new_thread_stats();
 
 #ifndef __WIN32__
     /*
@@ -7885,15 +7965,15 @@ int main (int argc, char **argv) {
     /* create unix mode sockets after dropping privileges */
     if (settings.socketpath != NULL) {
         if (server_socket_unix(settings.socketpath,settings.access)) {
-            vperror("failed to listen on UNIX socket: %s", settings.socketpath);
+            settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
+                                            "failed to listen on UNIX socket \"%s\": %s",
+                                            settings.socketpath, strerror(errno));
             exit(EX_OSERR);
         }
     }
 
     /* create the listening socket, bind it, and init */
     if (settings.socketpath == NULL) {
-        int udp_port;
-
         const char *portnumber_filename = getenv("MEMCACHED_PORT_FILENAME");
         char temp_portnumber_filename[PATH_MAX];
         FILE *portnumber_file = NULL;
@@ -7913,7 +7993,9 @@ int main (int argc, char **argv) {
 
         if (settings.port && server_sockets(settings.port, tcp_transport,
                                             portnumber_file)) {
-		vperror("failed to listen on TCP port %d", settings.port);
+            settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
+                                            "failed to listen on TCP port %d: %s",
+                                            settings.port, strerror(errno));
 #ifdef DAEMON_MEMCACHED
 		shutdown_server();
 		goto func_exit;
@@ -7928,12 +8010,13 @@ int main (int argc, char **argv) {
          * then daemonise if needed, then init libevent (in some cases
          * descriptors created by libevent wouldn't survive forking).
          */
-        udp_port = settings.udpport ? settings.udpport : settings.port;
 
         /* create the UDP listening socket and bind it */
         if (settings.udpport && server_sockets(settings.udpport, udp_transport,
                                                portnumber_file)) {
-            vperror("failed to listen on UDP port %d", settings.udpport);
+            settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
+                                            "failed to listen on UDP port %d: %s",
+                                            settings.port, strerror(errno));
             exit(EX_OSERR);
         }
 
@@ -7952,8 +8035,10 @@ int main (int argc, char **argv) {
 
     memcached_initialized = 1;
 
-    /* enter the event loop */
-    event_base_loop(main_base, 0);
+    if (!memcached_shutdown) {
+        /* enter the event loop */
+        event_base_loop(main_base, 0);
+    }
 
     if (settings.verbose) {
         settings.extensions.logger->log(EXTENSION_LOG_INFO, NULL,
