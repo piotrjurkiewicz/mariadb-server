@@ -60,6 +60,7 @@
 #cmakedefine HAVE_SELECT_H 1
 #cmakedefine HAVE_SIGNAL_H 1
 #cmakedefine HAVE_SOLARIS_LARGE_PAGES 1
+#cmakedefine HAVE_STDBOOL_H 1
 #cmakedefine HAVE_STDDEF_H 1
 #cmakedefine HAVE_STDLIB_H 1
 #cmakedefine HAVE_STDARG_H 1
@@ -112,7 +113,12 @@
 #cmakedefine HAVE_SYS_PARAM_H 1
 
 /* For memcached */
+#cmakedefine HAVE_NETINET_TCP_H 1
+#cmakedefine HAVE_NETDB_H 1
 #cmakedefine HAVE_SASL_SASL_H 1
+#cmakedefine HAVE_SYSEXITS_H 1
+#cmakedefine HAVE_SYS_UIO_H 1
+#cmakedefine HAVE_SIGIGNORE 1
 
 /* For libevent */
 #cmakedefine HAVE_DEVPOLL 1
