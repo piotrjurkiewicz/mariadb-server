@@ -33,12 +33,6 @@ ENDIF(CMAKE_C_FLAGS MATCHES "-Werror")
 
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_SHARED_LIBRARY_C_FLAGS} -std=gnu99")
 
-SET(MCD__UTILITITY_SOURCES
-		util-src/config_parser.c
-		util-src/util.c)
-
-ADD_LIBRARY(libmcd_util STATIC ${MCD__UTILITITY_SOURCES})
-
 SET(CMAKE_CPP_FLAGS "${CMAKE_CPP_FLAGS}
                      -I${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached_engine_ib/include
                      -I${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached_engine_ib/cache-src")
@@ -60,5 +54,5 @@ SET(DAEMON_MEMCACHED_ENGINE_IB_SOURCES
 MYSQL_ADD_PLUGIN(daemon_memcached_engine_ib ${DAEMON_MEMCACHED_ENGINE_IB_SOURCES}
 		MODULE_ONLY MODULE_OUTPUT_NAME "daemon_memcached_engine_ib")
 
-TARGET_LINK_LIBRARIES(daemon_memcached_engine_ib libmcd_util)
+TARGET_LINK_LIBRARIES(daemon_memcached_engine_ib daemon_memcached_utilities)
 
