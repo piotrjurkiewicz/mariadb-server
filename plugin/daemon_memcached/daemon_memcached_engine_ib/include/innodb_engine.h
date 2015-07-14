@@ -105,7 +105,6 @@ typedef struct innodb_engine {
 	SERVER_HANDLE_V1	server;		/*!< Memcached server */
 	GET_SERVER_API		get_server_api;	/*!< call back to get Memcached
 						server common functions */
-	ENGINE_HANDLE*		default_engine;	/*!< default memcached engine */
 
 	struct {
 		size_t		nthreads;	/*!< number of threads handling

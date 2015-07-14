@@ -33,16 +33,13 @@ typedef void*   hash_node_t;
 /* Database name and table name for our metadata "system" tables for
 InnoDB memcache. The table names are the same as those for the
 NDB memcache, to make the memcache setup compatible between the two.
-There are 3 "system tables":
+There are 2 "system tables":
 1) containers - main configure table contains row describing which InnoDB
 		table is used to store/retrieve Memcached key/value if InnoDB
 		Memcached engine is used
-2) cache_policies - decide whether to use "Memcached Default Engine" or "InnoDB
-		    Memcached Engine" to handler the requests
-3) config_options - for miscellaneous configuration options */
+2) config_options - for miscellaneous configuration options */
 #define MCI_CFG_DB_NAME			"daemon_memcached"
 #define MCI_CFG_CONTAINER_TABLE		"containers"
-#define MCI_CFG_CACHE_POLICIES		"cache_policies"
 #define MCI_CFG_CONFIG_OPTIONS		"config_options"
 
 /** Max table name length as defined in univ.i */
@@ -82,21 +79,6 @@ typedef enum container {
 	CONTAINER_NUM_COLS	/*!< number of columns */
 } container_t;
 
-/** columns in the "cache_policy" table */
-typedef enum cache_policy {
-	CACHE_POLICY_NAME,	/*!< "name" column, for the "cache_policy"
-				name */
-	CACHE_POLICY_GET,	/*!< "get" column, specifies the cache policy
-				for "get" command */
-	CACHE_POLICY_SET,	/*!< "set" column, specifies the cache policy
-				for "set" command */
-	CACHE_POLICY_DEL,	/*!< "delete" column, specifies the cache
-				policy for "delete" command */
-	CACHE_POLICY_FLUSH,	/*!< "flush_all" column, specifies the
-				cache policy for "flush_all" command */
-	CACHE_POLICY_NUM_COLS	/*!< total 5 columns */
-} cache_policy_t;
-
 /** columns in the "config_options" table */
 typedef enum config_opt {
 	CONFIG_OPT_KEY,		/*!< key column in the "config_option" table */
@@ -127,18 +109,6 @@ typedef struct meta_index {
 	meta_use_idx_t	srch_use_idx;	/*!< use cluster or secondary
 					index for the search */
 } meta_index_t;
-
-/** Cache options, tells if we will used Memcached default engine or InnoDB
-Memcached engine to handle the request */
-typedef enum meta_cache_opt {
-	META_CACHE_OPT_INNODB = 1,	/*!< Use InnoDB Memcached Engine only */
-	META_CACHE_OPT_DEFAULT,		/*!< Use Default Memcached Engine
-					only */
-	META_CACHE_OPT_MIX,		/*!< Use both, first use default
-					memcached engine */
-	META_CACHE_OPT_DISABLE,		/*!< This operation is disabled */
-	META_CACHE_NUM_OPT		/*!< Number of options */
-} meta_cache_opt_t;
 
 /** The "names" in the "config_option" table to identify possible
 config options. Both are optional.
@@ -208,12 +178,6 @@ typedef struct meta_cfg_info {
 	option_value_t	options[OPTION_ID_NUM_OPTIONS];
 						/*!< configure options, mostly
 						are configured delimiters */
-	meta_cache_opt_t set_option;		/*!< cache option for "set" */
-	meta_cache_opt_t get_option;		/*!< cache option for "get" */
-	meta_cache_opt_t del_option;		/*!< cache option for
-						"delete" */
-	meta_cache_opt_t flush_option;		/*!< cache option for
-						"delete" */
 	hash_node_t	name_hash;		/*!< name hash chain node */
 } meta_cfg_info_t;
 

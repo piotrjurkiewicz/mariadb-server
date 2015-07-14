@@ -237,6 +237,18 @@ innodb_unknown_command(
 	ADD_RESPONSE	response);	/*!< out: respondse */
 
 /*******************************************************************//**
+TODO
+@return void */
+static
+void
+innodb_item_set_cas(
+/*===================*/
+	ENGINE_HANDLE*	handle,		/*!< in: Engine Handle */
+	const void*	cookie,		/*!< in: connection cookie */
+	const item*		item,		/*!< in: item in question */
+	uint64_t cas);	/*!< in: CAS */
+
+/*******************************************************************//**
 Callback functions used by Memcached's process_command() function
 to get the result key/value information
 @return TRUE if info fetched */

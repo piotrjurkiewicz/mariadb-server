@@ -2,8 +2,6 @@ SET @tx_isolation= @@global.tx_isolation;
 SET GLOBAL TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
 #######################################################
 # Test case with expected configuration
-INSERT INTO cache_policies VALUES("cache_policy", "innodb_only",
-"innodb_only", "innodb_only", "innodb_only");
 INSERT INTO config_options VALUES("separator", "|");
 INSERT INTO containers VALUES ("desc_t1", "test", "t1",
 "c1", "c11,c2,c21", "c3", "c4", "c5", "PRIMARY");
@@ -67,8 +65,6 @@ H	H	Hamburg	Norderstedt
 # Test case with not existing table in container
 UNINSTALL PLUGIN daemon_memcached;
 DROP DATABASE daemon_memcached;
-INSERT INTO cache_policies VALUES("cache_policy", "innodb_only",
-"innodb_only", "innodb_only", "innodb_only");
 INSERT INTO config_options VALUES("separator", "|");
 INSERT INTO containers VALUES ("desc_t1", "test", "t9",
 "c1", "c11,c2,c21", "c3", "c4", "c5", "PRIMARY");
@@ -101,8 +97,6 @@ H	H	Hamburg	Norderstedt
 # Test case with not existing database in container
 UNINSTALL PLUGIN daemon_memcached;
 DROP DATABASE daemon_memcached;
-INSERT INTO cache_policies VALUES("cache_policy", "innodb_only",
-"innodb_only", "innodb_only", "innodb_only");
 INSERT INTO config_options VALUES("separator", "|");
 INSERT INTO containers VALUES ("desc_t1", "unknown", "t1",
 "c1", "c11,c2,c21", "c3", "c4", "c5", "PRIMARY");
@@ -135,8 +129,6 @@ H	H	Hamburg	Norderstedt
 # Test case with not existing key column in container
 UNINSTALL PLUGIN daemon_memcached;
 DROP DATABASE daemon_memcached;
-INSERT INTO cache_policies VALUES("cache_policy", "innodb_only",
-"innodb_only", "innodb_only", "innodb_only");
 INSERT INTO config_options VALUES("separator", "|");
 INSERT INTO containers VALUES ("desc_t1", "test", "t1",
 "unknown", "c11,c2,c21", "c3", "c4", "c5", "PRIMARY");
@@ -169,8 +161,6 @@ H	H	Hamburg	Norderstedt
 # Test case with not existing value columns in container
 UNINSTALL PLUGIN daemon_memcached;
 DROP DATABASE daemon_memcached;
-INSERT INTO cache_policies VALUES("cache_policy", "innodb_only",
-"innodb_only", "innodb_only", "innodb_only");
 INSERT INTO config_options VALUES("separator", "|");
 INSERT INTO containers VALUES ("desc_t1", "test", "t1",
 "c1", "unknown", "c3", "c4", "c5", "PRIMARY");
@@ -203,8 +193,6 @@ H	H	Hamburg	Norderstedt
 # Test case with NULL value columns in container
 UNINSTALL PLUGIN daemon_memcached;
 DROP DATABASE daemon_memcached;
-INSERT INTO cache_policies VALUES("cache_policy", "innodb_only",
-"innodb_only", "innodb_only", "innodb_only");
 INSERT INTO config_options VALUES("separator", "|");
 INSERT INTO containers VALUES ("desc_t1", "test", "t1",
 "c1", NULL, "c3", "c4", "c5", "PRIMARY");
@@ -237,8 +225,6 @@ H	H	Hamburg	Norderstedt
 # Test case with not existing mandatory column in container
 UNINSTALL PLUGIN daemon_memcached;
 DROP DATABASE daemon_memcached;
-INSERT INTO cache_policies VALUES("cache_policy", "innodb_only",
-"innodb_only", "innodb_only", "innodb_only");
 INSERT INTO config_options VALUES("separator", "|");
 INSERT INTO containers VALUES ("desc_t1", "test", "t1",
 "c1", "c11,c2,c21", "unknown", "unknown", "unknown", "PRIMARY");
@@ -279,8 +265,6 @@ H	H	Hamburg	Norderstedt
 # Test case map to a partitioned table
 UNINSTALL PLUGIN daemon_memcached;
 DROP DATABASE daemon_memcached;
-INSERT INTO cache_policies VALUES("cache_policy", "innodb_only",
-"innodb_only", "innodb_only", "innodb_only");
 INSERT INTO config_options VALUES("separator", "|");
 INSERT INTO containers VALUES ("desc_t1", "test", "t1",
 "c1", "c11,c2,c21", "c3", "c4", "c5", "PRIMARY");

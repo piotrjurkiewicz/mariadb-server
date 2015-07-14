@@ -3,31 +3,6 @@ create database daemon_memcached;
 use daemon_memcached;
 
 #-- ------------------------------------------------------------------------
-#-- Table `cache_policies`
-#--
-#-- Each record in this table represents a named caching policy, specifying:
-#--  * How the memcache GET command is executed, including whether to get
-#--    records from local cache only, from InnoDB only, from local cache if
-#--    present (treating InnoDB as a backing store), or not at all.
-#--  * Similarly, how memcache SET commands are executed.
-#--  * How memcache DELETE commands are executed.
-#--  * Whether flushing the cache should cause a mass delete from NDB.
-#--
-#-- ------------------------------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `cache_policies` (
-	`policy_name` VARCHAR(40) PRIMARY KEY,
-	`get_policy` ENUM('innodb_only', 'cache_only', 'caching','disabled')
-	 NOT NULL ,
-	`set_policy` ENUM('innodb_only', 'cache_only','caching','disabled')
-	 NOT NULL ,
-	`delete_policy` ENUM('innodb_only', 'cache_only', 'caching','disabled')
-	 NOT NULL,
-	`flush_policy` ENUM('innodb_only', 'cache_only', 'caching','disabled')
-	 NOT NULL
-) ENGINE = innodb;
-
-
-#-- ------------------------------------------------------------------------
 #-- Table `containers`
 #--
 #-- A container record describes an InnoDB table used for data storage by

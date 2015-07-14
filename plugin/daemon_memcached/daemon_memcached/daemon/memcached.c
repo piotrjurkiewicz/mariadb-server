@@ -7137,6 +7137,7 @@ int main (int argc, char **argv) {
     eng_config_info_t my_eng_config;
 
     memcached_initialized = 0;
+    memcached_shutdown = 0;
 
     if (m_config->m_engine_library) {
 	engine = m_config->m_engine_library;
@@ -7152,14 +7153,12 @@ int main (int argc, char **argv) {
 	engine_config = (const char *) (&my_eng_config);
 
     } else {
-	engine = "default_engine.so";
+        fprintf(stderr, "Engine library do not provided\n");
+        return EX_OSERR;
     }
 #else
     engine = "default_engine.so";
 #endif /* DAEMON_MEMCACHED */
-
-    memcached_shutdown = 0;
-    memcached_initialized = 0;
 
     /* make the time we started always be 2 seconds before we really
        did, so time(0) - time.started is never zero.  if so, things

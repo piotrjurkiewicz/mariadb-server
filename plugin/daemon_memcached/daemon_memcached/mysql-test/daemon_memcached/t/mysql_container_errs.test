@@ -21,9 +21,6 @@ echo # Test case with expected configuration;
 source include/memcache_config.inc;
 --enable_query_log
 
-INSERT INTO cache_policies VALUES("cache_policy", "innodb_only",
-				  "innodb_only", "innodb_only", "innodb_only");
-
 INSERT INTO config_options VALUES("separator", "|");
 
 INSERT INTO containers VALUES ("desc_t1", "test", "t1",
@@ -127,9 +124,6 @@ DROP DATABASE daemon_memcached;
 source include/memcache_config.inc;
 --enable_query_log
 
-INSERT INTO cache_policies VALUES("cache_policy", "innodb_only",
-				  "innodb_only", "innodb_only", "innodb_only");
-
 INSERT INTO config_options VALUES("separator", "|");
 
 # t9 is not existing!
@@ -201,9 +195,6 @@ DROP DATABASE daemon_memcached;
 --disable_query_log
 source include/memcache_config.inc;
 --enable_query_log
-
-INSERT INTO cache_policies VALUES("cache_policy", "innodb_only",
-				  "innodb_only", "innodb_only", "innodb_only");
 
 INSERT INTO config_options VALUES("separator", "|");
 
@@ -277,9 +268,6 @@ DROP DATABASE daemon_memcached;
 source include/memcache_config.inc;
 --enable_query_log
 
-INSERT INTO cache_policies VALUES("cache_policy", "innodb_only",
-				  "innodb_only", "innodb_only", "innodb_only");
-
 INSERT INTO config_options VALUES("separator", "|");
 
 # unknown is not existing!
@@ -351,9 +339,6 @@ DROP DATABASE daemon_memcached;
 --disable_query_log
 source include/memcache_config.inc;
 --enable_query_log
-
-INSERT INTO cache_policies VALUES("cache_policy", "innodb_only",
-				  "innodb_only", "innodb_only", "innodb_only");
 
 INSERT INTO config_options VALUES("separator", "|");
 
@@ -427,9 +412,6 @@ DROP DATABASE daemon_memcached;
 source include/memcache_config.inc;
 --enable_query_log
 
-INSERT INTO cache_policies VALUES("cache_policy", "innodb_only",
-				  "innodb_only", "innodb_only", "innodb_only");
-
 INSERT INTO config_options VALUES("separator", "|");
 
 # unknown is not existing!
@@ -501,9 +483,6 @@ DROP DATABASE daemon_memcached;
 --disable_query_log
 source include/memcache_config.inc;
 --enable_query_log
-
-INSERT INTO cache_policies VALUES("cache_policy", "innodb_only",
-				  "innodb_only", "innodb_only", "innodb_only");
 
 INSERT INTO config_options VALUES("separator", "|");
 
@@ -577,9 +556,6 @@ DROP DATABASE daemon_memcached;
 --disable_query_log
 source include/memcache_config.inc;
 --enable_query_log
-
-INSERT INTO cache_policies VALUES("cache_policy", "innodb_only",
-				  "innodb_only", "innodb_only", "innodb_only");
 
 INSERT INTO config_options VALUES("separator", "|");
 

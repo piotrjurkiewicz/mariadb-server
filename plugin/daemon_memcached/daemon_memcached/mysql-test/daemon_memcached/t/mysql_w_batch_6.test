@@ -27,9 +27,6 @@ SET @@global.innodb_lock_wait_timeout=1;
 source include/memcache_config.inc;
 --enable_query_log
 
-INSERT INTO cache_policies VALUES("cache_policy", "innodb_only",
-				  "innodb_only", "innodb_only", "innodb_only");
-
 INSERT INTO config_options VALUES("separator", "|");
 
 # describe table for memcache

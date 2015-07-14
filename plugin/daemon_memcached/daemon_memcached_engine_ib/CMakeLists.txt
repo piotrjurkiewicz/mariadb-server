@@ -21,7 +21,6 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached
 		    ${CMAKE_SOURCE_DIR}/regex
 		    ${CMAKE_SOURCE_DIR}/storage/innobase/include
 		    ${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached_engine_ib/include
-		    ${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached_engine_ib/cache-src
 		    ${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached/include)
 
 # If current CMAKE_C_FLAGS is with Werror, turn it off to compile successfully
@@ -34,8 +33,7 @@ ENDIF(CMAKE_C_FLAGS MATCHES "-Werror")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_SHARED_LIBRARY_C_FLAGS} -std=gnu99")
 
 SET(CMAKE_CPP_FLAGS "${CMAKE_CPP_FLAGS}
-                     -I${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached_engine_ib/include
-                     -I${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached_engine_ib/cache-src")
+                     -I${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached_engine_ib/include")
 
 SET(DAEMON_MEMCACHED_ENGINE_IB_SOURCES
 		src/innodb_config.c
@@ -43,11 +41,8 @@ SET(DAEMON_MEMCACHED_ENGINE_IB_SOURCES
 		src/hash_item_util.c
 		src/innodb_engine.c
 		src/innodb_api.c
-		src/embedded_default_engine.c
 		src/handler_api.cc
-		cache-src/assoc.c
-		cache-src/items.c
-		cache-src/slabs.c)
+)
 
 # ADD_LIBRARY(daemon_memcached_engine_ib SHARED ${DAEMON_MEMCACHED_ENGINE_IB_SOURCES})
 

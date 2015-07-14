@@ -32,7 +32,6 @@ Extracted and modified from NDB memcached project
 #include <assert.h>
 #include <pthread.h>
 #include <arpa/inet.h>
-#include "default_engine.h"
 #include <memcached/util.h>
 #include <memcached/config_parser.h>
 #include <unistd.h>
@@ -118,26 +117,6 @@ innodb_conn_clean_data(
 	bool			has_lock,
 	bool			free_all);
 
-/*******************************************************************//**
-Get default Memcached engine handle
-@return default Memcached engine handle */
-static inline
-struct default_engine*
-default_handle(
-/*===========*/
-	struct innodb_engine*	eng)
-{
-	return((struct default_engine*) eng->default_engine);
-}
-
-/****** Gateway to the default_engine's create_instance() function */
-ENGINE_ERROR_CODE
-create_my_default_instance(
-/*=======================*/
-	uint64_t,
-	GET_SERVER_API,
-	ENGINE_HANDLE **);
-
 /*********** FUNCTIONS IMPLEMENTING THE PUBLISHED API BEGIN HERE ********/
 
 /*******************************************************************//**
@@ -153,7 +132,6 @@ create_instance(
 						server interface */
 	ENGINE_HANDLE**		handle )	/*!< out: Engine handle */
 {
-	ENGINE_ERROR_CODE	err_ret;
 	struct innodb_engine*	innodb_eng;
 
 	SERVER_HANDLE_V1 *api = get_server_api();
@@ -184,7 +162,7 @@ create_instance(
 	innodb_eng->engine.arithmetic = innodb_arithmetic;
 	innodb_eng->engine.flush = innodb_flush;
 	innodb_eng->engine.unknown_command = innodb_unknown_command;
-	innodb_eng->engine.item_set_cas = item_set_cas;
+	innodb_eng->engine.item_set_cas = innodb_item_set_cas;
 	innodb_eng->engine.get_item_info = innodb_get_item_info;
 	innodb_eng->engine.get_stats_struct = NULL;
 	innodb_eng->engine.errinfo = NULL;
@@ -200,15 +178,6 @@ create_instance(
 	innodb_eng->info.info.features[1].feature =
 		ENGINE_FEATURE_PERSISTENT_STORAGE;
 	innodb_eng->info.info.features[0].feature = ENGINE_FEATURE_LRU;
-
-	/* Now call create_instace() for the default engine */
-	err_ret = create_my_default_instance(interface, get_server_api,
-				       &(innodb_eng->default_engine));
-
-	if (err_ret != ENGINE_SUCCESS) {
-		free(innodb_eng);
-		return(err_ret);
-	}
 
 	innodb_eng->clean_stale_conn = false;
 	innodb_eng->initialized = true;
@@ -385,7 +354,6 @@ innodb_initialize(
 {
 	ENGINE_ERROR_CODE	return_status = ENGINE_SUCCESS;
 	struct innodb_engine*	innodb_eng = innodb_handle(handle);
-	struct default_engine*	def_eng = default_handle(innodb_eng);
 	eng_config_info_t*	my_eng_config;
 	pthread_attr_t          attr;
 
@@ -434,12 +402,6 @@ innodb_initialize(
 
 	if (!innodb_eng->meta_info) {
 		return(ENGINE_TMPFAIL);
-	}
-
-	if (innodb_eng->default_engine) {
-		return_status = def_eng->engine.initialize(
-			innodb_eng->default_engine,
-			my_eng_config->option_string);
 	}
 
 	memcached_shutdown = false;
@@ -670,7 +632,6 @@ innodb_destroy(
 	bool		force)		/*!< in: Force to destroy */
 {
 	struct innodb_engine* innodb_eng = innodb_handle(handle);
-	struct default_engine *def_eng = default_handle(innodb_eng);
 
 	memcached_shutdown = true;
 
@@ -688,10 +649,6 @@ innodb_destroy(
 	pthread_mutex_destroy(&innodb_eng->conn_mutex);
 	pthread_mutex_destroy(&innodb_eng->cas_mutex);
 	pthread_mutex_destroy(&innodb_eng->flush_mutex);
-
-	if (innodb_eng->default_engine) {
-		def_eng->engine.destroy(innodb_eng->default_engine, force);
-	}
 
 	free(innodb_eng);
 }
@@ -1139,11 +1096,8 @@ innodb_allocate(
 {
 	size_t			len;
 	struct innodb_engine*	innodb_eng = innodb_handle(handle);
-	struct default_engine*	def_eng = default_handle(innodb_eng);
 	innodb_conn_data_t*	conn_data;
 	hash_item*		it = NULL;
-	meta_cfg_info_t*	meta_info = innodb_eng->meta_info;
-
 
 	conn_data = innodb_eng->server.cookie->get_engine_specific(cookie);
 
@@ -1154,19 +1108,6 @@ innodb_allocate(
 		if (!conn_data) {
 			return(ENGINE_TMPFAIL);
 		}
-	}
-
-	/* If system configured to use Memcached default engine (instead
-	of InnoDB engine), continue to use Memcached's default memory
-	allocation */
-	if (meta_info->set_option == META_CACHE_OPT_DEFAULT
-            || meta_info->set_option == META_CACHE_OPT_MIX) {
-		conn_data->use_default_mem = true;
-		conn_data->in_use = false;
-		return(def_eng->engine.allocate(
-			innodb_eng->default_engine,
-			cookie, item, key, nkey, nbytes,
-			flags, exptime));
 	}
 
 	conn_data->use_default_mem = false;
@@ -1181,13 +1122,13 @@ innodb_allocate(
 
 	it->next = it->prev = it->h_next = 0;
 	it->refcount = 1;
-	it->iflag = def_eng->config.use_cas ? ITEM_WITH_CAS : 0;
+	it->iflag = 0;
 	it->nkey = nkey;
 	it->nbytes = nbytes;
 	it->flags = flags;
 	it->slabs_clsid = 1;
 	/* item_get_key() is a memcached code, here we cast away const return */
-	memcpy((void*) item_get_key(it), key, nkey);
+	memcpy((void*) hash_item_get_key(it), key, nkey);
 	it->exptime = exptime;
 
 	*item = it;
@@ -1213,30 +1154,8 @@ innodb_remove(
 						engine only */
 {
 	struct innodb_engine*	innodb_eng = innodb_handle(handle);
-	struct default_engine*	def_eng = default_handle(innodb_eng);
 	ENGINE_ERROR_CODE	err_ret = ENGINE_SUCCESS;
 	innodb_conn_data_t*	conn_data;
-	meta_cfg_info_t*	meta_info = innodb_eng->meta_info;
-	ENGINE_ERROR_CODE	cacher_err = ENGINE_KEY_ENOENT;
-
-	if (meta_info->del_option == META_CACHE_OPT_DISABLE) {
-		return(ENGINE_SUCCESS);
-	}
-
-	if (meta_info->del_option == META_CACHE_OPT_DEFAULT
-	    || meta_info->del_option == META_CACHE_OPT_MIX) {
-		hash_item*	item = item_get(def_eng, key, nkey);
-
-		if (item != NULL) {
-			item_unlink(def_eng, item);
-			item_release(def_eng, item);
-			cacher_err = ENGINE_SUCCESS;
-		}
-
-		if (meta_info->del_option == META_CACHE_OPT_DEFAULT) {
-			return(cacher_err);
-		}
-	}
 
 	conn_data = innodb_conn_init(innodb_eng, cookie,
 				     CONN_MODE_WRITE, IB_LOCK_X, false,
@@ -1258,7 +1177,7 @@ innodb_remove(
 	innodb_api_cursor_reset(innodb_eng, conn_data, CONN_OP_DELETE,
 				err_ret == ENGINE_SUCCESS);
 
-	return((cacher_err == ENGINE_SUCCESS) ? ENGINE_SUCCESS : err_ret);
+	return(err_ret);
 }
 
 /*******************************************************************//**
@@ -1464,15 +1383,6 @@ innodb_release(
 
 	conn_data->result_in_use = false;
 
-	/* If item's memory comes from Memcached default engine, release it
-	through Memcached APIs */
-	if (conn_data->use_default_mem) {
-		struct default_engine*  def_eng = default_handle(innodb_eng);
-
-		item_release(def_eng, (hash_item *) item);
-		conn_data->use_default_mem = false;
-	}
-
 	return;
 }
 
@@ -1584,23 +1494,6 @@ innodb_get(
 	size_t			key_len = nkey;
 	int			lock_mode;
 	bool			report_table_switch = false;
-
-	if (meta_info->get_option == META_CACHE_OPT_DISABLE) {
-		return(ENGINE_KEY_ENOENT);
-	}
-
-	if (meta_info->get_option == META_CACHE_OPT_DEFAULT
-	    || meta_info->get_option == META_CACHE_OPT_MIX) {
-		*item = item_get(default_handle(innodb_eng), key, nkey);
-
-		if (*item != NULL) {
-			return(ENGINE_SUCCESS);
-		}
-
-		if (meta_info->get_option == META_CACHE_OPT_DEFAULT) {
-			return(ENGINE_KEY_ENOENT);
-		}
-	}
 
 	/* Check if we need to switch table mapping */
 	err_ret = check_key_name_for_map_switch(handle, cookie, key, &key_len);
@@ -1851,10 +1744,7 @@ innodb_get_stats(
 	int			nkey,		/*!< in: key length */
 	ADD_STAT		add_stat)	/*!< out: stats to fill */
 {
-	struct innodb_engine* innodb_eng = innodb_handle(handle);
-	struct default_engine *def_eng = default_handle(innodb_eng);
-	return(def_eng->engine.get_stats(innodb_eng->default_engine, cookie,
-					 stat_key, nkey, add_stat));
+	return(ENGINE_SUCCESS);
 }
 
 /*******************************************************************//**
@@ -1867,9 +1757,6 @@ innodb_reset_stats(
 	ENGINE_HANDLE*		handle,		/*!< in: Engine Handle */
 	const void*		cookie)		/*!< in: connection cookie */
 {
-	struct innodb_engine* innodb_eng = innodb_handle(handle);
-	struct default_engine *def_eng = default_handle(innodb_eng);
-	def_eng->engine.reset_stats(innodb_eng->default_engine, cookie);
 }
 
 /*******************************************************************//**
@@ -1897,24 +1784,9 @@ innodb_store(
 	ENGINE_ERROR_CODE	result;
 	uint64_t		input_cas;
 	innodb_conn_data_t*	conn_data;
-	meta_cfg_info_t*	meta_info = innodb_eng->meta_info;
 	uint32_t		val_len = ((hash_item*)item)->nbytes;
 	size_t			key_len = len;
 	ENGINE_ERROR_CODE	err_ret = ENGINE_SUCCESS;
-
-	if (meta_info->set_option == META_CACHE_OPT_DISABLE) {
-		return(ENGINE_SUCCESS);
-	}
-
-	if (meta_info->set_option == META_CACHE_OPT_DEFAULT
-	    || meta_info->set_option == META_CACHE_OPT_MIX) {
-		result = store_item(default_handle(innodb_eng), item, cas,
-				    op, cookie);
-
-		if (meta_info->set_option == META_CACHE_OPT_DEFAULT) {
-			return(result);
-		}
-	}
 
 	err_ret = check_key_name_for_map_switch(handle, cookie,
 						value, &key_len);
@@ -1972,28 +1844,8 @@ innodb_arithmetic(
 	char*		result_str)	/*!< out: result value as string */
 {
 	struct innodb_engine*	innodb_eng = innodb_handle(handle);
-	struct default_engine*	def_eng = default_handle(innodb_eng);
 	innodb_conn_data_t*	conn_data;
-	meta_cfg_info_t*	meta_info = innodb_eng->meta_info;
 	ENGINE_ERROR_CODE	err_ret;
-
-	if (meta_info->set_option == META_CACHE_OPT_DISABLE) {
-		return(ENGINE_SUCCESS);
-	}
-
-	if (meta_info->set_option == META_CACHE_OPT_DEFAULT
-	    || meta_info->set_option == META_CACHE_OPT_MIX) {
-		/* For cache-only, forward this to the
-		default engine */
-		err_ret = def_eng->engine.arithmetic(
-			innodb_eng->default_engine, cookie, key, nkey,
-			increment, create, delta, initial, exptime, cas,
-			result, vbucket, result_str);
-
-		if (meta_info->set_option == META_CACHE_OPT_DEFAULT) {
-			return(err_ret);
-		}
-	}
 
 	conn_data = innodb_conn_init(innodb_eng, cookie, CONN_MODE_WRITE,
 				     IB_LOCK_X, false, NULL);
@@ -2080,26 +1932,9 @@ innodb_flush(
 					InnoDB */
 {
 	struct innodb_engine*	innodb_eng = innodb_handle(handle);
-	struct default_engine*	def_eng = default_handle(innodb_eng);
-	ENGINE_ERROR_CODE	err = ENGINE_SUCCESS;
 	meta_cfg_info_t*	meta_info = innodb_eng->meta_info;
 	ib_err_t		ib_err = DB_SUCCESS;
 	innodb_conn_data_t*	conn_data;
-
-	if (meta_info->flush_option == META_CACHE_OPT_DISABLE) {
-		return(ENGINE_SUCCESS);
-	}
-
-	if (meta_info->flush_option == META_CACHE_OPT_DEFAULT
-	    || meta_info->flush_option == META_CACHE_OPT_MIX) {
-		/* default engine flush */
-		err = def_eng->engine.flush(innodb_eng->default_engine,
-					    cookie, when);
-
-		if (meta_info->flush_option == META_CACHE_OPT_DEFAULT) {
-			return(err);
-		}
-	}
 
 	/* Lock the whole engine, so no other connection can start
 	new opeartion */
@@ -2163,11 +1998,22 @@ innodb_unknown_command(
 	protocol_binary_request_header *request, /*!< in: request */
 	ADD_RESPONSE	response)	/*!< out: respondse */
 {
-	struct innodb_engine* innodb_eng = innodb_handle(handle);
-	struct default_engine *def_eng = default_handle(innodb_eng);
+	return(ENGINE_FAILED);
+}
 
-	return(def_eng->engine.unknown_command(innodb_eng->default_engine,
-					       cookie, request, response));
+/*******************************************************************//**
+TODO
+@return void */
+static
+void
+innodb_item_set_cas(
+/*===================*/
+	ENGINE_HANDLE*	handle,		/*!< in: Engine Handle */
+	const void*	cookie,		/*!< in: connection cookie */
+	const item*		item,		/*!< in: item in question */
+	uint64_t cas)	/*!< in: CAS */
+{
+	hash_item_set_cas(item, cas);
 }
 
 /*******************************************************************//**

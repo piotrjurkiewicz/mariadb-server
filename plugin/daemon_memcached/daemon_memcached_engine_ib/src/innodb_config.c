@@ -156,123 +156,6 @@ innodb_config_parse_value_col(
 }
 
 /**********************************************************************//**
-This function opens the cache_policy configuration table, and find the
-table and column info that used for memcached data
-@return true if everything works out fine */
-static
-bool
-innodb_read_cache_policy(
-/*=====================*/
-	meta_cfg_info_t*	item)	/*!< in: meta info structure */
-{
-	ib_trx_t		ib_trx;
-	ib_crsr_t		crsr = NULL;
-	ib_crsr_t		idx_crsr = NULL;
-	ib_tpl_t		tpl = NULL;
-	ib_err_t		err = DB_SUCCESS;
-	int			n_cols;
-	int			i;
-	ib_ulint_t		data_len;
-	ib_col_meta_t		col_meta;
-
-	ib_trx = ib_cb_trx_begin(IB_TRX_READ_COMMITTED, true, false);
-
-	err = innodb_api_begin(NULL, MCI_CFG_DB_NAME,
-			       MCI_CFG_CACHE_POLICIES, NULL, ib_trx,
-			       &crsr, &idx_crsr, IB_LOCK_S);
-
-	if (err != DB_SUCCESS) {
-		fprintf(stderr, " InnoDB_Memcached: Cannot open config table"
-				"'%s' in database '%s'. Error %d\n",
-			MCI_CFG_CACHE_POLICIES, MCI_CFG_DB_NAME,
-			err);
-		err = DB_ERROR;
-		goto func_exit;
-	}
-
-	tpl = innodb_cb_read_tuple_create(crsr);
-
-	/* Currently, we support one table per memcached setup.
-	We could extend that limit later */
-	err = innodb_cb_cursor_first(crsr);
-
-	if (err != DB_SUCCESS) {
-		fprintf(stderr, " InnoDB_Memcached: failed to locate entry in"
-				" config table '%s' in database '%s' \n",
-			MCI_CFG_CACHE_POLICIES, MCI_CFG_DB_NAME);
-		err = DB_ERROR;
-		goto func_exit;
-	}
-
-	err = ib_cb_read_row(crsr, tpl, NULL, NULL);
-
-	n_cols = innodb_cb_tuple_get_n_cols(tpl);
-
-	assert(n_cols >= CACHE_POLICY_NUM_COLS);
-
-	for (i = 0; i < CACHE_POLICY_NUM_COLS; ++i) {
-		char			opt_name;
-		meta_cache_opt_t	opt_val;
-
-		/* Skip cache policy name for now, We could have
-		different cache policy stored, and switch dynamically */
-		if (i == CACHE_POLICY_NAME) {
-			continue;
-		}
-
-		data_len = innodb_cb_col_get_meta(tpl, i, &col_meta);
-
-		if (data_len == IB_SQL_NULL) {
-			opt_val = META_CACHE_OPT_INNODB;
-		} else {
-			opt_name = *(char*)innodb_cb_col_get_value(tpl, i);
-
-			opt_val = (meta_cache_opt_t) opt_name;
-		}
-
-		if (opt_val >= META_CACHE_NUM_OPT
-		    || opt_val < META_CACHE_OPT_INNODB) {
-			fprintf(stderr, " InnoDB_Memcached: Invalid Cache"
-					" Policy %d. Reset to innodb_only\n",
-				(int) opt_val);
-			opt_val = META_CACHE_OPT_INNODB;
-		}
-
-		switch (i) {
-		case CACHE_POLICY_GET:
-			item->get_option = opt_val;
-			break;
-		case CACHE_POLICY_SET:
-			item->set_option = opt_val;
-			break;
-		case CACHE_POLICY_DEL:
-			item->del_option = opt_val;
-			break;
-		case CACHE_POLICY_FLUSH:
-			item->flush_option = opt_val;
-			break;
-		default:
-			assert(0);
-		}
-	}
-
-func_exit:
-
-	if (crsr) {
-		innodb_cb_cursor_close(crsr);
-	}
-
-	if (tpl) {
-		innodb_cb_tuple_delete(tpl);
-	}
-
-	innodb_cb_trx_commit(ib_trx);
-	ib_cb_trx_release(ib_trx);
-
-	return(err == DB_SUCCESS || err == DB_END_OF_INDEX);
-}
-
-/**********************************************************************//**
 This function opens the config_options configuration table, and find the
 table and column info that used for memcached data
 @return true if everything works out fine */
@@ -1218,11 +1101,6 @@ innodb_config(
 
 	/* Following two configure operations are optional, and can be
 	failed */
-	success = innodb_read_cache_policy(item);
-
-	if (!success) {
-		return(NULL);
-	}
 
 	success = innodb_read_config_option(item);
 

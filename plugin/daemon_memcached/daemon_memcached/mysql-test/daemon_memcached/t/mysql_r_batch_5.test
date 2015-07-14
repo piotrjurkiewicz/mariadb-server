@@ -25,9 +25,6 @@ SET @wait= @@global.wait_timeout;
 source include/memcache_config.inc;
 --enable_query_log
 
-INSERT INTO cache_policies VALUES("cache_policy", "innodb_only",
-				  "innodb_only", "innodb_only", "innodb_only");
-
 INSERT INTO config_options VALUES("separator", "|");
 
 # describe table for memcache
