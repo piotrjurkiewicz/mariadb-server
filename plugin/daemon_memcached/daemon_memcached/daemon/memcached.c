@@ -38,6 +38,12 @@
 
 #define DAEMON_MEMCACHED
 
+#ifdef DAEMON_MEMCACHED
+#define exit(x) fprintf(stderr, "Daemon Memcached exit(#x)\n"); \
+                shutdown_server(); \
+                goto func_exit;
+#endif /* DAEMON_MEMCACHED */
+
 static inline void item_set_cas(const void *cookie, item *it, uint64_t cas) {
     settings.engine.v1->item_set_cas(settings.engine.v0, cookie, it, cas);
 }
@@ -5983,7 +5989,7 @@ static int server_socket(const char *interface,
                                              transport, main_base, NULL))) {
                 settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
                         "failed to create listening connection\n");
-                exit(EXIT_FAILURE);
+                return 1;
             }
             listen_conn_add->next = listen_conn;
             listen_conn = listen_conn_add;
@@ -6117,7 +6123,7 @@ static int server_socket_unix(const char *path, int access_mask) {
                                  local_transport, main_base, NULL))) {
         settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
                  "failed to create listening connection\n");
-        exit(EXIT_FAILURE);
+        return 1;
     }
 
     STATS_LOCK();
@@ -7161,7 +7167,7 @@ int main (int argc, char **argv) {
 
     } else {
         fprintf(stderr, "Engine library do not provided\n");
-        return EX_OSERR;
+        exit(EX_OSERR);
     }
 #else
     engine = "default_engine.so";
@@ -7184,11 +7190,11 @@ int main (int argc, char **argv) {
 
     if (memcached_initialize_stderr_logger(get_server_api) != EXTENSION_SUCCESS) {
         fprintf(stderr, "Failed to initialize log system\n");
-        return EX_OSERR;
+        exit(EX_OSERR);
     }
 
     if (!sanitycheck()) {
-        return EX_OSERR;
+        exit(EX_OSERR);
     }
 
     daemon_memcached_make_option(m_config->m_mem_option,
@@ -7279,7 +7285,7 @@ int main (int argc, char **argv) {
                 if (p == NULL) {
                     settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
                                                     "Failed to allocate memory\n");
-                    return 1;
+                    exit(EX_USAGE);
                 }
                 snprintf(p, len, "%s,%s", settings.inter, optarg);
                 free(settings.inter);
@@ -7299,7 +7305,7 @@ int main (int argc, char **argv) {
             if (settings.reqs_per_event <= 0) {
                 settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
                       "Number of requests per event must be greater than 0\n");
-                return 1;
+                exit(EX_USAGE);
             }
             break;
         case 'u':
@@ -7313,7 +7319,7 @@ int main (int argc, char **argv) {
             if (settings.factor <= 1.0) {
                 settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
                         "Factor must be greater than 1\n");
-                return 1;
+                exit(EX_USAGE);
             }
              old_opts += sprintf(old_opts, "factor=%f;",
                                  settings.factor);
@@ -7323,7 +7329,7 @@ int main (int argc, char **argv) {
             if (settings.chunk_size == 0) {
                 settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
                         "Chunk size must be greater than 0\n");
-                return 1;
+                exit(EX_USAGE);
             }
             old_opts += sprintf(old_opts, "chunk_size=%u;",
                                 settings.chunk_size);
@@ -7333,7 +7339,7 @@ int main (int argc, char **argv) {
             if (settings.num_threads <= 0) {
                 settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
                         "Number of threads must be greater than 0\n");
-                return 1;
+                exit(EX_USAGE);
             }
             /* There're other problems when you get above 64 threads.
              * In the future we should portably detect # of cores for the
@@ -7394,12 +7400,12 @@ int main (int argc, char **argv) {
             if (settings.item_size_max < 1024) {
                 settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
                         "Item max size cannot be less than 1024 bytes.\n");
-                return 1;
+                exit(EX_USAGE);
             }
             if (settings.item_size_max > 1024 * 1024 * 128) {
                 settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
                         "Cannot set item size limit higher than 128 mb.\n");
-                return 1;
+                exit(EX_USAGE);
             }
             if (settings.item_size_max > 1024 * 1024) {
                 settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
@@ -7456,7 +7462,7 @@ int main (int argc, char **argv) {
         default:
             settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
                     "Illegal argument \"%c\"\n", c);
-            return 1;
+            exit(EX_USAGE);
         }
     }
 
@@ -7668,12 +7674,7 @@ int main (int argc, char **argv) {
     }
 
     if (!init_engine(engine_handle,engine_config,settings.extensions.logger)) {
-#ifdef DAEMON_MEMCACHED
-        shutdown_server();
-        goto func_exit;
-#else
-        return(false);
-#endif /* DAEMON_MEMCACHED */
+        exit(EXIT_FAILURE);
     }
 
     if (settings.verbose > 0) {
@@ -7749,12 +7750,7 @@ int main (int argc, char **argv) {
             settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
                                             "failed to listen on TCP port %d: %s",
                                             settings.port, strerror(errno));
-#ifdef DAEMON_MEMCACHED
-                shutdown_server();
-                goto func_exit;
-#else
-                exit(EX_OSERR);
-#endif /* DAEMON_MEMCACHED */
+            exit(EX_OSERR);
         }
 
         /*
