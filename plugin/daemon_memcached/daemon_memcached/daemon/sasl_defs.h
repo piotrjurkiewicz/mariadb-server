@@ -12,7 +12,6 @@
 # endif /* DAEMON_MEMCACHED_ENABLE_SASL_PWDB */
 #endif /* DAEMON_MEMCACHED_ENABLE_SASL */
 
-
 #if defined(HAVE_SASL_SASL_H) || defined(ENABLE_ISASL)
 #define HAVE_SASL_HDR 1
 #else

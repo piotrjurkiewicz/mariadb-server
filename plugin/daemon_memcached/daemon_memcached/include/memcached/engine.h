@@ -258,9 +258,9 @@ extern "C" {
                                     uint16_t vbucket);
 
         ENGINE_ERROR_CODE (*bind)(ENGINE_HANDLE* handle,
-                                    const void* cookie,
-                                    const void* name,
-                                    const size_t name_len);
+                                  const void* cookie,
+                                  const void* name,
+                                  const size_t name_len);
         /**
          * Indicate that a caller who received an item no longer needs
          * it.
@@ -281,7 +281,7 @@ extern "C" {
          * @param engine_data Engine specific resource to clean up
          */
         void (*clean_engine)(ENGINE_HANDLE* handle,
-			     const void *cookie,
+                             const void *cookie,
                              void* engine_data);
 
         /**
