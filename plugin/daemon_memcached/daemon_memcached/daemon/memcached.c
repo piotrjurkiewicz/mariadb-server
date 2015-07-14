@@ -85,29 +85,29 @@ static inline void item_set_cas(const void *cookie, item *it, uint64_t cas) {
 
 #if defined(HAVE_GCC_ATOMIC_BUILTINS)
 
-#define STATS_NOKEY(conn, op)	\
+#define STATS_NOKEY(conn, op)        \
 do { \
     struct thread_stats *thread_stats = \
         get_thread_stats(conn); \
-	__sync_add_and_fetch(&thread_stats->op, 1); \
+        __sync_add_and_fetch(&thread_stats->op, 1); \
 } while (0)
 
-#define STATS_NOKEY2(conn, op1, op2)	\
+#define STATS_NOKEY2(conn, op1, op2)        \
 do { \
     struct thread_stats *thread_stats = \
         get_thread_stats(conn); \
-	__sync_add_and_fetch(&thread_stats->op1, 1); \
-	__sync_add_and_fetch(&thread_stats->op2, 1); \
+        __sync_add_and_fetch(&thread_stats->op1, 1); \
+        __sync_add_and_fetch(&thread_stats->op2, 1); \
 } while (0)
 
-#define STATS_ADD(conn, op, amt)	\
+#define STATS_ADD(conn, op, amt)        \
 do { \
     struct thread_stats *thread_stats = \
         get_thread_stats(conn); \
-	__sync_add_and_fetch(&thread_stats->op, amt); \
+        __sync_add_and_fetch(&thread_stats->op, amt); \
 } while (0)
 
-#define MEMCACHED_ATOMIC_MSG	"InnoDB MEMCACHED: Memcached uses atomic increment \n"
+#define MEMCACHED_ATOMIC_MSG        "InnoDB MEMCACHED: Memcached uses atomic increment \n"
 
 #else /* HAVE_GCC_ATOMIC_BUILTINS */
 #define STATS_NOKEY(conn, op) { \
@@ -135,7 +135,7 @@ do { \
     pthread_mutex_unlock(&thread_stats->mutex); \
 }
 
-#define MEMCACHED_ATOMIC_MSG	"InnoDB Memcached: Memcached DOES NOT use atomic increment"
+#define MEMCACHED_ATOMIC_MSG        "InnoDB Memcached: Memcached DOES NOT use atomic increment"
 #endif /* HAVE_GCC_ATOMIC_BUILTINS */
 
 volatile sig_atomic_t memcached_shutdown;
@@ -719,8 +719,8 @@ static void conn_cleanup(conn *c) {
     }
 
     if (c->engine_storage) {
-	settings.engine.v1->clean_engine(settings.engine.v0, c,
-					 c->engine_storage);
+        settings.engine.v1->clean_engine(settings.engine.v0, c,
+                                         c->engine_storage);
     }
 
     c->engine_storage = NULL;
@@ -4067,8 +4067,8 @@ static inline char* process_get_command(conn *c, token_t *tokens, size_t ntokens
 
     /* We temporarily block the mgets commands till wl6650 checked in. */
     if ((key_token + 1)->length > 0) {
-	out_string(c, "We temporarily don't support multiple get option.");
-	return NULL;
+        out_string(c, "We temporarily don't support multiple get option.");
+        return NULL;
     }
 
     do {
@@ -5897,8 +5897,8 @@ static int server_socket(const char *interface,
         setsockopt(sfd, SOL_SOCKET, SO_REUSEADDR, (void *)&flags, sizeof(flags));
         if (IS_UDP(transport)) {
             maximize_sndbuf(sfd);
-	    udp_socket[num_udp_socket] = sfd;
-	    num_udp_socket++;
+            udp_socket[num_udp_socket] = sfd;
+            num_udp_socket++;
         } else {
             error = setsockopt(sfd, SOL_SOCKET, SO_KEEPALIVE, (void *)&flags, sizeof(flags));
             if (error != 0) {
@@ -6813,12 +6813,12 @@ static void shutdown_server(void) {
     int i;
     /* Clean up connections */
     while (listen_conn) {
-	conn_closing(listen_conn);
-	listen_conn = listen_conn->next;
+        conn_closing(listen_conn);
+        listen_conn = listen_conn->next;
     }
 
     for (i = 0; i < num_udp_socket; i++) {
-	safe_close(udp_socket[i]);
+        safe_close(udp_socket[i]);
     }
 #endif
     memcached_shutdown = 1;
@@ -7049,9 +7049,9 @@ static
 char*
 my_strdupl(const char* str, int len)
 {
-	char*   s = (char*) malloc(len + 1);
-	s[len] = 0;
-	return((char*) memcpy(s, str, len));
+    char*   s = (char*) malloc(len + 1);
+    s[len] = 0;
+    return((char*) memcpy(s, str, len));
 }
 
 /** Function that messages MySQL config variable string to something
@@ -7061,49 +7061,46 @@ void
 daemon_memcached_make_option(char* option, int* option_argc,
                              char*** option_argv)
 {
-	static const char*      sep = " ";
-	char*                   last;
-	char*                   opt_str;
-	char*                   my_str;
-	int                     num_arg = 0;
-	int                     i = 1;
+    static const char*      sep = " ";
+    char*                   last;
+    char*                   opt_str;
+    char*                   my_str;
+    int                     num_arg = 0;
+    int                     i = 1;
 
-	my_str = my_strdupl(option, strlen(option));
+    my_str = my_strdupl(option, strlen(option));
 
-	for (opt_str = strtok_r(my_str, sep, &last);
-	     opt_str;
-	     opt_str = strtok_r(NULL, sep, &last)) {
-		num_arg++;
-	}
+    for (opt_str = strtok_r(my_str, sep, &last);
+         opt_str;
+         opt_str = strtok_r(NULL, sep, &last)) {
+            num_arg++;
+    }
 
-	/* reset my_str, since strtok_r could alter it */
-	strncpy(my_str, option, strlen(option));
+    *option_argv = (char**) malloc((num_arg + 1)
+                                   * sizeof(**option_argv));
 
-	*option_argv = (char**) malloc((num_arg + 1)
-				       * sizeof(**option_argv));
+    for (opt_str = strtok_r(my_str, sep, &last);
+         opt_str;
+         opt_str = strtok_r(NULL, sep, &last)) {
+            (*option_argv)[i] = opt_str;
+            i++;
+    }
 
-	for (opt_str = strtok_r(my_str, sep, &last);
-	     opt_str;
-	     opt_str = strtok_r(NULL, sep, &last)) {
-		(*option_argv)[i] = opt_str;
-		i++;
-	}
+    assert(i == num_arg + 1);
 
-	assert(i == num_arg + 1);
+    *option_argc = (num_arg + 1);
 
-	*option_argc = (num_arg + 1);
-
-	return;
+    return;
 }
 
 /* Structure that adds the call back functions struture pointers,
 passed to InnoDB engine */
 typedef struct eng_config_info {
-	char*           option_string;
-	void*           cb_ptr;
-	unsigned int    eng_r_batch_size;
-	unsigned int    eng_w_batch_size;
-	bool		enable_binlog;
+    char*           option_string;
+    void*           cb_ptr;
+    unsigned int    eng_r_batch_size;
+    unsigned int    eng_w_batch_size;
+    bool                enable_binlog;
 } eng_config_info_t;
 #endif /* DAEMON_MEMCACHED */
 
@@ -7140,17 +7137,17 @@ int main (int argc, char **argv) {
     memcached_shutdown = 0;
 
     if (m_config->m_engine_library) {
-	engine = m_config->m_engine_library;
+        engine = m_config->m_engine_library;
 
-	/* FIXME: We should have a better way to pass the callback structure
-	point to storage engine. It is now appended in the configure
-	string in eng_config_info_t structure */
-	my_eng_config.cb_ptr = m_config->m_innodb_api_cb;
-	my_eng_config.eng_r_batch_size = m_config->m_r_batch_size;
-	my_eng_config.eng_w_batch_size = m_config->m_w_batch_size;
-	my_eng_config.enable_binlog = m_config->m_enable_binlog;
-	my_eng_config.option_string = old_opts;
-	engine_config = (const char *) (&my_eng_config);
+        /* FIXME: We should have a better way to pass the callback structure
+        point to storage engine. It is now appended in the configure
+        string in eng_config_info_t structure */
+        my_eng_config.cb_ptr = m_config->m_innodb_api_cb;
+        my_eng_config.eng_r_batch_size = m_config->m_r_batch_size;
+        my_eng_config.eng_w_batch_size = m_config->m_w_batch_size;
+        my_eng_config.enable_binlog = m_config->m_enable_binlog;
+        my_eng_config.option_string = old_opts;
+        engine_config = (const char *) (&my_eng_config);
 
     } else {
         fprintf(stderr, "Engine library do not provided\n");
@@ -7185,267 +7182,267 @@ int main (int argc, char **argv) {
     }
 
     if (m_config->m_mem_option) {
-	daemon_memcached_make_option(m_config->m_mem_option,
-				     &option_argc,
-				     &option_argv);
+        daemon_memcached_make_option(m_config->m_mem_option,
+                                     &option_argc,
+                                     &option_argv);
     }
 
 #ifdef DAEMON_MEMCACHED
 
     if (option_argc > 0 && option_argv) {
-	    /* Always reset the index to 1, since this function can
-	    be invoked multiple times with install/uninstall plugins */
-	    optind = 1;
-	    while (-1 != (c = getopt(option_argc, option_argv,
-		  "a:"  /* access mask for unix socket */
-		  "p:"  /* TCP port number to listen on */
-		  "s:"  /* unix socket path to listen on */
-		  "U:"  /* UDP port number to listen on */
-		  "m:"  /* max memory to use for items in megabytes */
-		  "M"   /* return error on memory exhausted */
-		  "c:"  /* max simultaneous connections */
-		  "k"   /* lock down all paged memory */
-		  "hi"  /* help, licence info */
-		  "r"   /* maximize core file limit */
-		  "v"   /* verbose */
-		  "d"   /* daemon mode */
-		  "l:"  /* interface to listen on */
-		  "u:"  /* user identity to run as */
-		  "P:"  /* save PID in file */
-		  "f:"  /* factor? */
-		  "n:"  /* minimum space allocated for key+value+flags */
-		  "t:"  /* threads */
-		  "D:"  /* prefix delimiter? */
-		  "L"   /* Large memory pages */
-		  "R:"  /* max requests per event */
-		  "C"   /* Disable use of CAS */
-		  "b:"  /* backlog queue limit */
-		  "B:"  /* Binding protocol */
-		  "I:"  /* Max item size */
-		  "S"   /* Sasl ON */
-		  "E:"  /* Engine to load */
-		  "e:"  /* Engine options */
-		  "q"   /* Disallow detailed stats */
-		  "X:"  /* Load extension */
-		))) {
-		switch (c) {
-		case 'a':
-		    /* access for unix domain socket, as octal mask (like chmod)*/
-		    settings.access= strtol(optarg,NULL,8);
-		    break;
+            /* Always reset the index to 1, since this function can
+            be invoked multiple times with install/uninstall plugins */
+            optind = 1;
+            while (-1 != (c = getopt(option_argc, option_argv,
+                  "a:"  /* access mask for unix socket */
+                  "p:"  /* TCP port number to listen on */
+                  "s:"  /* unix socket path to listen on */
+                  "U:"  /* UDP port number to listen on */
+                  "m:"  /* max memory to use for items in megabytes */
+                  "M"   /* return error on memory exhausted */
+                  "c:"  /* max simultaneous connections */
+                  "k"   /* lock down all paged memory */
+                  "hi"  /* help, licence info */
+                  "r"   /* maximize core file limit */
+                  "v"   /* verbose */
+                  "d"   /* daemon mode */
+                  "l:"  /* interface to listen on */
+                  "u:"  /* user identity to run as */
+                  "P:"  /* save PID in file */
+                  "f:"  /* factor? */
+                  "n:"  /* minimum space allocated for key+value+flags */
+                  "t:"  /* threads */
+                  "D:"  /* prefix delimiter? */
+                  "L"   /* Large memory pages */
+                  "R:"  /* max requests per event */
+                  "C"   /* Disable use of CAS */
+                  "b:"  /* backlog queue limit */
+                  "B:"  /* Binding protocol */
+                  "I:"  /* Max item size */
+                  "S"   /* Sasl ON */
+                  "E:"  /* Engine to load */
+                  "e:"  /* Engine options */
+                  "q"   /* Disallow detailed stats */
+                  "X:"  /* Load extension */
+                ))) {
+                switch (c) {
+                case 'a':
+                    /* access for unix domain socket, as octal mask (like chmod)*/
+                    settings.access= strtol(optarg,NULL,8);
+                    break;
 
-		case 'U':
-		    settings.udpport = atoi(optarg);
-		    udp_specified = true;
-		    break;
-		case 'p':
-		    settings.port = atoi(optarg);
-		    tcp_specified = true;
-		    break;
-		case 's':
-		    settings.socketpath = optarg;
-		    break;
-		case 'm':
-		    settings.maxbytes = ((size_t)atoi(optarg)) * 1024 * 1024;
-		     old_opts += sprintf(old_opts, "cache_size=%lu;",
-					 (unsigned long)settings.maxbytes);
-		   break;
-		case 'M':
-		    settings.evict_to_free = 0;
-		    old_opts += sprintf(old_opts, "eviction=false;");
-		    break;
-		case 'c':
-		    settings.maxconns = atoi(optarg);
-		    break;
-		case 'h':
-		    usage();
-		    exit(EXIT_SUCCESS);
-		case 'i':
-		    usage_license();
-		    exit(EXIT_SUCCESS);
-		case 'k':
-		    lock_memory = true;
-		    break;
-		case 'v':
-		    settings.verbose++;
-		    perform_callbacks(ON_LOG_LEVEL, NULL, NULL);
-		    break;
-		case 'l':
-		    settings.inter= strdup(optarg);
-		    break;
-		case 'd':
-		    do_daemonize = true;
-		    break;
-		case 'r':
-		    maxcore = 1;
-		    break;
-		case 'R':
-		    settings.reqs_per_event = atoi(optarg);
-		    if (settings.reqs_per_event <= 0) {
-			settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
-			      "Number of requests per event must be greater than 0\n");
-			return (void*)1;
-		    }
-		    break;
-		case 'u':
-		    username = optarg;
-		    break;
-		case 'P':
-		    pid_file = optarg;
-		    break;
-		case 'f':
-		    settings.factor = atof(optarg);
-		    if (settings.factor <= 1.0) {
-			settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
-				"Factor must be greater than 1\n");
-			return (void*)1;
-		    }
-		     old_opts += sprintf(old_opts, "factor=%f;",
-					 settings.factor);
-		   break;
-		case 'n':
-		    settings.chunk_size = atoi(optarg);
-		    if (settings.chunk_size == 0) {
-			settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
-				"Chunk size must be greater than 0\n");
-			return (void*)1;
-		    }
-		    old_opts += sprintf(old_opts, "chunk_size=%u;",
-					settings.chunk_size);
-		    break;
-		case 't':
-		    settings.num_threads = atoi(optarg);
-		    if (settings.num_threads <= 0) {
-			settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
-				"Number of threads must be greater than 0\n");
-			return (void*)1;
-		    }
-		    /* There're other problems when you get above 64 threads.
-		     * In the future we should portably detect # of cores for the
-		     * default.
-		     */
-		    if (settings.num_threads > 64) {
-			settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
-				"WARNING: Setting a high number of worker"
-				"threads is not recommended.\n"
-				" Set this value to the number of cores in"
-				" your machine or less.\n");
-		    }
-		    break;
-		case 'D':
-		    settings.prefix_delimiter = optarg[0];
-		    settings.detail_enabled = 1;
-		    break;
-		case 'L' :
-		    if (enable_large_pages() == 0) {
-			old_opts += sprintf(old_opts, "preallocate=true;");
-		    }
-		    break;
-		case 'C' :
-		    settings.use_cas = false;
-		    break;
-		case 'b' :
-		    settings.backlog = atoi(optarg);
-		    break;
-		case 'B':
-		    protocol_specified = true;
-		    if (strcmp(optarg, "auto") == 0) {
-			settings.binding_protocol = negotiating_prot;
-		    } else if (strcmp(optarg, "binary") == 0) {
-			settings.binding_protocol = binary_prot;
-		    } else if (strcmp(optarg, "ascii") == 0) {
-			settings.binding_protocol = ascii_prot;
-		    } else {
-			settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
-				"Invalid value for binding protocol: %s\n"
-				" -- should be one of auto, binary, or ascii\n", optarg);
-			exit(EX_USAGE);
-		    }
-		    break;
-		case 'I':
-		    unit = optarg[strlen(optarg)-1];
-		    if (unit == 'k' || unit == 'm' ||
-			unit == 'K' || unit == 'M') {
-			optarg[strlen(optarg)-1] = '\0';
-			size_max = atoi(optarg);
-			if (unit == 'k' || unit == 'K')
-			    size_max *= 1024;
-			if (unit == 'm' || unit == 'M')
-			    size_max *= 1024 * 1024;
-			settings.item_size_max = size_max;
-		    } else {
-			settings.item_size_max = atoi(optarg);
-		    }
-		    if (settings.item_size_max < 1024) {
-			settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
-				"Item max size cannot be less than 1024 bytes.\n");
-			return (void*)1;
-		    }
-		    if (settings.item_size_max > 1024 * 1024 * 128) {
-			settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
-				"Cannot set item size limit higher than 128 mb.\n");
-			return (void*)1;
-		    }
-		    if (settings.item_size_max > 1024 * 1024) {
-			settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
-			    "WARNING: Setting item max size above 1MB is not"
-			    " recommended!\n"
-			    " Raising this limit increases the minimum memory requirements\n"
-			    " and will decrease your memory efficiency.\n"
-			);
-		    }
+                case 'U':
+                    settings.udpport = atoi(optarg);
+                    udp_specified = true;
+                    break;
+                case 'p':
+                    settings.port = atoi(optarg);
+                    tcp_specified = true;
+                    break;
+                case 's':
+                    settings.socketpath = optarg;
+                    break;
+                case 'm':
+                    settings.maxbytes = ((size_t)atoi(optarg)) * 1024 * 1024;
+                     old_opts += sprintf(old_opts, "cache_size=%lu;",
+                                         (unsigned long)settings.maxbytes);
+                   break;
+                case 'M':
+                    settings.evict_to_free = 0;
+                    old_opts += sprintf(old_opts, "eviction=false;");
+                    break;
+                case 'c':
+                    settings.maxconns = atoi(optarg);
+                    break;
+                case 'h':
+                    usage();
+                    exit(EXIT_SUCCESS);
+                case 'i':
+                    usage_license();
+                    exit(EXIT_SUCCESS);
+                case 'k':
+                    lock_memory = true;
+                    break;
+                case 'v':
+                    settings.verbose++;
+                    perform_callbacks(ON_LOG_LEVEL, NULL, NULL);
+                    break;
+                case 'l':
+                    settings.inter= strdup(optarg);
+                    break;
+                case 'd':
+                    do_daemonize = true;
+                    break;
+                case 'r':
+                    maxcore = 1;
+                    break;
+                case 'R':
+                    settings.reqs_per_event = atoi(optarg);
+                    if (settings.reqs_per_event <= 0) {
+                        settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
+                              "Number of requests per event must be greater than 0\n");
+                        return (void*)1;
+                    }
+                    break;
+                case 'u':
+                    username = optarg;
+                    break;
+                case 'P':
+                    pid_file = optarg;
+                    break;
+                case 'f':
+                    settings.factor = atof(optarg);
+                    if (settings.factor <= 1.0) {
+                        settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
+                                "Factor must be greater than 1\n");
+                        return (void*)1;
+                    }
+                     old_opts += sprintf(old_opts, "factor=%f;",
+                                         settings.factor);
+                   break;
+                case 'n':
+                    settings.chunk_size = atoi(optarg);
+                    if (settings.chunk_size == 0) {
+                        settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
+                                "Chunk size must be greater than 0\n");
+                        return (void*)1;
+                    }
+                    old_opts += sprintf(old_opts, "chunk_size=%u;",
+                                        settings.chunk_size);
+                    break;
+                case 't':
+                    settings.num_threads = atoi(optarg);
+                    if (settings.num_threads <= 0) {
+                        settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
+                                "Number of threads must be greater than 0\n");
+                        return (void*)1;
+                    }
+                    /* There're other problems when you get above 64 threads.
+                     * In the future we should portably detect # of cores for the
+                     * default.
+                     */
+                    if (settings.num_threads > 64) {
+                        settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
+                                "WARNING: Setting a high number of worker"
+                                "threads is not recommended.\n"
+                                " Set this value to the number of cores in"
+                                " your machine or less.\n");
+                    }
+                    break;
+                case 'D':
+                    settings.prefix_delimiter = optarg[0];
+                    settings.detail_enabled = 1;
+                    break;
+                case 'L' :
+                    if (enable_large_pages() == 0) {
+                        old_opts += sprintf(old_opts, "preallocate=true;");
+                    }
+                    break;
+                case 'C' :
+                    settings.use_cas = false;
+                    break;
+                case 'b' :
+                    settings.backlog = atoi(optarg);
+                    break;
+                case 'B':
+                    protocol_specified = true;
+                    if (strcmp(optarg, "auto") == 0) {
+                        settings.binding_protocol = negotiating_prot;
+                    } else if (strcmp(optarg, "binary") == 0) {
+                        settings.binding_protocol = binary_prot;
+                    } else if (strcmp(optarg, "ascii") == 0) {
+                        settings.binding_protocol = ascii_prot;
+                    } else {
+                        settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
+                                "Invalid value for binding protocol: %s\n"
+                                " -- should be one of auto, binary, or ascii\n", optarg);
+                        exit(EX_USAGE);
+                    }
+                    break;
+                case 'I':
+                    unit = optarg[strlen(optarg)-1];
+                    if (unit == 'k' || unit == 'm' ||
+                        unit == 'K' || unit == 'M') {
+                        optarg[strlen(optarg)-1] = '\0';
+                        size_max = atoi(optarg);
+                        if (unit == 'k' || unit == 'K')
+                            size_max *= 1024;
+                        if (unit == 'm' || unit == 'M')
+                            size_max *= 1024 * 1024;
+                        settings.item_size_max = size_max;
+                    } else {
+                        settings.item_size_max = atoi(optarg);
+                    }
+                    if (settings.item_size_max < 1024) {
+                        settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
+                                "Item max size cannot be less than 1024 bytes.\n");
+                        return (void*)1;
+                    }
+                    if (settings.item_size_max > 1024 * 1024 * 128) {
+                        settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
+                                "Cannot set item size limit higher than 128 mb.\n");
+                        return (void*)1;
+                    }
+                    if (settings.item_size_max > 1024 * 1024) {
+                        settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
+                            "WARNING: Setting item max size above 1MB is not"
+                            " recommended!\n"
+                            " Raising this limit increases the minimum memory requirements\n"
+                            " and will decrease your memory efficiency.\n"
+                        );
+                    }
 #ifndef __WIN32__
-		    old_opts += sprintf(old_opts, "item_size_max=%zu;",
-					settings.item_size_max);
+                    old_opts += sprintf(old_opts, "item_size_max=%zu;",
+                                        settings.item_size_max);
 #else
-		    old_opts += sprintf(old_opts, "item_size_max=%lu;", (long unsigned)
-					settings.item_size_max);
+                    old_opts += sprintf(old_opts, "item_size_max=%lu;", (long unsigned)
+                                        settings.item_size_max);
 #endif
-		    break;
-		case 'E':
-		    engine = optarg;
-		    break;
-		case 'e':
-		    /* FIXME, we use engine_config to pass callback function
-		    for now. Will need a better solution 
-		    engine_config = optarg; */
-		    break;
-		case 'q':
-		    settings.allow_detailed = false;
-		    break;
-		case 'S': /* set Sasl authentication to true. Default is false */
+                    break;
+                case 'E':
+                    engine = optarg;
+                    break;
+                case 'e':
+                    /* FIXME, we use engine_config to pass callback function
+                    for now. Will need a better solution
+                    engine_config = optarg; */
+                    break;
+                case 'q':
+                    settings.allow_detailed = false;
+                    break;
+                case 'S': /* set Sasl authentication to true. Default is false */
 # ifdef DAEMON_MEMCACHED_ENABLE_SASL
 #  ifndef SASL_ENABLED
-		    settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
-			    "This server is not built with SASL support.\n");
-		    exit(EX_USAGE);
+                    settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
+                            "This server is not built with SASL support.\n");
+                    exit(EX_USAGE);
 #  endif /* !SASL_ENABLED */
-		    settings.require_sasl = true;
+                    settings.require_sasl = true;
 # endif /* DAEMON_MEMCACHED_ENABLE_SASL */
-		    break;
-		case 'X' :
-		    {
-			char *ptr = strchr(optarg, ',');
-			if (ptr != NULL) {
-			    *ptr = '\0';
-			    ++ptr;
-			}
-			if (!load_extension(optarg, ptr)) {
-			    exit(EXIT_FAILURE);
-			}
-			if (ptr != NULL) {
-			    *(ptr - 1) = ',';
-			}
-		    }
-		    break;
-		default:
-		    settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
-			    "Illegal argument \"%c\"\n", c);
-		    return (void*)1;
-		}
-	}
+                    break;
+                case 'X' :
+                    {
+                        char *ptr = strchr(optarg, ',');
+                        if (ptr != NULL) {
+                            *ptr = '\0';
+                            ++ptr;
+                        }
+                        if (!load_extension(optarg, ptr)) {
+                            exit(EXIT_FAILURE);
+                        }
+                        if (ptr != NULL) {
+                            *(ptr - 1) = ',';
+                        }
+                    }
+                    break;
+                default:
+                    settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
+                            "Illegal argument \"%c\"\n", c);
+                    return (void*)1;
+                }
+        }
 
-	free(option_argv);
+        free(option_argv);
     }
     fprintf(stderr, MEMCACHED_ATOMIC_MSG);
 #else
@@ -7918,7 +7915,7 @@ int main (int argc, char **argv) {
         shutdown_server();
         goto func_exit;
 #else
-	return(false);
+        return(false);
 #endif /* DAEMON_MEMCACHED */
     }
 
@@ -7996,10 +7993,10 @@ int main (int argc, char **argv) {
                                             "failed to listen on TCP port %d: %s",
                                             settings.port, strerror(errno));
 #ifdef DAEMON_MEMCACHED
-		shutdown_server();
-		goto func_exit;
+                shutdown_server();
+                goto func_exit;
 #else
-		exit(EX_OSERR);
+                exit(EX_OSERR);
 #endif /* DAEMON_MEMCACHED */
         }
 
