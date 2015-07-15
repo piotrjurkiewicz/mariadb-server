@@ -34,6 +34,7 @@ Extracted and modified from NDB memcached project
 #include <arpa/inet.h>
 #include <memcached/util.h>
 #include <memcached/config_parser.h>
+#include <memcached/context.h>
 #include <unistd.h>
 
 #include "innodb_engine.h"
@@ -62,18 +63,6 @@ static bool	memcached_shutdown	= false;
 
 /** Tells whether the background thread is exited */
 static bool	bk_thd_exited		= true;
-
-/** InnoDB Memcached engine configuration info */
-typedef struct eng_config_info {
-	char*		option_string;		/*!< memcached config option
-						string */
-	void*		cb_ptr;			/*!< call back function ptr */
-	unsigned int	eng_read_batch_size;	/*!< read batch size */
-	unsigned int	eng_write_batch_size;	/*!< write batch size */
-	bool		eng_enable_binlog;	/*!< whether binlog is
-						enabled specifically for
-						this memcached engine */
-} eng_config_info_t;
 
 extern option_t config_option_names[];
 
@@ -354,29 +343,29 @@ innodb_initialize(
 {
 	ENGINE_ERROR_CODE	return_status = ENGINE_SUCCESS;
 	struct innodb_engine*	innodb_eng = innodb_handle(handle);
-	eng_config_info_t*	my_eng_config;
+	memcached_context_t	*context;
 	pthread_attr_t          attr;
 
-	my_eng_config = (eng_config_info_t*) config_str;
+	context = (memcached_context_t *) config_str;
 
 	/* If no call back function registered (InnoDB engine failed to load),
 	load InnoDB Memcached engine should fail too */
-	if (!my_eng_config->cb_ptr) {
+	if (!(context->config.innodb_api_cb)) {
 		return(ENGINE_TMPFAIL);
 	}
 
 	/* Register the call back function */
-	register_innodb_cb((void*) my_eng_config->cb_ptr);
+	register_innodb_cb((void*) context->config.innodb_api_cb);
 
-	innodb_eng->read_batch_size = (my_eng_config->eng_read_batch_size
-					? my_eng_config->eng_read_batch_size
+	innodb_eng->read_batch_size = (context->config.r_batch_size
+					? context->config.r_batch_size
 					: CONN_NUM_READ_COMMIT);
 
-	innodb_eng->write_batch_size = (my_eng_config->eng_write_batch_size
-					? my_eng_config->eng_write_batch_size
+	innodb_eng->write_batch_size = (context->config.w_batch_size
+					? context->config.w_batch_size
 					: CONN_NUM_WRITE_COMMIT);
 
-	innodb_eng->enable_binlog = my_eng_config->eng_enable_binlog;
+	innodb_eng->enable_binlog = context->config.enable_binlog;
 
 	innodb_eng->cfg_status = innodb_cb_get_cfg();
 

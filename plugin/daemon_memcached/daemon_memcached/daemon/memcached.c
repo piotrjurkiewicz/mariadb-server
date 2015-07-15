@@ -7109,19 +7109,10 @@ daemon_memcached_make_option(char* option, int* option_argc,
     return;
 }
 
-/* Structure that adds the call back functions struture pointers,
-passed to InnoDB engine */
-typedef struct eng_config_info {
-    char*           option_string;
-    void*           cb_ptr;
-    unsigned int    eng_r_batch_size;
-    unsigned int    eng_w_batch_size;
-    bool                enable_binlog;
-} eng_config_info_t;
 #endif /* DAEMON_MEMCACHED */
 
 #ifdef DAEMON_MEMCACHED
-void* daemon_memcached_main(void *p) {
+void* daemon_memcached_main(void *arg) {
 #else
 int main (int argc, char **argv) {
 #endif
@@ -7139,38 +7130,32 @@ int main (int argc, char **argv) {
     bool protocol_specified = false;
     bool tcp_specified = false;
     bool udp_specified = false;
-    memcached_context_t* m_config = (memcached_context_t*)p;
-    const char *engine;
+
+    const char *engine = "default_engine.so";
     const char *engine_config = NULL;
     char old_options[1024] = { [0] = '\0' };
     char *old_opts = old_options;
-#ifdef DAEMON_MEMCACHED
+
+    memcached_context_t *context = (memcached_context_t *) arg;
+
     int option_argc = 0;
     char** option_argv = NULL;
-    eng_config_info_t my_eng_config;
 
     memcached_initialized = 0;
     memcached_shutdown = 0;
 
-    if (m_config->m_engine_library) {
-        engine = m_config->m_engine_library;
-
-        /* FIXME: We should have a better way to pass the callback structure
-        point to storage engine. It is now appended in the configure
-        string in eng_config_info_t structure */
-        my_eng_config.cb_ptr = m_config->m_innodb_api_cb;
-        my_eng_config.eng_r_batch_size = m_config->m_r_batch_size;
-        my_eng_config.eng_w_batch_size = m_config->m_w_batch_size;
-        my_eng_config.enable_binlog = m_config->m_enable_binlog;
-        my_eng_config.option_string = old_opts;
-        engine_config = (const char *) (&my_eng_config);
+#ifdef DAEMON_MEMCACHED
+    if (context->config.engine_library) {
+        engine = context->config.engine_library;
+        /* FIXME: We should have a better way to pass the context structure
+        point to storage engine. It is now appended in the engine configure
+        string. */
+        engine_config = (const char *) context;
 
     } else {
         fprintf(stderr, "Engine library do not provided\n");
         exit(EX_OSERR);
     }
-#else
-    engine = "default_engine.so";
 #endif /* DAEMON_MEMCACHED */
 
     /* make the time we started always be 2 seconds before we really
@@ -7197,7 +7182,7 @@ int main (int argc, char **argv) {
         exit(EX_OSERR);
     }
 
-    daemon_memcached_make_option(m_config->m_mem_option,
+    daemon_memcached_make_option(context->config.option,
                                  &option_argc,
                                  &option_argv);
 

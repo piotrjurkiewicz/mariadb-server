@@ -32,33 +32,24 @@ Created 04/12/2011 Jimmy Yang
 #include <mysql_version.h>
 #include "sql_plugin.h"
 
-/** Configuration info passed to memcached, including
-the name of our Memcached InnoDB engine and memcached configure
-string to be loaded by memcached. */
-struct mysql_memcached_context
-{
-    pthread_t memcached_thread;
-    memcached_context_t memcached_conf;
-};
-
 /** Variables for configure options */
-static char *mci_engine_library = NULL;
-static char *mci_eng_lib_path = NULL;
-static char *mci_memcached_option = NULL;
+static char *mci_engine_lib_name = NULL;
+static char *mci_engine_lib_path = NULL;
+static char *mci_option = NULL;
 static unsigned int mci_r_batch_size = 1048576;
 static unsigned int mci_w_batch_size = 32;
 static my_bool mci_enable_binlog = false;
 
-static MYSQL_SYSVAR_STR(engine_lib_name, mci_engine_library,
+static MYSQL_SYSVAR_STR(engine_lib_name, mci_engine_lib_name,
                         PLUGIN_VAR_READONLY | PLUGIN_VAR_MEMALLOC,
                         "memcached engine library name", NULL, NULL,
                         "daemon_memcached_engine_ib.so");
 
-static MYSQL_SYSVAR_STR(engine_lib_path, mci_eng_lib_path,
+static MYSQL_SYSVAR_STR(engine_lib_path, mci_engine_lib_path,
                         PLUGIN_VAR_READONLY | PLUGIN_VAR_MEMALLOC,
                         "memcached engine library path", NULL, NULL, NULL);
 
-static MYSQL_SYSVAR_STR(option, mci_memcached_option,
+static MYSQL_SYSVAR_STR(option, mci_option,
                         PLUGIN_VAR_READONLY | PLUGIN_VAR_MEMALLOC,
                         "memcached option string", NULL, NULL, NULL);
 
@@ -90,7 +81,7 @@ static struct st_mysql_sys_var *daemon_memcached_sys_var[] = {
 static int daemon_memcached_plugin_deinit(void *p)
 {
     struct st_plugin_int *plugin = (struct st_plugin_int *) p;
-    struct mysql_memcached_context *con = NULL;
+    memcached_context_t *con = NULL;
     int loop_count = 0;
 
     /* If memcached plugin is still initializing, wait for a
@@ -123,12 +114,12 @@ static int daemon_memcached_plugin_deinit(void *p)
                 " the thread\n");
     }
 
-    con = (struct mysql_memcached_context *) (plugin->data);
+    con = (memcached_context_t *) (plugin->data);
 
-    pthread_cancel(con->memcached_thread);
+    pthread_cancel(con->thread);
 
-    if (con->memcached_conf.m_engine_library) {
-        my_free(con->memcached_conf.m_engine_library);
+    if (con->config.engine_library) {
+        my_free(con->config.engine_library);
     }
 
     my_free(con);
@@ -138,47 +129,47 @@ static int daemon_memcached_plugin_deinit(void *p)
 
 static int daemon_memcached_plugin_init(void *p)
 {
-    struct mysql_memcached_context *con;
+    memcached_context_t *context;
     pthread_attr_t attr;
     struct st_plugin_int *plugin = (struct st_plugin_int *) p;
 
-    con = (mysql_memcached_context *) my_malloc(/* 5.7: PSI_INSTRUMENT_ME, */
-                                                sizeof(*con), MYF(0));
+    context = (memcached_context_t *) my_malloc(/* 5.7: PSI_INSTRUMENT_ME, */
+                                                sizeof(*context), MYF(0));
 
-    if (mci_engine_library) {
-        char *lib_path = (mci_eng_lib_path)
-                         ? mci_eng_lib_path : opt_plugin_dir;
+    if (mci_engine_lib_name) {
+        char *lib_path = (mci_engine_lib_path)
+                         ? mci_engine_lib_path : opt_plugin_dir;
         int lib_len = strlen(lib_path)
-                      + strlen(mci_engine_library)
+                      + strlen(mci_engine_lib_name)
                       + strlen(FN_DIRSEP) + 1;
 
-        con->memcached_conf.m_engine_library = (char *) my_malloc(/* 5.7: PSI_INSTRUMENT_ME, */
+        context->config.engine_library = (char *) my_malloc(/* 5.7: PSI_INSTRUMENT_ME, */
                                                                   lib_len, MYF(0));
 
-        strxmov(con->memcached_conf.m_engine_library, lib_path,
-                FN_DIRSEP, mci_engine_library, NullS);
+        strxmov(context->config.engine_library, lib_path,
+                FN_DIRSEP, mci_engine_lib_name, NullS);
     } else {
-        con->memcached_conf.m_engine_library = NULL;
+        context->config.engine_library = NULL;
     }
 
-    con->memcached_conf.m_mem_option = mci_memcached_option;
-    con->memcached_conf.m_innodb_api_cb = plugin->data;
-    con->memcached_conf.m_r_batch_size = mci_r_batch_size;
-    con->memcached_conf.m_w_batch_size = mci_w_batch_size;
-    con->memcached_conf.m_enable_binlog = mci_enable_binlog;
+    context->config.option = mci_option;
+    context->config.innodb_api_cb = plugin->data;
+    context->config.r_batch_size = mci_r_batch_size;
+    context->config.w_batch_size = mci_w_batch_size;
+    context->config.enable_binlog = mci_enable_binlog;
 
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
     /* now create the thread */
-    if (pthread_create(&con->memcached_thread, &attr,
+    if (pthread_create(&context->thread, &attr,
                        daemon_memcached_main,
-                       (void *) &con->memcached_conf) != 0) {
+                       context) != 0) {
         fprintf(stderr, "Could not create memcached daemon thread!\n");
         exit(0);
     }
 
-    plugin->data = (void *) con;
+    plugin->data = (void *) context;
 
     return (0);
 }
