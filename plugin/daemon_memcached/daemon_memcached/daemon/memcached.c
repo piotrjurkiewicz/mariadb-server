@@ -39,7 +39,7 @@
 #define DAEMON_MEMCACHED
 
 #ifdef DAEMON_MEMCACHED
-#define exit(x) fprintf(stderr, "Daemon Memcached exit(#x)\n"); \
+#define exit(x) fprintf(stderr, "Daemon Memcached exit(" #x ")\n"); \
                 shutdown_server(); \
                 goto func_exit;
 #endif /* DAEMON_MEMCACHED */
