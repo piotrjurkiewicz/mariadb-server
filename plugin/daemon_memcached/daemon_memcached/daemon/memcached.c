@@ -7072,7 +7072,7 @@ daemon_memcached_make_option(char* option, int* option_argc,
     char*                   opt_str;
     char*                   my_str;
     int                     num_arg = 0;
-    int                     i = 1;
+    int                     i = 0;
 
     if (option) {
         /* TODO: Fix memory leak here */
@@ -7092,6 +7092,7 @@ daemon_memcached_make_option(char* option, int* option_argc,
                                    * sizeof(**option_argv));
 
     (*option_argv)[i] = "memcached";
+    i++;
 
     if (option) {
         for (opt_str = strtok_r(my_str, sep, &last);
