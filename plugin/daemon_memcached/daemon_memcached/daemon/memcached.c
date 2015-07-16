@@ -7064,28 +7064,26 @@ my_strdupl(const char* str, int len)
 that can be parsed by getopt() */
 static
 void
-daemon_memcached_make_option(char* option, int* option_argc,
-                             char*** option_argv)
+daemon_memcached_make_option(char* option, char** option_copy,
+                             int* option_argc, char*** option_argv)
 {
     static const char*      sep = " ";
     char*                   last;
     char*                   opt_str;
-    char*                   my_str;
     int                     num_arg = 0;
     int                     i = 0;
 
     if (option) {
-        /* TODO: Fix memory leak here */
-        my_str = my_strdupl(option, strlen(option));
+        *option_copy = my_strdupl(option, strlen(option));
 
-        for (opt_str = strtok_r(my_str, sep, &last);
+        for (opt_str = strtok_r(*option_copy, sep, &last);
              opt_str;
              opt_str = strtok_r(NULL, sep, &last)) {
                 num_arg++;
         }
 
-        /* reset my_str, since strtok_r could alter it */
-        strncpy(my_str, option, strlen(option));
+        /* reset option_copy, since strtok_r could alter it */
+        strncpy(*option_copy, option, strlen(option));
     }
 
     *option_argv = (char**) malloc((num_arg + 1)
@@ -7095,7 +7093,7 @@ daemon_memcached_make_option(char* option, int* option_argc,
     i++;
 
     if (option) {
-        for (opt_str = strtok_r(my_str, sep, &last);
+        for (opt_str = strtok_r(*option_copy, sep, &last);
              opt_str;
              opt_str = strtok_r(NULL, sep, &last)) {
                 (*option_argv)[i] = opt_str;
@@ -7139,6 +7137,7 @@ int main (int argc, char **argv) {
 
     memcached_context_t *context = (memcached_context_t *) arg;
 
+    char* option_copy = NULL;
     int option_argc = 0;
     char** option_argv = NULL;
 
@@ -7184,6 +7183,7 @@ int main (int argc, char **argv) {
     }
 
     daemon_memcached_make_option(context->config.option,
+                                 &option_copy,
                                  &option_argc,
                                  &option_argv);
 
@@ -7801,6 +7801,9 @@ func_exit:
         main_base = NULL;
     }
 #endif
+
+    if (option_copy)
+        free(option_copy);
 
     memcached_shutdown = 2;
     memcached_initialized = 2;
