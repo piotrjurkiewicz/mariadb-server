@@ -81,7 +81,7 @@ static struct st_mysql_sys_var *daemon_memcached_sys_var[] = {
 static int daemon_memcached_plugin_deinit(void *p)
 {
     struct st_plugin_int *plugin = (struct st_plugin_int *) p;
-    memcached_context_t *con = NULL;
+    memcached_context_t *context = NULL;
     int loop_count = 0;
 
     /* If memcached plugin is still initializing, wait for a
@@ -114,15 +114,15 @@ static int daemon_memcached_plugin_deinit(void *p)
                 " the thread\n");
     }
 
-    con = (memcached_context_t *) (plugin->data);
+    context = (memcached_context_t *) (plugin->data);
 
-    pthread_cancel(con->thread);
+    pthread_cancel(context->thread);
 
-    if (con->config.engine_library) {
-        my_free(con->config.engine_library);
+    if (context->config.engine_library) {
+        my_free(context->config.engine_library);
     }
 
-    my_free(con);
+    my_free(context);
 
     return (0);
 }
