@@ -1974,7 +1974,6 @@ innodb_flush(
 					InnoDB */
 {
 	struct innodb_engine*	innodb_eng = innodb_handle(handle);
-	meta_cfg_info_t*	meta_info = innodb_eng->meta_info;
 	ib_err_t		ib_err = DB_SUCCESS;
 	innodb_conn_data_t*	conn_data;
 
@@ -2019,8 +2018,8 @@ innodb_flush(
 	}
 
 	ib_err = innodb_api_flush(innodb_eng, conn_data,
-				  meta_info->col_info[CONTAINER_DB].col_name,
-			          meta_info->col_info[CONTAINER_TABLE].col_name);
+				  conn_data->conn_meta->col_info[CONTAINER_DB].col_name,
+				  conn_data->conn_meta->col_info[CONTAINER_TABLE].col_name);
 
 	/* Commit work and release the MDL table. */
 	innodb_api_cursor_reset(innodb_eng, conn_data, CONN_OP_FLUSH, true);
