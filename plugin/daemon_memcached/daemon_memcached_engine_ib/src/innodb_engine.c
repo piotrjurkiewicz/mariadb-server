@@ -66,11 +66,6 @@ static bool	bk_thd_exited		= true;
 
 extern option_t config_option_names[];
 
-/** Check the input key name implies a table mapping switch. The name
-would start with "@@", and in the format of "@@new_table_mapping.key"
-or simply "@@new_table_mapping" */
-
-
 /**********************************************************************//**
 Unlock a table and commit the transaction
 return 0 if fail to commit the transaction */
@@ -166,7 +161,6 @@ create_instance(
 	innodb_eng->engine.get_item_info = innodb_get_item_info;
 	innodb_eng->engine.get_stats_struct = NULL;
 	innodb_eng->engine.errinfo = NULL;
-	innodb_eng->engine.bind = innodb_bind;
 
 	innodb_eng->server = *api;
 	innodb_eng->get_server_api = get_server_api;
@@ -1192,8 +1186,7 @@ innodb_remove(
 }
 
 /*******************************************************************//**
-Switch the table mapping. Open the new table specified in "@@new_table_map.key"
-string.
+Switch the table mapping.
 @return ENGINE_SUCCESS if successful, otherwise error code */
 static
 ENGINE_ERROR_CODE
@@ -1204,53 +1197,22 @@ innodb_switch_mapping(
 	const char*		name,		/*!< in: full name contains
 						table map name, and possible
 						key value */
-	size_t*			name_len,	/*!< in/out: name length,
+	size_t			name_len)	/*!< in: name length,
 						out with length excludes
 						the table map name */
-	bool			has_prefix)	/*!< in: whether the name has
-						"@@" prefix */
 {
 	struct innodb_engine*	innodb_eng = innodb_handle(handle);
 	innodb_conn_data_t*	conn_data;
-	char			new_name[KEY_MAX_LENGTH];
-	meta_cfg_info_t*	meta_info = innodb_eng->meta_info;
 	char*			new_map_name;
 	unsigned int		new_map_name_len = 0;
-	char*			last;
 	meta_cfg_info_t*	new_meta_info;
-	int			sep_len = 0;
 
-	if (has_prefix) {
-		char*		sep = NULL;
-
-		assert(*name_len > 2 && name[0] == '@' && name[1] == '@');
-		assert(*name_len < KEY_MAX_LENGTH);
-
-		memcpy(new_name, &name[2], (*name_len) - 2);
-
-		new_name[*name_len - 2] = 0;
-
-		GET_OPTION(meta_info, OPTION_ID_TBL_MAP_SEP, sep, sep_len);
-
-		assert(sep_len > 0);
-
-		new_map_name = strtok_r(new_name, sep, &last);
-
-		if (new_map_name == NULL) {
-			return(ENGINE_KEY_ENOENT);
-		}
-
-		new_map_name_len = strlen(new_map_name);
-	} else {
-		/* This is used in the "bind" command, and without the
-		"@@" prefix. */
-		if (name == NULL) {
-			return(ENGINE_KEY_ENOENT);
-		}
-
-		new_map_name = (char*) name;
-		new_map_name_len = *name_len;
+	if (name == NULL) {
+		return(ENGINE_KEY_ENOENT);
 	}
+
+	new_map_name = (char*) name;
+	new_map_name_len = name_len;
 
 	conn_data = innodb_eng->server.cookie->get_engine_specific(cookie);
 
@@ -1261,7 +1223,7 @@ innodb_switch_mapping(
 	    && (strcmp(
 		new_map_name,
 		conn_data->conn_meta->col_info[CONTAINER_NAME].col_name) == 0)) {
-		goto get_key_name;
+		return(ENGINE_SUCCESS);
 	}
 
 	new_meta_info = innodb_config(
@@ -1285,45 +1247,7 @@ innodb_switch_mapping(
 
 	assert(conn_data->conn_meta == new_meta_info);
 
-get_key_name:
-	/* Now calculate name length exclude the table mapping name,
-	this is the length for the remaining key portion */
-	if (has_prefix) {
-		assert(*name_len >= strlen(new_map_name) + 2);
-
-		if (*name_len >= strlen(new_map_name) + 2 + sep_len) {
-			*name_len -= strlen(new_map_name) + 2 + sep_len;
-		} else {
-			/* the name does not even contain a delimiter,
-			so there will be no keys either */
-			*name_len  = 0;
-		}
-	}
-
 	return(ENGINE_SUCCESS);
-}
-
-/*******************************************************************//**
-check whether a table mapping switch is needed, if so, switch the table
-mapping
-@return ENGINE_SUCCESS if successful otherwise error code */
-static inline
-ENGINE_ERROR_CODE
-check_key_name_for_map_switch(
-/*==========================*/
-	ENGINE_HANDLE*		handle,		/*!< in: Engine Handle */
-	const void*		cookie,		/*!< in: connection cookie */
-	const void*		key,		/*!< in: search key */
-	size_t*			nkey)		/*!< in/out: key length */
-{
-	ENGINE_ERROR_CODE	err_ret = ENGINE_SUCCESS;
-
-	if ((*nkey) > 3 && ((char*)key)[0] == '@'
-	    && ((char*)key)[1] == '@') {
-		err_ret = innodb_switch_mapping(handle, cookie, key, nkey, true);
-	}
-
-	return(err_ret);
 }
 
 /*******************************************************************//**
@@ -1345,27 +1269,7 @@ check_container_for_map_switch(
 	const char* name = container->name;
 	size_t name_len = strlen(name);
 
-	err_ret = innodb_switch_mapping(handle, cookie, name, &name_len, false);
-
-	return(err_ret);
-}
-
-/*******************************************************************//**
-Function to support the "bind" command, bind the connection to a new
-table mapping.
-@return ENGINE_SUCCESS if successful, otherwise error code */
-static
-ENGINE_ERROR_CODE
-innodb_bind(
-/*========*/
-	ENGINE_HANDLE*		handle,		/*!< in: Engine handle */
-	const void*		cookie,		/*!< in: connection cookie */
-	const void*		name,		/*!< in: table ID name */
-	size_t			name_len)	/*!< in: name length */
-{
-	ENGINE_ERROR_CODE	err_ret = ENGINE_SUCCESS;
-
-	err_ret = innodb_switch_mapping(handle, cookie, name, &name_len, false);
+	err_ret = innodb_switch_mapping(handle, cookie, name, name_len);
 
 	return(err_ret);
 }
@@ -1528,32 +1432,13 @@ innodb_get(
 	const char*		option_delimiter;
 	size_t			key_len = nkey;
 	int			lock_mode;
-	bool			report_table_switch = false;
 
 	/* Check if we need to switch table mapping */
-	err_ret = check_key_name_for_map_switch(handle, cookie, key, &key_len);
 	err_ret = check_container_for_map_switch(handle, cookie);
 
 	/* If specified new table map does not exist, or table does not
 	qualify for InnoDB memcached, return error */
 	if (err_ret != ENGINE_SUCCESS) {
-		goto err_exit;
-	}
-
-	/* If only the new mapping name is provided, and no key value,
-	return here */
-	if (key_len <= 0) {
-		/* If this is a command in the form of "get @@new_table_map",
-		for the purpose of switching to the specified table with
-		the table map name, if the switch is successful, we will
-		return the table name as result */
-		if (nkey > 0) {
-			report_table_switch = true;
-
-			goto search_done;
-		}
-
-		err_ret = ENGINE_KEY_ENOENT;
 		goto err_exit;
 	}
 
@@ -1577,37 +1462,6 @@ innodb_get(
 	if (err != DB_SUCCESS) {
 		err_ret = ENGINE_KEY_ENOENT;
 		goto func_exit;
-	}
-
-search_done:
-	if (report_table_switch) {
-		char	table_name[MAX_TABLE_NAME_LEN
-				   + MAX_DATABASE_NAME_LEN];
-		char*	name;
-		char*	dbname;
-
-		conn_data = innodb_eng->server.cookie->get_engine_specific(cookie);
-		assert(nkey > 0);
-
-		name = conn_data->conn_meta->col_info[CONTAINER_TABLE].col_name;
-		dbname = conn_data->conn_meta->col_info[CONTAINER_DB].col_name;
-#ifdef __WIN__
-		sprintf(table_name, "%s\%s", dbname, name);
-#else
-		snprintf(table_name, sizeof(table_name),
-			 "%s/%s", dbname, name);
-#endif
-
-		assert(!conn_data->result_in_use);
-		conn_data->result_in_use = true;
-		result = (mci_item_t*)(conn_data->result);
-
-		memset(result, 0, sizeof(*result));
-
-		memcpy(conn_data->row_buf, table_name, strlen(table_name));
-
-		result->col_value[MCI_COL_VALUE].value_str = conn_data->row_buf;
-		result->col_value[MCI_COL_VALUE].value_len = strlen(table_name);
 	}
 
 	result->col_value[MCI_COL_KEY].value_str = (char*)key;
@@ -1751,10 +1605,8 @@ search_done:
 
 func_exit:
 
-	if (!report_table_switch) {
-		innodb_api_cursor_reset(innodb_eng, conn_data,
-					CONN_OP_READ, true);
-	}
+	innodb_api_cursor_reset(innodb_eng, conn_data,
+				CONN_OP_READ, true);
 
 err_exit:
 
@@ -1824,8 +1676,6 @@ innodb_store(
 	size_t			key_len = len;
 	ENGINE_ERROR_CODE	err_ret = ENGINE_SUCCESS;
 
-	err_ret = check_key_name_for_map_switch(handle, cookie,
-						value, &key_len);
 	err_ret = check_container_for_map_switch(handle, cookie);
 
 	if (err_ret != ENGINE_SUCCESS) {

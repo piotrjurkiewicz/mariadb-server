@@ -111,19 +111,15 @@ typedef struct meta_index {
 } meta_index_t;
 
 /** The "names" in the "config_option" table to identify possible
-config options. Both are optional.
+config options. They are optional.
 "COLUMN_SEPARATOR" is the delimiter that separates multiple columns and
-"TABLE_MAP_SEPARATOR" is the delimiter that separates table map name
 and key value */
 #define COLUMN_SEPARATOR        "separator"
-#define TABLE_MAP_SEPARATOR     "table_map_delimiter"
 
 /* list of configure options we support */
 typedef enum option_id {
 	OPTION_ID_COL_SEP,		/*!< ID for character(s) separating
 					multiple column mapping */
-	OPTION_ID_TBL_MAP_SEP,		/*!< ID for character(s) separating
-					table map name and key */
 	OPTION_ID_NUM_OPTIONS		/*!< number of options */
 } option_id_t;
 

@@ -96,18 +96,6 @@ innodb_remove(
 					engine only */
 
 /*******************************************************************//**
-bind table
-@return number of connection cleaned */
-static
-ENGINE_ERROR_CODE
-innodb_bind(
-/*========*/
-	ENGINE_HANDLE*	handle,		/*!< in: Engine handle */
-	const void*	cookie,		/*!< in: connection cookie */
-	const void*	name,		/*!< in: table ID name */
-        const size_t	name_len);	/*!< in: name length */
-
-/*******************************************************************//**
 release */
 static
 void

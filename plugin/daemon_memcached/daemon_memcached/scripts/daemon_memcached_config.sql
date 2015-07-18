@@ -53,7 +53,6 @@ INSERT INTO containers VALUES ("aaa", "test", "demo_test",
 			       "c1", "c2",  "c3", "c4", "c5", "PRIMARY");
 
 INSERT INTO config_options VALUES("separator", "|");
-INSERT INTO config_options VALUES("table_map_delimiter", ".");
 
 CREATE DATABASE IF NOT EXISTS test;
 USE test

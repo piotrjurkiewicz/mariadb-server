@@ -39,8 +39,7 @@ Created 04/12/2011 Jimmy Yang
 /** Configure options enum IDs, their "names" and their default value */
 option_t	config_option_names[] =
 {
-        {OPTION_ID_COL_SEP, COLUMN_SEPARATOR, {"|", 1}},
-        {OPTION_ID_TBL_MAP_SEP, TABLE_MAP_SEPARATOR, {".", 1}}
+        {OPTION_ID_COL_SEP, COLUMN_SEPARATOR, {"|", 1}}
 };
 
 /**********************************************************************//**
