@@ -106,6 +106,17 @@ innodb_conn_clean_data(
 	bool			has_lock,
 	bool			free_all);
 
+/*******************************************************************//**
+check whether a table mapping switch is needed, if so, switch the table
+mapping
+@return ENGINE_SUCCESS if successful otherwise error code */
+static
+ENGINE_ERROR_CODE
+check_container_for_map_switch(
+/*==========================*/
+		ENGINE_HANDLE*		handle,		/*!< in: Engine Handle */
+		const void*		cookie);	/*!< in: connection cookie */
+
 /*********** FUNCTIONS IMPLEMENTING THE PUBLISHED API BEGIN HERE ********/
 
 /*******************************************************************//**
@@ -1088,6 +1099,12 @@ innodb_allocate(
 	innodb_conn_data_t*	conn_data;
 	hash_item*		it = NULL;
 
+	ENGINE_ERROR_CODE	err_ret = ENGINE_SUCCESS;
+	err_ret = check_container_for_map_switch(handle, cookie);
+	if (err_ret != ENGINE_SUCCESS) {
+		return err_ret;
+	}
+
 	conn_data = innodb_eng->server.cookie->get_engine_specific(cookie);
 
 	if (!conn_data) {
@@ -1145,6 +1162,11 @@ innodb_remove(
 	struct innodb_engine*	innodb_eng = innodb_handle(handle);
 	ENGINE_ERROR_CODE	err_ret = ENGINE_SUCCESS;
 	innodb_conn_data_t*	conn_data;
+
+	err_ret = check_container_for_map_switch(handle, cookie);
+	if (err_ret != ENGINE_SUCCESS) {
+		return err_ret;
+	}
 
 	conn_data = innodb_conn_init(innodb_eng, cookie,
 				     CONN_MODE_WRITE, IB_LOCK_X, false,
@@ -1300,6 +1322,30 @@ check_key_name_for_map_switch(
 	    && ((char*)key)[1] == '@') {
 		err_ret = innodb_switch_mapping(handle, cookie, key, nkey, true);
 	}
+
+	return(err_ret);
+}
+
+/*******************************************************************//**
+check whether a table mapping switch is needed, if so, switch the table
+mapping
+@return ENGINE_SUCCESS if successful otherwise error code */
+static
+ENGINE_ERROR_CODE
+check_container_for_map_switch(
+/*==========================*/
+	ENGINE_HANDLE*		handle,		/*!< in: Engine Handle */
+	const void*		cookie)		/*!< in: connection cookie */
+{
+	ENGINE_ERROR_CODE	err_ret = ENGINE_SUCCESS;
+
+	struct innodb_engine* innodb_eng = innodb_handle(handle);
+	memcached_container_t* container = innodb_eng->server.cookie->get_container(cookie);
+
+	const char* name = container->name;
+	size_t name_len = strlen(name);
+
+	err_ret = innodb_switch_mapping(handle, cookie, name, &name_len, false);
 
 	return(err_ret);
 }
@@ -1486,6 +1532,7 @@ innodb_get(
 
 	/* Check if we need to switch table mapping */
 	err_ret = check_key_name_for_map_switch(handle, cookie, key, &key_len);
+	err_ret = check_container_for_map_switch(handle, cookie);
 
 	/* If specified new table map does not exist, or table does not
 	qualify for InnoDB memcached, return error */
@@ -1779,6 +1826,7 @@ innodb_store(
 
 	err_ret = check_key_name_for_map_switch(handle, cookie,
 						value, &key_len);
+	err_ret = check_container_for_map_switch(handle, cookie);
 
 	if (err_ret != ENGINE_SUCCESS) {
 		return(err_ret);
@@ -1835,6 +1883,11 @@ innodb_arithmetic(
 	struct innodb_engine*	innodb_eng = innodb_handle(handle);
 	innodb_conn_data_t*	conn_data;
 	ENGINE_ERROR_CODE	err_ret;
+
+	err_ret = check_container_for_map_switch(handle, cookie);
+	if (err_ret != ENGINE_SUCCESS) {
+		return err_ret;
+	}
 
 	conn_data = innodb_conn_init(innodb_eng, cookie, CONN_MODE_WRITE,
 				     IB_LOCK_X, false, NULL);
@@ -1925,6 +1978,12 @@ innodb_flush(
 	ib_err_t		ib_err = DB_SUCCESS;
 	innodb_conn_data_t*	conn_data;
 
+	ENGINE_ERROR_CODE	err_ret = ENGINE_SUCCESS;
+	err_ret = check_container_for_map_switch(handle, cookie);
+	if (err_ret != ENGINE_SUCCESS) {
+		return err_ret;
+	}
+
 	/* Lock the whole engine, so no other connection can start
 	new opeartion */
         pthread_mutex_lock(&innodb_eng->conn_mutex);
@@ -2013,15 +2072,21 @@ static
 bool
 innodb_get_item_info(
 /*=================*/
-	ENGINE_HANDLE*		handle __attribute__((unused)),
+	ENGINE_HANDLE*		handle,
 						/*!< in: Engine Handle */
-	const void*		cookie __attribute__((unused)),
+	const void*		cookie,
 						/*!< in: connection cookie */
 	const item*		item,		/*!< in: item in question */
 	item_info*		item_info)	/*!< out: item info got */
 {
 	struct innodb_engine* innodb_eng = innodb_handle(handle);
 	innodb_conn_data_t*     conn_data;
+
+	ENGINE_ERROR_CODE	err_ret = ENGINE_SUCCESS;
+	err_ret = check_container_for_map_switch(handle, cookie);
+	if (err_ret != ENGINE_SUCCESS) {
+		return err_ret;
+	}
 
 	conn_data = innodb_eng->server.cookie->get_engine_specific(cookie);
 

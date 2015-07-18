@@ -30,6 +30,7 @@ struct conn_queue_item {
     int               event_flags;
     int               read_buffer_size;
     enum network_transport     transport;
+    void             *container;
     CQ_ITEM          *next;
 };
 
@@ -346,8 +347,8 @@ static void thread_libevent_process(int fd, short which, void *arg) {
 
     while ((item = cq_pop(me->new_conn_queue)) != NULL) {
         conn *c = conn_new(item->sfd, item->init_state, item->event_flags,
-                           item->read_buffer_size, item->transport, me->base,
-                           NULL);
+                           item->read_buffer_size, item->transport,
+                           item->container, me->base, NULL);
         if (c == NULL) {
             if (IS_UDP(item->transport)) {
                 settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
@@ -696,7 +697,8 @@ static int last_thread = -1;
  * of an incoming connection.
  */
 void dispatch_conn_new(SOCKET sfd, STATE_FUNC init_state, int event_flags,
-                       int read_buffer_size, enum network_transport transport) {
+                       int read_buffer_size, enum network_transport transport,
+                       memcached_container_t *container) {
     CQ_ITEM *item = cqi_new();
     int tid = (last_thread + 1) % settings.num_threads;
 
@@ -709,6 +711,7 @@ void dispatch_conn_new(SOCKET sfd, STATE_FUNC init_state, int event_flags,
     item->event_flags = event_flags;
     item->read_buffer_size = read_buffer_size;
     item->transport = transport;
+    item->container = container;
 
     cq_push(thread->new_conn_queue, item);
 

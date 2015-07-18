@@ -584,6 +584,7 @@ static void conn_destructor(void *buffer, void *unused) {
 conn *conn_new(const SOCKET sfd, STATE_FUNC init_state,
                const int event_flags,
                const int read_buffer_size, enum network_transport transport,
+               memcached_container_t *container,
                struct event_base *base, struct timeval *timeout) {
     conn *c = cache_alloc(conn_cache);
     if (c == NULL) {
@@ -607,6 +608,7 @@ conn *conn_new(const SOCKET sfd, STATE_FUNC init_state,
 
     c->transport = transport;
     c->protocol = settings.binding_protocol;
+    c->container = container;
 
     if (IS_UDP(transport)) {
         c->request_addr_size = sizeof(c->request_addr);
@@ -5204,7 +5206,7 @@ bool conn_listening(conn *c)
     }
 
     dispatch_conn_new(sfd, conn_new_cmd, EV_READ | EV_PERSIST,
-                      DATA_BUFFER_SIZE, tcp_transport);
+                      DATA_BUFFER_SIZE, tcp_transport, c->container);
 
     return false;
 }
@@ -5847,6 +5849,7 @@ static void maximize_sndbuf(const int sfd) {
 static int server_socket(const char *interface,
                          int port,
                          enum network_transport transport,
+                         memcached_container_t *container,
                          FILE *portnumber_file) {
     int sfd;
     struct linger ling = {0, 0};
@@ -5977,7 +5980,7 @@ static int server_socket(const char *interface,
             for (c = 0; c < settings.num_threads_per_udp; c++) {
                 /* this is guaranteed to hit all threads because we round-robin */
                 dispatch_conn_new(sfd, conn_read, EV_READ | EV_PERSIST,
-                                  UDP_READ_BUFFER_SIZE, transport);
+                                  UDP_READ_BUFFER_SIZE, transport, container);
                 STATS_LOCK();
                 ++stats.curr_conns;
                 ++stats.daemon_conns;
@@ -5986,7 +5989,8 @@ static int server_socket(const char *interface,
         } else {
             if (!(listen_conn_add = conn_new(sfd, conn_listening,
                                              EV_READ | EV_PERSIST, 1,
-                                             transport, main_base, NULL))) {
+                                             transport, container,
+                                             main_base, NULL))) {
                 settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
                         "failed to create listening connection\n");
                 return 1;
@@ -6006,6 +6010,7 @@ static int server_socket(const char *interface,
     return success == 0;
 }
 
+#ifndef DAEMON_MEMCACHED
 static int server_sockets(int port, enum network_transport transport,
                           FILE *portnumber_file) {
     if (settings.inter == NULL) {
@@ -6045,6 +6050,7 @@ static int server_sockets(int port, enum network_transport transport,
         return ret;
     }
 }
+#endif
 
 static int new_socket_unix(void) {
     int sfd;
@@ -6064,7 +6070,7 @@ static int new_socket_unix(void) {
 }
 
 /* this will probably not work on windows */
-static int server_socket_unix(const char *path, int access_mask) {
+static int server_socket_unix(const char *path, int access_mask, memcached_container_t *container) {
     int sfd;
     struct linger ling = {0, 0};
     struct sockaddr_un addr;
@@ -6120,7 +6126,8 @@ static int server_socket_unix(const char *path, int access_mask) {
     }
     if (!(listen_conn = conn_new(sfd, conn_listening,
                                  EV_READ | EV_PERSIST, 1,
-                                 local_transport, main_base, NULL))) {
+                                 local_transport, container,
+                                 main_base, NULL))) {
         settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
                  "failed to create listening connection\n");
         return 1;
@@ -6446,6 +6453,11 @@ static void store_engine_specific(const void *cookie,
 static void *get_engine_specific(const void *cookie) {
     conn *c = (conn*)cookie;
     return c->engine_storage;
+}
+
+static int get_container(const void *cookie) {
+    conn *c = (conn *)cookie;
+    return c->container;
 }
 
 static int get_socket_fd(const void *cookie) {
@@ -6923,6 +6935,7 @@ static SERVER_HANDLE_V1 *get_server_api(void)
     };
 
     static SERVER_COOKIE_API server_cookie_api = {
+        .get_container = get_container,
         .get_auth_data = get_auth_data,
         .store_engine_specific = store_engine_specific,
         .get_engine_specific = get_engine_specific,
@@ -7702,6 +7715,33 @@ int main (int argc, char **argv) {
     /* initialise clock event */
     clock_handler(0, 0, 0);
 
+#ifdef DAEMON_MEMCACHED
+    memcached_container_t *current_container;
+    unsigned int i;
+
+    for (i = 0; i < context->containers_length; i++) {
+        current_container = &context->containers_array[i];
+        int ret;
+
+        if (strncmp("unix", current_container->port, strlen("unix")) == 0) {
+            ret = server_socket_unix(current_container->port + 5, settings.access, current_container);
+        } else {
+            int port = atoi(current_container->port);
+            ret = server_socket(settings.inter, port, tcp_transport, current_container, NULL);
+        }
+
+        if (ret == 0) {
+            settings.extensions.logger->log(EXTENSION_LOG_INFO, NULL,
+                                            "Started container: %s\n",
+                                            current_container->port);
+        } else {
+            settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
+                                            "Failed to start container: %s\n",
+                                            current_container->port);
+        }
+        current_container++;
+    }
+#else
     /* create unix mode sockets after dropping privileges */
     if (settings.socketpath != NULL) {
         if (server_socket_unix(settings.socketpath,settings.access)) {
@@ -7760,6 +7800,7 @@ int main (int argc, char **argv) {
             rename(temp_portnumber_filename, portnumber_filename);
         }
     }
+#endif
 
     if (pid_file != NULL) {
         save_pid(pid_file);

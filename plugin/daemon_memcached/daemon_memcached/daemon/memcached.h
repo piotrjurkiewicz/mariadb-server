@@ -15,6 +15,7 @@
 #include <memcached/protocol_binary.h>
 #include <memcached/engine.h>
 #include <memcached/extension.h>
+#include <memcached/context.h>
 
 #include "cache.h"
 
@@ -330,6 +331,7 @@ struct conn {
 
     enum protocol protocol;   /* which protocol this connection speaks */
     enum network_transport transport; /* what transport is used by this connection */
+    memcached_container_t *container;
 
     /* data for UDP clients */
     int    request_id; /* Incoming UDP request ID, if this is a UDP "connection" */
@@ -382,6 +384,7 @@ struct conn {
  */
 conn *conn_new(const SOCKET sfd, STATE_FUNC init_state, const int event_flags,
                const int read_buffer_size, enum network_transport transport,
+               memcached_container_t *container,
                struct event_base *base, struct timeval *timeout);
 #ifndef WIN32
 extern int daemonize(int nochdir, int noclose);
@@ -412,7 +415,8 @@ void threads_shutdown(void);
 
 int  dispatch_event_add(int thread, conn *c);
 void dispatch_conn_new(SOCKET sfd, STATE_FUNC init_state, int event_flags,
-                       int read_buffer_size, enum network_transport transport);
+                       int read_buffer_size, enum network_transport transport,
+                       memcached_container_t *container);
 
 /* Lock wrappers for cache functions that are called from main loop. */
 void accept_new_conns(const bool do_accept);

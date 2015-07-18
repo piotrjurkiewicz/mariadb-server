@@ -5,6 +5,7 @@
 
 #include <memcached/types.h>
 #include <memcached/config_parser.h>
+#include <memcached/context.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -81,6 +82,15 @@ extern "C" {
      * Commands to operate on a specific cookie.
      */
     typedef struct {
+        /**
+         * Retrieve container of the session for the given cookie.
+         *
+         * @param cookie The cookie provided by the frontend
+         *
+         * @return pointer to the memcached_container structure
+         */
+        memcached_container_t *(*get_container)(const void *cookie);
+
         /**
          * Retrieve socket file descriptor of the session for the given cookie.
          *

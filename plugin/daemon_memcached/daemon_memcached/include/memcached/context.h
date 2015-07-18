@@ -19,10 +19,20 @@ struct memcached_config
 
 typedef struct memcached_config memcached_config_t;
 
+struct memcached_container
+{
+    char *port;
+    char *name;
+};
+
+typedef struct memcached_container memcached_container_t;
+
 struct memcached_context
 {
     memcached_config_t config;
     pthread_t thread;
+    memcached_container_t *containers_array;
+    unsigned int containers_length;
 };
 
 typedef struct memcached_context memcached_context_t;
