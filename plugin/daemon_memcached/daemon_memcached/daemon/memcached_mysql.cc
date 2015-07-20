@@ -83,6 +83,7 @@ static int daemon_memcached_plugin_deinit(void *p)
     struct st_plugin_int *plugin = (struct st_plugin_int *) p;
     memcached_context_t *context = NULL;
     int loop_count = 0;
+    unsigned int i;
 
     /* If memcached plugin is still initializing, wait for a
     while.*/
@@ -122,7 +123,14 @@ static int daemon_memcached_plugin_deinit(void *p)
         my_free(context->config.engine_library);
     }
 
-    my_free(context->containers_array);
+    for (i = 0; i < context->containers_number; i++) {
+        free(context->containers[i].name);
+    }
+
+    if (context->containers) {
+        free(context->containers);
+    }
+
     my_free(context);
 
     return (0);
@@ -159,15 +167,8 @@ static int daemon_memcached_plugin_init(void *p)
     context->config.w_batch_size = mci_w_batch_size;
     context->config.enable_binlog = mci_enable_binlog;
 
-    context->containers_array = (memcached_container_t *) my_malloc(3 * sizeof(memcached_container_t), MYF(0));
-    context->containers_array[0].port = "30001";
-    context->containers_array[0].name = "aaa";
-    context->containers_array[1].port = "unix:/tmp/memcached.socket";
-    context->containers_array[1].name = "bbb";
-    context->containers_array[2].port = "30002";
-    context->containers_array[2].name = "bbb";
-
-    context->containers_length = 3;
+    context->containers = NULL;
+    context->containers_number = 0;
 
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);

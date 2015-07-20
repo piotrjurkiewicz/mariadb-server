@@ -6405,7 +6405,7 @@ static void *get_engine_specific(const void *cookie) {
     return c->engine_storage;
 }
 
-static int get_container(const void *cookie) {
+static memcached_container_t* get_container(const void *cookie) {
     conn *c = (conn *)cookie;
     return c->container;
 }
@@ -7669,25 +7669,25 @@ int main (int argc, char **argv) {
     memcached_container_t *current_container;
     unsigned int i;
 
-    for (i = 0; i < context->containers_length; i++) {
-        current_container = &context->containers_array[i];
+    for (i = 0; i < context->containers_number; i++) {
+        current_container = &context->containers[i];
         int ret;
 
-        if (strncmp("unix", current_container->port, strlen("unix")) == 0) {
-            ret = server_socket_unix(current_container->port + 5, settings.access, current_container);
+        if (strncmp("unix", current_container->name, strlen("unix")) == 0) {
+            ret = server_socket_unix(current_container->name + 5, settings.access, current_container);
         } else {
-            int port = atoi(current_container->port);
+            int port = atoi(current_container->name);
             ret = server_socket(settings.inter, port, tcp_transport, current_container, NULL);
         }
 
         if (ret == 0) {
             settings.extensions.logger->log(EXTENSION_LOG_INFO, NULL,
                                             "Started container: %s\n",
-                                            current_container->port);
+                                            current_container->name);
         } else {
             settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
                                             "Failed to start container: %s\n",
-                                            current_container->port);
+                                            current_container->name);
         }
         current_container++;
     }

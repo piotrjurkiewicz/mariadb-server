@@ -336,6 +336,57 @@ innodb_get_info(
 }
 
 /*******************************************************************//**
+Populate containers array in memcached context.
+@return ENGINE_SUCCESS if successful otherwise error code */
+static
+ENGINE_ERROR_CODE
+populate_containers_array(
+/*======================*/
+	ENGINE_HANDLE*		handle,		/*!< in: Engine Handle */
+	memcached_context_t*	context)	/*!< out: memcached context */
+{
+	struct innodb_engine*	innodb_eng = innodb_handle(handle);
+
+	ib_ulint_t		i;
+	hash_table_t*		TABLE;
+	meta_cfg_info_t*	data;
+	unsigned int		n = 0;
+
+	TABLE = innodb_eng->meta_hash;
+
+	for (i = 0; i < TABLE->n_cells; i++) {
+		data = (meta_cfg_info_t*) HASH_GET_FIRST(TABLE, i);
+
+		while (data) {
+			n++;
+			data = HASH_GET_NEXT(name_hash, data);
+		}
+	}
+
+	/* This memory is freed in memcached_mysql.cc/daemon_memcached_plugin_deinit() */
+	context->containers = (memcached_container_t *) malloc(n * sizeof(memcached_container_t));
+	context->containers_number = n;
+
+	n = 0;
+
+	for (i = 0; i < TABLE->n_cells; i++) {
+		data = (meta_cfg_info_t*) HASH_GET_FIRST(TABLE, i);
+
+		while (data) {
+			assert(n < context->containers_number);
+			/* This memory is freed in memcached_mysql.cc/daemon_memcached_plugin_deinit() */
+			context->containers[n].name = strdup(data->col_info[CONTAINER_NAME].col_name);
+			n++;
+			data = HASH_GET_NEXT(name_hash, data);
+		}
+	}
+
+	assert(n == context->containers_number);
+
+	return(ENGINE_SUCCESS);
+}
+
+/*******************************************************************//**
 Initialize InnoDB Memcached Engine.
 @return ENGINE_SUCCESS if successful */
 static
@@ -395,7 +446,14 @@ innodb_initialize(
 		NULL, 0, &innodb_eng->meta_hash);
 
 	if (!innodb_eng->meta_info) {
+		fprintf(stderr, "No containers defined\n");
 		return(ENGINE_TMPFAIL);
+	}
+
+	return_status = populate_containers_array(handle, context);
+
+	if (return_status != ENGINE_SUCCESS) {
+		return(return_status);
 	}
 
 	memcached_shutdown = false;
