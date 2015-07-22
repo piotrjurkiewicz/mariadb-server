@@ -19,10 +19,10 @@ source include/memcache_config.inc;
 --enable_query_log
 
 INSERT INTO config_options VALUES("separator", "|");
-INSERT INTO config_options VALUES("table_map_delimiter", ".");
 
 # describe table for memcache
-INSERT INTO containers VALUES ("desct1", "test", "t1",
+--replace_result $DAEMON_MEMCACHED_PORT_0 DAEMON_MEMCACHED_PORT_0
+eval INSERT INTO containers VALUES ("desct1", "test", "t1",
 			       "c1", "c2,c21", "c3", "c4", "c5", "PRIMARY");
 
 USE test;

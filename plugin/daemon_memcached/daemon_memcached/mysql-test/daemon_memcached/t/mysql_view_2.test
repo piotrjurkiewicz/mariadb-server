@@ -19,20 +19,25 @@ source include/memcache_config.inc;
 --enable_query_log
 
 INSERT INTO config_options VALUES("separator", "|");
-INSERT INTO config_options VALUES("table_map_delimiter", ".");
 
 # describe table for memcache
-INSERT INTO containers VALUES ("desct1", "test", "t1",
+--replace_result $DAEMON_MEMCACHED_PORT_0 DAEMON_MEMCACHED_PORT_0
+eval INSERT INTO containers VALUES ("$DAEMON_MEMCACHED_PORT_0", "test", "t1",
 			       "c1", "c2,c21", "c3", "c4", "c5", "PRIMARY");
-INSERT INTO containers VALUES ("desct2", "test", "t2",
+--replace_result $DAEMON_MEMCACHED_PORT_1 DAEMON_MEMCACHED_PORT_1
+eval INSERT INTO containers VALUES ("$DAEMON_MEMCACHED_PORT_1", "test", "t2",
 			       "c1", "c2", "c3", "c4", "c5", "PRIMARY");
-INSERT INTO containers VALUES ("desc_v1", "test", "v1",
+--replace_result $DAEMON_MEMCACHED_PORT_2 DAEMON_MEMCACHED_PORT_2
+eval INSERT INTO containers VALUES ("$DAEMON_MEMCACHED_PORT_2", "test", "v1",
                                "vc1", "vc2,vc21", "vc3", "vc4", "vc5", "PRIMARY");
-INSERT INTO containers VALUES ("desct3", "test", "t3",
+--replace_result $DAEMON_MEMCACHED_PORT_3 DAEMON_MEMCACHED_PORT_3
+eval INSERT INTO containers VALUES ("$DAEMON_MEMCACHED_PORT_3", "test", "t3",
 			       "c1", "c2,c21", "c3", "c4", "c5", "PRIMARY");
-INSERT INTO containers VALUES ("desct4", "test", "t4",
+--replace_result $DAEMON_MEMCACHED_PORT_4 DAEMON_MEMCACHED_PORT_4
+eval INSERT INTO containers VALUES ("$DAEMON_MEMCACHED_PORT_4", "test", "t4",
 			       "c1", "c2,c21,c22", "c3", "c4", "c5", "PRIMARY");
-INSERT INTO containers VALUES ("desct5", "test", "t5",
+--replace_result $DAEMON_MEMCACHED_PORT_5 DAEMON_MEMCACHED_PORT_5
+eval INSERT INTO containers VALUES ("$DAEMON_MEMCACHED_PORT_5", "test", "t5",
 			       "c1", "c2,c21,c22,c23", "c3", "c4", "c5", "PRIMARY");
 
 USE test;
@@ -121,7 +126,7 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT_0}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -140,68 +145,96 @@ EOF
 perl;
 use DBI;
 use Cache::Memcached;
-my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
+my $memd0 = new Cache::Memcached {
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT_0}" ],
+  'connect_timeout' => 20,
+  'select_timeout' => 20
+};
+my $memd1 = new Cache::Memcached {
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT_1}" ],
+  'connect_timeout' => 20,
+  'select_timeout' => 20
+};
+my $memd2 = new Cache::Memcached {
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT_2}" ],
+  'connect_timeout' => 20,
+  'select_timeout' => 20
+};
+my $memd3 = new Cache::Memcached {
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT_3}" ],
+  'connect_timeout' => 20,
+  'select_timeout' => 20
+};
+my $memd4 = new Cache::Memcached {
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT_4}" ],
+  'connect_timeout' => 20,
+  'select_timeout' => 20
+};
+my $memd5 = new Cache::Memcached {
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT_5}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
 print "Here the memcached results with D,B,H,C of t1:\n";
-$val = $memd->get('@@desct1.D');
+$val = $memd0->get('D');
 if ($val) { print "$val\n"; }
-$val = $memd->get("\@\@desct1.B");
+$val = $memd0->get("B");
 if ($val) { print "$val\n"; }
-$val = $memd->get('@@desct1.'.'H');
+$val = $memd0->get(''.'H');
 if ($val) { print "$val\n"; }
-$val = $memd->get('@@desct1.C');
+$val = $memd0->get('C');
 if ($val) { print "$val\n"; }
 print "Here the memcached results with D,B,H,C of t2:\n";
-$val = $memd->get("\@\@desct2");
-$val = $memd->get("D");
+$val = $memd1->get("D");
 if ($val) { print "$val\n"; }
-$val = $memd->get('@@desct2.B');
+$val = $memd1->get('B');
 if ($val) { print "$val\n"; }
-$val = $memd->get('H');
+$val = $memd1->get('H');
 if ($val) { print "$val\n"; }
-$val = $memd->get('C');
+$val = $memd1->get('C');
 if ($val) { print "$val\n"; }
 print "Here the memcached results with D,B,H,A of t3:\n";
-$val = $memd->get("\@\@desct3.D");
+$val = $memd3->get("D");
 if ($val) { print "$val\n"; }
-$val = $memd->get('@@desct3.B');
+$val = $memd3->get('B');
 if ($val) { print "$val\n"; }
-$val = $memd->get('@@desct3.H');
+$val = $memd3->get('H');
 if ($val) { print "$val\n"; }
-$val = $memd->get('@@desct3.A');
+$val = $memd3->get('A');
 if ($val) { print "$val\n"; }
 print "Here the memcached results with D,O,K,S of t5:\n";
-$val = $memd->get("\@\@desct5.D");
+$val = $memd5->get("D");
 if ($val) { print "$val\n"; }
-$val = $memd->get('@@desct5.O');
+$val = $memd5->get('O');
 if ($val) { print "$val\n"; }
-$val = $memd->get('@@desct5.K');
+$val = $memd5->get('K');
 if ($val) { print "$val\n"; }
-$val = $memd->get('@@desct5.S');
+$val = $memd5->get('S');
 if ($val) { print "$val\n"; }
 print "Here the memcached results with Z,B,H,M of t4:\n";
-$val = $memd->get("\@\@desct4.Z");
+$val = $memd4->get("Z");
 if ($val) { print "$val\n"; }
-$val = $memd->get('@@desct4.B');
+$val = $memd4->get('B');
 if ($val) { print "$val\n"; }
-$val = $memd->get('@@desct4.H');
+$val = $memd4->get('H');
 if ($val) { print "$val\n"; }
-$val = $memd->get('@@desct4.M');
+$val = $memd4->get('M');
 if ($val) { print "$val\n"; }
 print "Here the memcached results with D,B,H,C of t2:\n";
-$memd->get("\@\@desct2");
-$val = $memd->get("D");
+$val = $memd1->get("D");
 if ($val) { print "$val\n"; }
-$val = $memd->get('B');
+$val = $memd1->get('B');
 if ($val) { print "$val\n"; }
-$val = $memd->get('H');
+$val = $memd1->get('H');
 if ($val) { print "$val\n"; }
-$val = $memd->get('C');
+$val = $memd1->get('C');
 if ($val) { print "$val\n"; }
-$memd->disconnect_all;
+$memd0->disconnect_all;
+$memd1->disconnect_all;
+$memd2->disconnect_all;
+$memd3->disconnect_all;
+$memd4->disconnect_all;
+$memd5->disconnect_all;
 EOF
 
 --sorted_result
@@ -222,18 +255,18 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT_2}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
 print "Here the memcached results with D,B,H,C of view v1:\n";
-$val = $memd->get("\@\@desc_v1.D");
+$val = $memd->get("D");
 if ($val) { print "$val\n"; }
-$val = $memd->get("\@\@desc_v1.B");
+$val = $memd->get("B");
 if ($val) { print "$val\n"; }
-$val = $memd->get('@@desc_v1.H');
+$val = $memd->get('H');
 if ($val) { print "$val\n"; }
-$val = $memd->get('@@desc_v1.C');
+$val = $memd->get('C');
 if ($val) { print "$val\n"; }
 $memd->disconnect_all;
 EOF
@@ -242,13 +275,13 @@ perl;
 use DBI;
 use Cache::Memcached;
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT_2}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
 print "Here the memcached results after set to view v1:\n";
-$val = $memd->set("\@\@desc_v1.E","Essen|Ost");
-$val = $memd->get("\@\@desc_v1.E");
+$val = $memd->set("E","Essen|Ost");
+$val = $memd->get("E");
 if ($val) { print "$val\n"; }
 $memd->disconnect_all;
 EOF
@@ -259,39 +292,66 @@ SELECT vc1,vc2,vc21 FROM v1;
 perl;
 use DBI;
 use Cache::Memcached;
-my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
+my $memd0 = new Cache::Memcached {
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT_0}" ],
+  'connect_timeout' => 20,
+  'select_timeout' => 20
+};
+my $memd1 = new Cache::Memcached {
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT_1}" ],
+  'connect_timeout' => 20,
+  'select_timeout' => 20
+};
+my $memd2 = new Cache::Memcached {
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT_2}" ],
+  'connect_timeout' => 20,
+  'select_timeout' => 20
+};
+my $memd3 = new Cache::Memcached {
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT_3}" ],
+  'connect_timeout' => 20,
+  'select_timeout' => 20
+};
+my $memd4 = new Cache::Memcached {
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT_4}" ],
+  'connect_timeout' => 20,
+  'select_timeout' => 20
+};
+my $memd5 = new Cache::Memcached {
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT_5}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
 print "Here the memcached results after set in default:\n";
-$val = $memd->set("E","Essen|Ost");
-$val = $memd->get("E");
+$val = $memd0->set("E","Essen|Ost");
+$val = $memd0->get("E");
 if ($val) { print "$val\n"; }
 print "Here the memcached results after set in t2:\n";
-$val = $memd->set("\@\@desct2.E","Essen");
-$val = $memd->get("\@\@desct2.E");
+$val = $memd1->set("E","Essen");
+$val = $memd1->get("E");
 if ($val) { print "$val\n"; }
 print "Here the memcached results after set in t5:\n";
-$val = $memd->get("\@\@desct5");
-$val = $memd->set("E","Essen|Mitte|111111|Mahlzeit");
-$val = $memd->get("E");
+$val = $memd5->set("E","Essen|Mitte|111111|Mahlzeit");
+$val = $memd5->get("E");
 if ($val) { print "$val\n"; }
 print "Here the memcached results after set in t3:\n";
-$val = $memd->set('@@desct3.E',"Essen|Ost");
-$memd->get('@@desct3');
-$val = $memd->get("E");
+$val = $memd3->set('E',"Essen|Ost");
+$val = $memd3->get("E");
 if ($val) { print "$val\n"; }
 print "Here the memcached results after set in t4:\n";
-$val = $memd->set('@@desct4.E',"Essen|Mitte|111111");
-$val = $memd->get('@@desct4.E');
+$val = $memd4->set('E',"Essen|Mitte|111111");
+$val = $memd4->get('E');
 if ($val) { print "$val\n"; }
 print "Here the memcached results after set in t5:\n";
-$val = $memd->get("\@\@desct5");
-$val = $memd->set("\@\@desct5.E","Essen|Aussen|111111|Mahlzeit");
-$val = $memd->get("\@\@desct5.E");
+$val = $memd5->set("E","Essen|Aussen|111111|Mahlzeit");
+$val = $memd5->get("E");
 if ($val) { print "$val\n"; }
-$memd->disconnect_all;
+$memd0->disconnect_all;
+$memd1->disconnect_all;
+$memd2->disconnect_all;
+$memd3->disconnect_all;
+$memd4->disconnect_all;
+$memd5->disconnect_all;
 EOF
 
 --sorted_result

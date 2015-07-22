@@ -3,4 +3,3 @@ $DAEMON_MEMCACHED_OPT
 --log-bin
 --binlog-format=mixed
 --loose-innodb_api_enable_binlog=1
---loose-daemon_memcached_option="-p$DAEMON_MEMCACHED_PORT"

@@ -1,21 +1,20 @@
 SET @tx_isolation= @@global.tx_isolation;
 SET GLOBAL TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
 INSERT INTO config_options VALUES("separator", "|");
-INSERT INTO config_options VALUES("table_map_delimiter", ".");
-INSERT INTO containers VALUES ("desct11", "test", "t1",
+INSERT INTO containers VALUES ("DAEMON_MEMCACHED_PORT_0", "test", "t1",
 "c1", "c2,c21,c22,c23,c24,c25,c26,c27", "c3", "c4", "c5",
 "PRIMARY");
-INSERT INTO containers VALUES ("desct12", "test", "t1",
+INSERT INTO containers VALUES ("DAEMON_MEMCACHED_PORT_1", "test", "t1",
 "c2", "c1, c2", "c3", "c4", "c5", "i12");
-INSERT INTO containers VALUES ("desct13", "test", "t1",
+INSERT INTO containers VALUES ("DAEMON_MEMCACHED_PORT_2", "test", "t1",
 "c2", "c1,c21", "c3", "c4", "c5", "i12");
-INSERT INTO containers VALUES ("desct14", "test", "t1",
+INSERT INTO containers VALUES ("DAEMON_MEMCACHED_PORT_3", "test", "t1",
 "c21", "c1,c23,c22", "c3", "c4", "c5", "i14");
-INSERT INTO containers VALUES ("desct15", "test", "t1",
+INSERT INTO containers VALUES ("DAEMON_MEMCACHED_PORT_4", "test", "t1",
 "c23", "c1,c21,c22,c24", "c3", "c4", "c5", "i15");
-INSERT INTO containers VALUES ("desct16", "test", "t1",
+INSERT INTO containers VALUES ("DAEMON_MEMCACHED_PORT_5", "test", "t1",
 "c25", "c23,c24,c27,c1", "c3", "c4", "c5", "i16");
-INSERT INTO containers VALUES ("desct17", "test", "t1",
+INSERT INTO containers VALUES ("DAEMON_MEMCACHED_PORT_6", "test", "t1",
 "c26", "c2, c1", "c3", "c4", "c5", "i17");
 USE test;
 DROP TABLE IF EXISTS t1,t2;
@@ -49,42 +48,42 @@ S	Stuttgart	Nord	65432	Fernsehturm	4	D	d	U
 SELECT SLEEP(2);
 SLEEP(2)
 0
-Here the memcached results with D,O,K,S of default:
+Here the memcached results with D,O,K,S of DAEMON_MEMCACHED_PORT_0:
 Duesseldorf|City|98765|Hafen|1|A|a|Z
 Oldenburg|Mitte|87654|Deich|2|B|b|Y
 Koeln|West|76543|Rhein|3|C|c|X
 Stuttgart|Nord|65432|Fernsehturm|4|D|d|U
-Here the memcached results with c1 of desct11:
+Here the memcached results with c1 of DAEMON_MEMCACHED_PORT_0:
 Duesseldorf|City|98765|Hafen|1|A|a|Z
 Oldenburg|Mitte|87654|Deich|2|B|b|Y
 Koeln|West|76543|Rhein|3|C|c|X
 Stuttgart|Nord|65432|Fernsehturm|4|D|d|U
-Here the memcached results with c2 of desct13:
+Here the memcached results with c2 of DAEMON_MEMCACHED_PORT_2:
 D|City
 O|Mitte
 K|West
 S|Nord
-Here the memcached results with c2 of desct12:
+Here the memcached results with c2 of DAEMON_MEMCACHED_PORT_1:
 D|Duesseldorf
 O|Oldenburg
 K|Koeln
 S|Stuttgart
-Here the memcached results with c2,c21,c22 of desct14:
+Here the memcached results with c2,c21,c22 of DAEMON_MEMCACHED_PORT_3:
 D|Hafen|98765
 O|Deich|87654
 K|Rhein|76543
 S|Fernsehturm|65432
-Here the memcached results with c2,c21,c22,c23 of desct15:
+Here the memcached results with c2,c21,c22,c23 of DAEMON_MEMCACHED_PORT_4:
 D|City|98765|1
 O|Mitte|87654|2
 K|West|76543|3
 S|Nord|65432|4
-Here the memcached results with c23,c24,c25,c26 of desct16:
+Here the memcached results with c23,c24,c25,c26 of DAEMON_MEMCACHED_PORT_5:
 Hafen|1|Z|D
 Rhein|3|X|K
 Fernsehturm|4|U|S
 Deich|2|Y|O
-Here the memcached results with c26 of desct17:
+Here the memcached results with c26 of DAEMON_MEMCACHED_PORT_6:
 Koeln|K
 Oldenburg|O
 Duesseldorf|D
@@ -95,7 +94,7 @@ D	Duesseldorf	City	98765	Hafen	1	A	a	Z
 K	Koeln	West	76543	Rhein	3	C	c	X
 O	Oldenburg	Mitte	87654	Deich	2	B	b	Y
 S	Stuttgart	Nord	65432	Fernsehturm	4	D	d	U
-Here the memcached results after set in desct12:
+Here the memcached results after set in DAEMON_MEMCACHED_PORT_1:
 E|Essen
 SELECT c1,c2,c21,c22,c23,c24,c25,c26,c27 FROM t1;
 c1	c2	c21	c22	c23	c24	c25	c26	c27
@@ -104,7 +103,7 @@ E	Essen	NULL	NULL	NULL	NULL	NULL	NULL	NULL
 K	Koeln	West	76543	Rhein	3	C	c	X
 O	Oldenburg	Mitte	87654	Deich	2	B	b	Y
 S	Stuttgart	Nord	65432	Fernsehturm	4	D	d	U
-Here the memcached results after set in desct13:
+Here the memcached results after set in DAEMON_MEMCACHED_PORT_2:
 E|Neustadt
 SELECT c1,c2,c21,c22,c23,c24,c25,c26,c27 FROM t1;
 c1	c2	c21	c22	c23	c24	c25	c26	c27
@@ -113,7 +112,7 @@ E	Essen	Neustadt	NULL	NULL	NULL	NULL	NULL	NULL
 K	Koeln	West	76543	Rhein	3	C	c	X
 O	Oldenburg	Mitte	87654	Deich	2	B	b	Y
 S	Stuttgart	Nord	65432	Fernsehturm	4	D	d	U
-Here the memcached results after set in desct14:
+Here the memcached results after set in DAEMON_MEMCACHED_PORT_3:
 SELECT c1,c2,c21,c22,c23,c24,c25,c26,c27 FROM t1;
 c1	c2	c21	c22	c23	c24	c25	c26	c27
 D	Duesseldorf	City	98765	Hafen	1	A	a	Z
@@ -121,7 +120,7 @@ E	Essen	Neustadt	NULL	NULL	NULL	NULL	NULL	NULL
 K	Koeln	West	76543	Rhein	3	C	c	X
 O	Oldenburg	Mitte	87654	Deich	2	B	b	Y
 S	Stuttgart	Nord	65432	Fernsehturm	4	D	d	U
-Here the memcached results after set in desct15:
+Here the memcached results after set in DAEMON_MEMCACHED_PORT_4:
 SELECT c1,c2,c21,c22,c23,c24,c25,c26,c27 FROM t1;
 c1	c2	c21	c22	c23	c24	c25	c26	c27
 D	Duesseldorf	City	98765	Hafen	1	A	a	Z
@@ -129,7 +128,7 @@ E	Essen	Neustadt	NULL	NULL	NULL	NULL	NULL	NULL
 K	Koeln	West	76543	Rhein	3	C	c	X
 O	Oldenburg	Mitte	87654	Deich	2	B	b	Y
 S	Stuttgart	Nord	65432	Fernsehturm	4	D	d	U
-Here the memcached results after set in desct16:
+Here the memcached results after set in DAEMON_MEMCACHED_PORT_5:
 SELECT c1,c2,c21,c22,c23,c24,c25,c26,c27 FROM t1;
 c1	c2	c21	c22	c23	c24	c25	c26	c27
 D	Duesseldorf	City	98765	Hafen	1	A	a	Z
@@ -137,7 +136,7 @@ E	Essen	Neustadt	NULL	NULL	NULL	NULL	NULL	NULL
 K	Koeln	West	76543	Rhein	3	C	c	X
 O	Oldenburg	Mitte	87654	Deich	2	B	b	Y
 S	Stuttgart	Nord	65432	Fernsehturm	4	D	d	U
-Here the memcached results after set in desct17:
+Here the memcached results after set in DAEMON_MEMCACHED_PORT_6:
 SELECT c1,c2,c21,c22,c23,c24,c25,c26,c27 FROM t1;
 c1	c2	c21	c22	c23	c24	c25	c26	c27
 D	Duesseldorf	City	98765	Hafen	1	A	a	Z

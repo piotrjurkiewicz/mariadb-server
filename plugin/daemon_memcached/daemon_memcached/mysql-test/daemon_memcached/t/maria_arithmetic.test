@@ -15,7 +15,8 @@ source include/memcache_config.inc;
 INSERT INTO config_options VALUES("separator", "|");
 
 # describe table for memcached
-INSERT INTO containers VALUES ("desc_t1", "test", "t1", "c1", "c2", "c3", "c4", "c5", "PRIMARY");
+--replace_result $DAEMON_MEMCACHED_PORT_0 DAEMON_MEMCACHED_PORT_0
+eval INSERT INTO containers VALUES ("$DAEMON_MEMCACHED_PORT_0", "test", "t1", "c1", "c2", "c3", "c4", "c5", "PRIMARY");
 
 USE test;
 
@@ -60,7 +61,7 @@ sub Cache::Memcached::_incrdecr {
     return $1;
 }
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT_0}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -136,7 +137,7 @@ sub Cache::Memcached::_incrdecr {
     return $1;
 }
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT_0}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -211,7 +212,7 @@ sub Cache::Memcached::_incrdecr {
     return $1;
 }
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT_0}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -287,7 +288,7 @@ sub Cache::Memcached::_incrdecr {
     return $1;
 }
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT_0}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -362,7 +363,7 @@ sub Cache::Memcached::_incrdecr {
     return $1;
 }
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT_0}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -438,7 +439,7 @@ sub Cache::Memcached::_incrdecr {
     return $1;
 }
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT_0}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -513,7 +514,7 @@ sub Cache::Memcached::_incrdecr {
     return $1;
 }
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT_0}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -589,7 +590,7 @@ sub Cache::Memcached::_incrdecr {
     return $1;
 }
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT_0}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };
@@ -664,7 +665,7 @@ sub Cache::Memcached::_incrdecr {
     return $1;
 }
 my $memd = new Cache::Memcached {
-  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT}" ],
+  'servers' => [ "127.0.0.1:$ENV{DAEMON_MEMCACHED_PORT_0}" ],
   'connect_timeout' => 20,
   'select_timeout' => 20
 };

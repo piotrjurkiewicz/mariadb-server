@@ -1,16 +1,15 @@
 SET @tx_isolation= @@global.tx_isolation;
 SET GLOBAL TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
 INSERT INTO config_options VALUES("separator", "|");
-INSERT INTO config_options VALUES("table_map_delimiter", "!");
-INSERT INTO containers VALUES ("desct1", "test", "t1",
+INSERT INTO containers VALUES ("DAEMON_MEMCACHED_PORT_0", "test", "t1",
 "c1", "c2,c21", "c3", "c4", "c5", "PRIMARY");
-INSERT INTO containers VALUES ("desct2", "test", "t2",
+INSERT INTO containers VALUES ("DAEMON_MEMCACHED_PORT_1", "test", "t2",
 "c1", "c2", "c3", "c4", "c5", "PRIMARY");
-INSERT INTO containers VALUES ("desct3", "test", "t3",
+INSERT INTO containers VALUES ("DAEMON_MEMCACHED_PORT_2", "test", "t3",
 "c1", "c2,c21", "c3", "c4", "c5", "PRIMARY");
-INSERT INTO containers VALUES ("desct4", "test", "t4",
+INSERT INTO containers VALUES ("DAEMON_MEMCACHED_PORT_3", "test", "t4",
 "c1", "c2,c21,c22", "c3", "c4", "c5", "PRIMARY");
-INSERT INTO containers VALUES ("desct5", "test", "t5",
+INSERT INTO containers VALUES ("DAEMON_MEMCACHED_PORT_4", "test", "t5",
 "c1", "c2,c21,c22,c23", "c3", "c4", "c5", "PRIMARY");
 USE test;
 DROP TABLE IF EXISTS t1,t2;
@@ -95,7 +94,7 @@ S	Stuttgart	Nord	65432	Fernsehturm
 SELECT SLEEP(2);
 SLEEP(2)
 0
-Here the memcached results with D,B,H,C of default:
+Here the memcached results with D,B,H,C of t1:
 Darmstadt|City
 Berlin|Mitte
 Hamburg|Außenalster
@@ -157,7 +156,7 @@ D	Düsseldorf	City	98765	Hafen
 K	Köln	West	76543	Rhein
 O	Oldenburg	Mitte	87654	Bäder
 S	Stuttgart	Nord	65432	Fernsehturm
-Here the memcached results after set in default:
+Here the memcached results after set in t1:
 Essen|Ost
 Here the memcached results after set in t2:
 Essen
