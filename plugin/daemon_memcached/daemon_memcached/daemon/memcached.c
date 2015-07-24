@@ -6027,6 +6027,7 @@ static int server_socket_unix(const char *path, int access_mask, memcached_conta
     struct stat tstat;
     int flags =1;
     int old_umask;
+    conn *listen_conn_add;
 
     if (!path) {
         return 1;
@@ -6074,16 +6075,19 @@ static int server_socket_unix(const char *path, int access_mask, memcached_conta
         safe_close(sfd);
         return 1;
     }
-    if (!(listen_conn = conn_new(sfd, conn_listening,
-                                 EV_READ | EV_PERSIST, 1,
-                                 local_transport, container,
-                                 main_base, NULL))) {
+    if (!(listen_conn_add = conn_new(sfd, conn_listening,
+                                     EV_READ | EV_PERSIST, 1,
+                                     local_transport, container,
+                                     main_base, NULL))) {
         settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
                  "failed to create listening connection\n");
         return 1;
     }
 
+    listen_conn_add->next = listen_conn;
+    listen_conn = listen_conn_add;
     STATS_LOCK();
+    ++stats.curr_conns;
     ++stats.daemon_conns;
     STATS_UNLOCK();
 
