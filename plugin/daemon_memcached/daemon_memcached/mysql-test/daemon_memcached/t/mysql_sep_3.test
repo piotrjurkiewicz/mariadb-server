@@ -24,7 +24,7 @@ INSERT INTO config_options VALUES("separator", "ü");
 
 # describe table for memcache
 --replace_result $DAEMON_MEMCACHED_PORT_0 DAEMON_MEMCACHED_PORT_0
-eval INSERT INTO containers VALUES ("$DAEMON_MEMCACHED_PORT_0", "test", "t1",
+eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_0", "test", "t1",
 			       "c1", "c2,c21,c22,c23,c24,c25", "c3", "c4", "c5", "PRIMARY");
 
 USE test;

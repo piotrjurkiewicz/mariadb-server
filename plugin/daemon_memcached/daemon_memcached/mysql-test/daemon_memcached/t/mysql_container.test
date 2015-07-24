@@ -22,7 +22,7 @@ INSERT INTO config_options VALUES("separator", "|");
 
 # describe table for memcache
 --replace_result $DAEMON_MEMCACHED_PORT_0 DAEMON_MEMCACHED_PORT_0
-eval INSERT INTO containers VALUES ("$DAEMON_MEMCACHED_PORT_0", "test", "t1",
+eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_0", "test", "t1",
 			       "c1", "c2",  "c3", "c4", "c5", "PRIMARY");
 
 USE test;
@@ -134,7 +134,7 @@ DELETE FROM containers;
 
 # describe table for memcache
 --replace_result $DAEMON_MEMCACHED_PORT_1 DAEMON_MEMCACHED_PORT_1
-eval INSERT INTO containers VALUES ("$DAEMON_MEMCACHED_PORT_1", "test", "t2",
+eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_1", "test", "t2",
 			       "c1", "c2",  "c3", "c4", "c5", "PRIMARY");
 
 USE test;
@@ -247,12 +247,12 @@ DELETE FROM containers;
 
 --replace_result $DAEMON_MEMCACHED_PORT_1 DAEMON_MEMCACHED_PORT_1
 --error 1048
-eval INSERT INTO containers VALUES ("$DAEMON_MEMCACHED_PORT_1", NULL, "t2",
+eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_1", NULL, "t2",
 			       "c1", "c2",  "c3", "c4", "c5", "PRIMARY");
 
 --replace_result $DAEMON_MEMCACHED_PORT_1 DAEMON_MEMCACHED_PORT_1
 --error 1048
-eval INSERT INTO containers VALUES ("$DAEMON_MEMCACHED_PORT_1", "test", "t2",
+eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_1", "test", "t2",
 			       NULL, "c2",  "c3", "c4", "c5", "PRIMARY");
 
 #----------------------------------------------------------------
@@ -264,7 +264,7 @@ DELETE FROM containers;
 
 # describe table for memcache
 --replace_result $DAEMON_MEMCACHED_PORT_1 DAEMON_MEMCACHED_PORT_1
-eval INSERT INTO containers VALUES ("$DAEMON_MEMCACHED_PORT_1", "junk", "t2",
+eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_1", "junk", "t2",
 			       "c1", "c2",  "c3", "c4", "c5", "PRIMARY");
 
 # even though the plugin can be installed, the initialization will fail
@@ -298,7 +298,7 @@ DELETE FROM containers;
 
 # describe table for memcache
 --replace_result $DAEMON_MEMCACHED_PORT_1 DAEMON_MEMCACHED_PORT_1
-eval INSERT INTO containers VALUES ("$DAEMON_MEMCACHED_PORT_1", "test", "t2",
+eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_1", "test", "t2",
 			       "c1", "c2",  "c3", "c4", "c5", "PRIMARY");
 
 USE test;
@@ -380,7 +380,7 @@ DELETE FROM containers;
 
 # describe table for memcache
 --replace_result $DAEMON_MEMCACHED_PORT_1 DAEMON_MEMCACHED_PORT_1
-eval INSERT INTO containers VALUES ("$DAEMON_MEMCACHED_PORT_1", "test", "t2",
+eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_1", "test", "t2",
 			       "c1", "c2",  "c3", "c4", "c5", "PRIMARY");
 
 USE test;
@@ -570,7 +570,7 @@ DELETE FROM containers;
 
 # describe table for memcache
 --replace_result $DAEMON_MEMCACHED_PORT_1 DAEMON_MEMCACHED_PORT_1
-eval INSERT INTO containers VALUES ("$DAEMON_MEMCACHED_PORT_1", "test", "t2",
+eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_1", "test", "t2",
 			       "c1", "c2",  "c3", "c4", "c5", "PRIMARY");
 
 USE test;

@@ -1,7 +1,7 @@
 SET @tx_isolation= @@global.tx_isolation;
 SET GLOBAL TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
 INSERT INTO config_options VALUES("separator", "|");
-INSERT INTO containers VALUES ("DAEMON_MEMCACHED_PORT_0", "test", "t1",
+INSERT INTO containers VALUES ("tcp://127.0.0.1:DAEMON_MEMCACHED_PORT_0", "test", "t1",
 "c1", "c2",  "c3", "c4", "c5", "PRIMARY");
 USE test;
 DROP TABLE IF EXISTS t1;
@@ -49,7 +49,7 @@ Hamburg
 UNINSTALL PLUGIN daemon_memcached;
 use daemon_memcached;
 DELETE FROM containers;
-INSERT INTO containers VALUES ("DAEMON_MEMCACHED_PORT_1", "test", "t2",
+INSERT INTO containers VALUES ("tcp://127.0.0.1:DAEMON_MEMCACHED_PORT_1", "test", "t2",
 "c1", "c2",  "c3", "c4", "c5", "PRIMARY");
 USE test;
 DROP TABLE IF EXISTS t1;
@@ -97,14 +97,14 @@ t2_Hamburg
 UNINSTALL PLUGIN daemon_memcached;
 use daemon_memcached;
 DELETE FROM containers;
-INSERT INTO containers VALUES ("DAEMON_MEMCACHED_PORT_1", NULL, "t2",
+INSERT INTO containers VALUES ("tcp://127.0.0.1:DAEMON_MEMCACHED_PORT_1", NULL, "t2",
 "c1", "c2",  "c3", "c4", "c5", "PRIMARY");
 ERROR 23000: Column 'db_schema' cannot be null
-INSERT INTO containers VALUES ("DAEMON_MEMCACHED_PORT_1", "test", "t2",
+INSERT INTO containers VALUES ("tcp://127.0.0.1:DAEMON_MEMCACHED_PORT_1", "test", "t2",
 NULL, "c2",  "c3", "c4", "c5", "PRIMARY");
 ERROR 23000: Column 'key_columns' cannot be null
 DELETE FROM containers;
-INSERT INTO containers VALUES ("DAEMON_MEMCACHED_PORT_1", "junk", "t2",
+INSERT INTO containers VALUES ("tcp://127.0.0.1:DAEMON_MEMCACHED_PORT_1", "junk", "t2",
 "c1", "c2",  "c3", "c4", "c5", "PRIMARY");
 INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
 SELECT SLEEP(2);
@@ -113,7 +113,7 @@ SLEEP(2)
  This will fail, since memcached not initialized 
 UNINSTALL PLUGIN daemon_memcached;
 DELETE FROM containers;
-INSERT INTO containers VALUES ("DAEMON_MEMCACHED_PORT_1", "test", "t2",
+INSERT INTO containers VALUES ("tcp://127.0.0.1:DAEMON_MEMCACHED_PORT_1", "test", "t2",
 "c1", "c2",  "c3", "c4", "c5", "PRIMARY");
 USE test;
 DROP TABLE IF EXISTS t2;
@@ -143,7 +143,7 @@ SLEEP(2)
 UNINSTALL PLUGIN daemon_memcached;
 use daemon_memcached;
 DELETE FROM containers;
-INSERT INTO containers VALUES ("DAEMON_MEMCACHED_PORT_1", "test", "t2",
+INSERT INTO containers VALUES ("tcp://127.0.0.1:DAEMON_MEMCACHED_PORT_1", "test", "t2",
 "c1", "c2",  "c3", "c4", "c5", "PRIMARY");
 USE test;
 DROP TABLE IF EXISTS t2;
@@ -191,7 +191,7 @@ Ok.
 UNINSTALL PLUGIN daemon_memcached;
 use daemon_memcached;
 DELETE FROM containers;
-INSERT INTO containers VALUES ("DAEMON_MEMCACHED_PORT_1", "test", "t2",
+INSERT INTO containers VALUES ("tcp://127.0.0.1:DAEMON_MEMCACHED_PORT_1", "test", "t2",
 "c1", "c2",  "c3", "c4", "c5", "PRIMARY");
 USE test;
 DROP TABLE IF EXISTS t2;

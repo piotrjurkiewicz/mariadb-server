@@ -1,20 +1,20 @@
 SET @tx_isolation= @@global.tx_isolation;
 SET GLOBAL TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
 INSERT INTO config_options VALUES("separator", "|");
-INSERT INTO containers VALUES ("DAEMON_MEMCACHED_PORT_0", "test", "t1",
+INSERT INTO containers VALUES ("tcp://127.0.0.1:DAEMON_MEMCACHED_PORT_0", "test", "t1",
 "c1", "c2,c21,c22,c23,c24,c25,c26,c27", "c3", "c4", "c5",
 "PRIMARY");
-INSERT INTO containers VALUES ("DAEMON_MEMCACHED_PORT_1", "test", "t1",
+INSERT INTO containers VALUES ("tcp://127.0.0.1:DAEMON_MEMCACHED_PORT_1", "test", "t1",
 "c2", "c1, c2", "c3", "c4", "c5", "i12");
-INSERT INTO containers VALUES ("DAEMON_MEMCACHED_PORT_2", "test", "t1",
+INSERT INTO containers VALUES ("tcp://127.0.0.1:DAEMON_MEMCACHED_PORT_2", "test", "t1",
 "c2", "c1,c21", "c3", "c4", "c5", "i12");
-INSERT INTO containers VALUES ("DAEMON_MEMCACHED_PORT_3", "test", "t1",
+INSERT INTO containers VALUES ("tcp://127.0.0.1:DAEMON_MEMCACHED_PORT_3", "test", "t1",
 "c21", "c1,c23,c22", "c3", "c4", "c5", "i14");
-INSERT INTO containers VALUES ("DAEMON_MEMCACHED_PORT_4", "test", "t1",
+INSERT INTO containers VALUES ("tcp://127.0.0.1:DAEMON_MEMCACHED_PORT_4", "test", "t1",
 "c23", "c1,c21,c22,c24", "c3", "c4", "c5", "i15");
-INSERT INTO containers VALUES ("DAEMON_MEMCACHED_PORT_5", "test", "t1",
+INSERT INTO containers VALUES ("tcp://127.0.0.1:DAEMON_MEMCACHED_PORT_5", "test", "t1",
 "c25", "c23,c24,c27,c1", "c3", "c4", "c5", "i16");
-INSERT INTO containers VALUES ("DAEMON_MEMCACHED_PORT_6", "test", "t1",
+INSERT INTO containers VALUES ("tcp://127.0.0.1:DAEMON_MEMCACHED_PORT_6", "test", "t1",
 "c26", "c2, c1", "c3", "c4", "c5", "i17");
 USE test;
 DROP TABLE IF EXISTS t1,t2;

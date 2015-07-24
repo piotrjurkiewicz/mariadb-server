@@ -49,7 +49,7 @@ CREATE  TABLE IF NOT EXISTS `config_options` (
 -- PRIMARY -> use primary key to search
 -- ------------------------------------------------------------------------
 
-INSERT INTO containers VALUES ("aaa", "test", "demo_test",
+INSERT INTO containers VALUES ("tcp://127.0.0.1:11211", "test", "demo_test",
 			       "c1", "c2",  "c3", "c4", "c5", "PRIMARY");
 
 INSERT INTO config_options VALUES("separator", "|");

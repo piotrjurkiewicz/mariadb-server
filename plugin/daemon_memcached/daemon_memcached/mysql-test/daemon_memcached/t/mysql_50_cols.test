@@ -24,7 +24,7 @@ INSERT INTO config_options VALUES("separator", ",");
 
 # describe table for memcache
 --replace_result $DAEMON_MEMCACHED_PORT_0 DAEMON_MEMCACHED_PORT_0
-eval INSERT INTO containers VALUES ("$DAEMON_MEMCACHED_PORT_0", "test", "t1",
+eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_0", "test", "t1",
 			       "c1", 
                                "c200,c201,c202,c203,c204,c205,c206,c207,c208,c209,
                                 c210,c211,c212,c213,c214,c215,c216,c217,c218,c219,
@@ -43,7 +43,7 @@ DELETE FROM containers;
 
 # The 255 character limit of "value_columns" can hold columns up to "c230"
 --replace_result $DAEMON_MEMCACHED_PORT_0 DAEMON_MEMCACHED_PORT_0
-eval INSERT INTO containers VALUES ("$DAEMON_MEMCACHED_PORT_0", "test", "t1",
+eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_0", "test", "t1",
 			       "c1", 
                                "c200,c201,c202,c203,c204,c205,c206,c207,c208,c209,
                                 c210,c211,c212,c213,c214,c215,c216,c217,c218,c219,

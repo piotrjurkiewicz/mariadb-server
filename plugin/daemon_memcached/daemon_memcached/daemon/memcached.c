@@ -7675,13 +7675,70 @@ int main (int argc, char **argv) {
 
     for (i = 0; i < context->containers_number; i++) {
         current_container = &context->containers[i];
-        int ret;
+        int ret = -1;
 
-        if (strncmp("unix", current_container->name, strlen("unix")) == 0) {
-            ret = server_socket_unix(current_container->name + 5, settings.access, current_container);
+        if (strncmp("unix:", current_container->name, strlen("unix:")) == 0) {
+            char *path = current_container->name + strlen("unix:");
+
+            if (strncmp("//", path, strlen("//")) == 0) {
+                path += 2;
+            }
+
+            ret = server_socket_unix(path, settings.access, current_container);
+        } else if (strncmp("tcp://", current_container->name, strlen("tcp://")) == 0 ||
+                   strncmp("udp://", current_container->name, strlen("udp://")) == 0) {
+            enum network_transport transport = 0;
+            int port = 0;
+            char buffer[128];
+            char *interface_ptr = NULL;
+            char *prot_colon_ptr = NULL;
+            char *port_colon_ptr = NULL;
+            char *ipv6_close_ptr = NULL;
+
+            strncpy(buffer, current_container->name, 128);
+
+            prot_colon_ptr = strchr(buffer, ':');
+            port_colon_ptr = strrchr(buffer, ':');
+            ipv6_close_ptr = strrchr(buffer, ']');
+
+            if (prot_colon_ptr != NULL && port_colon_ptr != NULL &&
+                prot_colon_ptr < port_colon_ptr && ipv6_close_ptr < port_colon_ptr) {
+                *prot_colon_ptr = '\0';
+                *port_colon_ptr = '\0';
+                port = atoi(port_colon_ptr + 1);
+
+                if (strcmp("tcp", buffer) == 0) {
+                    transport = tcp_transport;
+                }
+                if (strcmp("udp", buffer) == 0) {
+                    transport = udp_transport;
+                }
+
+                if (*(prot_colon_ptr + 3) == '[' && *(port_colon_ptr - 1) == ']') {
+                    /* IPv6 address */
+                    *(port_colon_ptr - 1) = '\0';
+                    interface_ptr = prot_colon_ptr + 4;
+                } else {
+                    /* IPv4 address or hostname */
+                    interface_ptr = prot_colon_ptr + 3;
+                }
+
+                if (strcmp(interface_ptr, "*") == 0) {
+                    interface_ptr = NULL;
+                }
+
+                ret = server_socket(interface_ptr, port, transport, current_container, NULL);
+
+            } else {
+                settings.extensions.logger->log(EXTENSION_LOG_INFO, NULL,
+                                                "Port not specified: %s\n",
+                                                current_container->name);
+            }
+
         } else {
-            int port = atoi(current_container->name);
-            ret = server_socket(settings.inter, port, tcp_transport, current_container, NULL);
+            settings.extensions.logger->log(EXTENSION_LOG_INFO, NULL,
+                                            "Invalid transport protocol specified: %s\n",
+                                            current_container->name);
         }
 
         if (ret == 0) {

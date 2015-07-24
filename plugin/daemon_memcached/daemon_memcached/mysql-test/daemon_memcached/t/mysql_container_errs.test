@@ -24,7 +24,7 @@ source include/memcache_config.inc;
 INSERT INTO config_options VALUES("separator", "|");
 
 --replace_result $DAEMON_MEMCACHED_PORT_0 DAEMON_MEMCACHED_PORT_0
-eval INSERT INTO containers VALUES ("$DAEMON_MEMCACHED_PORT_0", "test", "t1",
+eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_0", "test", "t1",
 			       "c1", "c11,c2,c21", "c3", "c4", "c5", "PRIMARY");
 
 USE test;
@@ -129,7 +129,7 @@ INSERT INTO config_options VALUES("separator", "|");
 
 # t9 is not existing!
 --replace_result $DAEMON_MEMCACHED_PORT_0 DAEMON_MEMCACHED_PORT_0
-eval INSERT INTO containers VALUES ("$DAEMON_MEMCACHED_PORT_0", "test", "t9",
+eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_0", "test", "t9",
 			       "c1", "c11,c2,c21", "c3", "c4", "c5", "PRIMARY");
 
 # Tables must exist before plugin can be started!
@@ -202,7 +202,7 @@ INSERT INTO config_options VALUES("separator", "|");
 
 # unknown is not existing!
 --replace_result $DAEMON_MEMCACHED_PORT_0 DAEMON_MEMCACHED_PORT_0
-eval INSERT INTO containers VALUES ("$DAEMON_MEMCACHED_PORT_0", "unknown", "t1",
+eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_0", "unknown", "t1",
 			       "c1", "c11,c2,c21", "c3", "c4", "c5", "PRIMARY");
 
 # Tables must exist before plugin can be started!
@@ -275,7 +275,7 @@ INSERT INTO config_options VALUES("separator", "|");
 
 # unknown is not existing!
 --replace_result $DAEMON_MEMCACHED_PORT_0 DAEMON_MEMCACHED_PORT_0
-eval INSERT INTO containers VALUES ("$DAEMON_MEMCACHED_PORT_0", "test", "t1",
+eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_0", "test", "t1",
 			       "unknown", "c11,c2,c21", "c3", "c4", "c5", "PRIMARY");
 
 # Tables must exist before plugin can be started!
@@ -348,7 +348,7 @@ INSERT INTO config_options VALUES("separator", "|");
 
 # unknown is not existing!
 --replace_result $DAEMON_MEMCACHED_PORT_0 DAEMON_MEMCACHED_PORT_0
-eval INSERT INTO containers VALUES ("$DAEMON_MEMCACHED_PORT_0", "test", "t1",
+eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_0", "test", "t1",
 			       "c1", "unknown", "c3", "c4", "c5", "PRIMARY");
 
 # Tables must exist before plugin can be started!
@@ -421,7 +421,7 @@ INSERT INTO config_options VALUES("separator", "|");
 
 # unknown is not existing!
 --replace_result $DAEMON_MEMCACHED_PORT_0 DAEMON_MEMCACHED_PORT_0
-eval INSERT INTO containers VALUES ("$DAEMON_MEMCACHED_PORT_0", "test", "t1",
+eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_0", "test", "t1",
 			       "c1", NULL, "c3", "c4", "c5", "PRIMARY");
 
 # Tables must exist before plugin can be started!
@@ -494,7 +494,7 @@ INSERT INTO config_options VALUES("separator", "|");
 
 # unknown is not existing!
 --replace_result $DAEMON_MEMCACHED_PORT_0 DAEMON_MEMCACHED_PORT_0
-eval INSERT INTO containers VALUES ("$DAEMON_MEMCACHED_PORT_0", "test", "t1",
+eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_0", "test", "t1",
 			       "c1", "c11,c2,c21", "unknown", "unknown", "unknown", "PRIMARY");
 
 # Tables must exist before plugin can be started!
@@ -568,7 +568,7 @@ INSERT INTO config_options VALUES("separator", "|");
 
 # unknown is not existing!
 --replace_result $DAEMON_MEMCACHED_PORT_0 DAEMON_MEMCACHED_PORT_0
-eval INSERT INTO containers VALUES ("$DAEMON_MEMCACHED_PORT_0", "test", "t1",
+eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_0", "test", "t1",
 			       "c1", "c11,c2,c21", "c3", "c4", "c5", "PRIMARY");
 
 USE test;
