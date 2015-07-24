@@ -59,7 +59,9 @@ it candidate for background thread to commit it */
 #define CONN_IDLE_TIME_TO_BK_COMMIT		5
 
 /** Tells whether memcached plugin is being shutdown */
-static bool	memcached_shutdown	= false;
+static bool	plugin_shutdown		= false;
+pthread_mutex_t	plugin_shutdown_mutex;
+pthread_cond_t	plugin_shutdown_cv;
 
 /** Tells whether the background thread is exited */
 static bool	bk_thd_exited		= true;
@@ -209,23 +211,21 @@ innodb_bk_thread(
 
 	conn_data = UT_LIST_GET_FIRST(innodb_eng->conn_data);
 
-	while(!memcached_shutdown) {
+	pthread_mutex_lock(&plugin_shutdown_mutex);
+
+	while (!plugin_shutdown) {
 		innodb_conn_data_t*	next_conn_data;
 		uint64_t                time;
 		uint64_t		trx_start = 0;
 		uint64_t		processed_count = 0;
+		struct timespec		ts;
 
 		/* Do the cleanup every innodb_eng->bk_commit_interval
-		seconds. We also check if the plugin is being shutdown
-		every second */
-		for (uint i = 0; i < innodb_eng->bk_commit_interval; i++) {
-			sleep(1);
+		seconds. */
 
-			/* If memcached is being shutdown, break */
-			if (memcached_shutdown) {
-				break;
-			}
-		}
+		clock_gettime(CLOCK_REALTIME, &ts);
+		ts.tv_sec += innodb_eng->bk_commit_interval;
+		pthread_cond_timedwait(&plugin_shutdown_cv, &plugin_shutdown_mutex, &ts);
 
 		time = mci_get_time();
 
@@ -308,6 +308,8 @@ next_item:
 		innodb_eng->clean_stale_conn = false;
 		UNLOCK_CONN_IF_NOT_LOCKED(false, innodb_eng);
 	}
+
+	pthread_mutex_unlock(&plugin_shutdown_mutex);
 
 	bk_thd_exited = true;
 
@@ -404,6 +406,9 @@ innodb_initialize(
 
 	context = (memcached_context_t *) config_str;
 
+	pthread_mutex_init(&plugin_shutdown_mutex, NULL);
+	pthread_cond_init(&plugin_shutdown_cv, NULL);
+
 	/* If no call back function registered (InnoDB engine failed to load),
 	load InnoDB Memcached engine should fail too */
 	if (!(context->config.innodb_api_cb)) {
@@ -456,7 +461,8 @@ innodb_initialize(
 		return(return_status);
 	}
 
-	memcached_shutdown = false;
+	plugin_shutdown = false;
+
         pthread_attr_init(&attr);
         pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
         pthread_create(&innodb_eng->bk_thd_for_commit, &attr, innodb_bk_thread,
@@ -685,11 +691,14 @@ innodb_destroy(
 {
 	struct innodb_engine* innodb_eng = innodb_handle(handle);
 
-	memcached_shutdown = true;
+	pthread_mutex_lock(&plugin_shutdown_mutex);
+	plugin_shutdown = true;
+	pthread_cond_signal(&plugin_shutdown_cv);
+	pthread_mutex_unlock(&plugin_shutdown_mutex);
 
 	/* Wait for the background thread to exit */
 	while (!bk_thd_exited) {
-		sleep(1);
+		usleep(1000);
 	}
 
 	innodb_conn_clean(innodb_eng, true, false);
@@ -697,6 +706,9 @@ innodb_destroy(
 	if (innodb_eng->meta_hash) {
 		HASH_CLEANUP(innodb_eng->meta_hash, meta_cfg_info_t*);
 	}
+
+	pthread_cond_destroy(&plugin_shutdown_cv);
+	pthread_mutex_destroy(&plugin_shutdown_mutex);
 
 	pthread_mutex_destroy(&innodb_eng->conn_mutex);
 	pthread_mutex_destroy(&innodb_eng->cas_mutex);

@@ -87,8 +87,8 @@ static int daemon_memcached_plugin_deinit(void *p)
 
     /* If memcached plugin is still initializing, wait for a
     while.*/
-    while (!init_complete() && loop_count < 15) {
-        sleep(1);
+    while (!init_complete() && loop_count < 15000) {
+        usleep(1000);
         loop_count++;
     }
 
@@ -104,8 +104,9 @@ static int daemon_memcached_plugin_deinit(void *p)
     }
 
     loop_count = 0;
-    while (!shutdown_complete() && loop_count < 25) {
-        sleep(2);
+
+    while (!shutdown_complete() && loop_count < 50000) {
+        usleep(1000);
         loop_count++;
     }
 
