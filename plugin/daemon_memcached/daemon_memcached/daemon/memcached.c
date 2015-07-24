@@ -5811,7 +5811,6 @@ static int server_socket(const char *interface,
     int error;
     int success = 0;
     int flags =1;
-    num_udp_socket = 0;
 
     hints.ai_socktype = IS_UDP(transport) ? SOCK_DGRAM : SOCK_STREAM;
 
@@ -7134,6 +7133,7 @@ int main (int argc, char **argv) {
 
     /* Initialize the socket subsystem */
     initialize_sockets();
+    num_udp_socket = 0;
 
     /* init settings */
     settings_init();
