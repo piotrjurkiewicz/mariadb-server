@@ -66,8 +66,6 @@ pthread_cond_t	plugin_shutdown_cv;
 /** Tells whether the background thread is exited */
 static bool	bk_thd_exited		= true;
 
-extern option_t config_option_names[];
-
 /**********************************************************************//**
 Unlock a table and commit the transaction
 return 0 if fail to commit the transaction */
@@ -1557,8 +1555,8 @@ innodb_get(
 		unsigned int	total_len = 0;
 		char		int_buf[MAX_INT_CHAR_LEN];
 
-		GET_OPTION(meta_info, OPTION_ID_COL_SEP, option_delimiter,
-			   option_length);
+		option_delimiter = meta_info->col_info[CONTAINER_SEP].col_name;
+		option_length = meta_info->col_info[CONTAINER_SEP].col_name_len;
 
 		assert(option_length > 0 && option_delimiter);
 

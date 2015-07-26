@@ -20,8 +20,6 @@ SET GLOBAL TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
 source include/memcache_config.inc;
 --enable_query_log
 SET sql_mode='NO_ENGINE_SUBSTITUTION';
-INSERT INTO config_options VALUES("separator", ",");
-
 # describe table for memcache
 --replace_result $DAEMON_MEMCACHED_PORT_0 DAEMON_MEMCACHED_PORT_0
 eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_0", "test", "t1",
@@ -31,7 +29,7 @@ eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_0", 
                                 c220,c221,c222,c223,c224,c225,c226,c227,c228,c229,
                                 c230,c231,c232,c233,c234,c235,c236,c237,c238,c239,
                                 c240,c241,c242,c243,c244,c245,c246,c247,c248,c249", 
-                               "c3", "c4", "c5", "PRIMARY");
+                               "c3", "c4", "c5", "PRIMARY", ",");
 
 # Container's value_columns is 255 bytes, above insertion would be truncated.
 # The truncation left an invalid column name "c", which will be rejected
@@ -48,7 +46,7 @@ eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_0", 
                                "c200,c201,c202,c203,c204,c205,c206,c207,c208,c209,
                                 c210,c211,c212,c213,c214,c215,c216,c217,c218,c219,
                                 c220,c221,c222,c223,c224,c225,c226,c227,c228,c229",
-                               "c3", "c4", "c5", "PRIMARY");
+                               "c3", "c4", "c5", "PRIMARY", ",");
 
 USE test;
 

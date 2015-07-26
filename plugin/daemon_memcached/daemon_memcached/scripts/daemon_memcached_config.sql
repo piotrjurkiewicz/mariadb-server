@@ -29,12 +29,9 @@ CREATE  TABLE IF NOT EXISTS `containers` (
 	`flags` VARCHAR(250) NOT NULL DEFAULT "0",
 	`cas_column` VARCHAR(250),
 	`expire_time_column` VARCHAR(250),
-	`unique_idx_name_on_key` VARCHAR(250) NOT NULL
+	`unique_idx_name_on_key` VARCHAR(250) NOT NULL,
+	`sep` VARCHAR(32) NOT NULL DEFAULT "|"
 ) ENGINE = InnoDB;
-
-CREATE  TABLE IF NOT EXISTS `config_options` (
-	`name` varchar(50) not null primary key,
-	`value` varchar(50)) ENGINE = InnoDB;
 
 -- ------------------------------------------------------------------------
 -- This is an example
@@ -47,12 +44,11 @@ CREATE  TABLE IF NOT EXISTS `config_options` (
 -- c4 -> cas
 -- c5 -> exp time
 -- PRIMARY -> use primary key to search
+-- | -> use this character as separator
 -- ------------------------------------------------------------------------
 
 INSERT INTO containers VALUES ("tcp://127.0.0.1:11211", "test", "demo_test",
-			       "c1", "c2",  "c3", "c4", "c5", "PRIMARY");
-
-INSERT INTO config_options VALUES("separator", "|");
+			       "c1", "c2",  "c3", "c4", "c5", "PRIMARY", "|");
 
 CREATE DATABASE IF NOT EXISTS test;
 USE test

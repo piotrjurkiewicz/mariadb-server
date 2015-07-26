@@ -7,9 +7,8 @@ SET @@global.autocommit=0;
 SET @tx_isolation= @@global.tx_isolation;
 SET GLOBAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 SET @wait= @@global.wait_timeout;
-INSERT INTO config_options VALUES("separator", "|");
 INSERT INTO containers VALUES ("tcp://127.0.0.1:DAEMON_MEMCACHED_PORT_0", "test", "t1",
-"c1", "c2,c21", "c3", "c4", "c5", "PRIMARY");
+"c1", "c2,c21", "c3", "c4", "c5", "PRIMARY", "|");
 CREATE USER mysqltest1@localhost;
 COMMIT;
 connect  mysqltest1,localhost,mysqltest1,,;

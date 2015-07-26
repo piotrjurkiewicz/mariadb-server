@@ -21,11 +21,9 @@ echo # Test case with expected configuration;
 source include/memcache_config.inc;
 --enable_query_log
 
-INSERT INTO config_options VALUES("separator", "|");
-
 --replace_result $DAEMON_MEMCACHED_PORT_0 DAEMON_MEMCACHED_PORT_0
 eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_0", "test", "t1",
-			       "c1", "c11,c2,c21", "c3", "c4", "c5", "PRIMARY");
+			       "c1", "c11,c2,c21", "c3", "c4", "c5", "PRIMARY", "|");
 
 USE test;
 
@@ -125,12 +123,10 @@ DROP DATABASE daemon_memcached;
 source include/memcache_config.inc;
 --enable_query_log
 
-INSERT INTO config_options VALUES("separator", "|");
-
 # t9 is not existing!
 --replace_result $DAEMON_MEMCACHED_PORT_0 DAEMON_MEMCACHED_PORT_0
 eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_0", "test", "t9",
-			       "c1", "c11,c2,c21", "c3", "c4", "c5", "PRIMARY");
+			       "c1", "c11,c2,c21", "c3", "c4", "c5", "PRIMARY", "|");
 
 # Tables must exist before plugin can be started!
 INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
@@ -198,12 +194,10 @@ DROP DATABASE daemon_memcached;
 source include/memcache_config.inc;
 --enable_query_log
 
-INSERT INTO config_options VALUES("separator", "|");
-
 # unknown is not existing!
 --replace_result $DAEMON_MEMCACHED_PORT_0 DAEMON_MEMCACHED_PORT_0
 eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_0", "unknown", "t1",
-			       "c1", "c11,c2,c21", "c3", "c4", "c5", "PRIMARY");
+			       "c1", "c11,c2,c21", "c3", "c4", "c5", "PRIMARY", "|");
 
 # Tables must exist before plugin can be started!
 INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
@@ -271,12 +265,10 @@ DROP DATABASE daemon_memcached;
 source include/memcache_config.inc;
 --enable_query_log
 
-INSERT INTO config_options VALUES("separator", "|");
-
 # unknown is not existing!
 --replace_result $DAEMON_MEMCACHED_PORT_0 DAEMON_MEMCACHED_PORT_0
 eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_0", "test", "t1",
-			       "unknown", "c11,c2,c21", "c3", "c4", "c5", "PRIMARY");
+			       "unknown", "c11,c2,c21", "c3", "c4", "c5", "PRIMARY", "|");
 
 # Tables must exist before plugin can be started!
 INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
@@ -344,12 +336,10 @@ DROP DATABASE daemon_memcached;
 source include/memcache_config.inc;
 --enable_query_log
 
-INSERT INTO config_options VALUES("separator", "|");
-
 # unknown is not existing!
 --replace_result $DAEMON_MEMCACHED_PORT_0 DAEMON_MEMCACHED_PORT_0
 eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_0", "test", "t1",
-			       "c1", "unknown", "c3", "c4", "c5", "PRIMARY");
+			       "c1", "unknown", "c3", "c4", "c5", "PRIMARY", "|");
 
 # Tables must exist before plugin can be started!
 INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
@@ -417,12 +407,10 @@ DROP DATABASE daemon_memcached;
 source include/memcache_config.inc;
 --enable_query_log
 
-INSERT INTO config_options VALUES("separator", "|");
-
 # unknown is not existing!
 --replace_result $DAEMON_MEMCACHED_PORT_0 DAEMON_MEMCACHED_PORT_0
 eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_0", "test", "t1",
-			       "c1", NULL, "c3", "c4", "c5", "PRIMARY");
+			       "c1", NULL, "c3", "c4", "c5", "PRIMARY", "|");
 
 # Tables must exist before plugin can be started!
 INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
@@ -490,12 +478,10 @@ DROP DATABASE daemon_memcached;
 source include/memcache_config.inc;
 --enable_query_log
 
-INSERT INTO config_options VALUES("separator", "|");
-
 # unknown is not existing!
 --replace_result $DAEMON_MEMCACHED_PORT_0 DAEMON_MEMCACHED_PORT_0
 eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_0", "test", "t1",
-			       "c1", "c11,c2,c21", "unknown", "unknown", "unknown", "PRIMARY");
+			       "c1", "c11,c2,c21", "unknown", "unknown", "unknown", "PRIMARY", "|");
 
 # Tables must exist before plugin can be started!
 INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
@@ -564,12 +550,10 @@ DROP DATABASE daemon_memcached;
 source include/memcache_config.inc;
 --enable_query_log
 
-INSERT INTO config_options VALUES("separator", "|");
-
 # unknown is not existing!
 --replace_result $DAEMON_MEMCACHED_PORT_0 DAEMON_MEMCACHED_PORT_0
 eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_0", "test", "t1",
-			       "c1", "c11,c2,c21", "c3", "c4", "c5", "PRIMARY");
+			       "c1", "c11,c2,c21", "c3", "c4", "c5", "PRIMARY", "|");
 
 USE test;
 

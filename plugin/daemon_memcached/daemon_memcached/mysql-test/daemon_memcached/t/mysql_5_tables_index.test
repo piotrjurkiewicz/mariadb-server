@@ -18,24 +18,22 @@ SET GLOBAL TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
 source include/memcache_config.inc;
 --enable_query_log
 
-INSERT INTO config_options VALUES("separator", "|");
-
 # describe table for memcache
 --replace_result $DAEMON_MEMCACHED_PORT_0 DAEMON_MEMCACHED_PORT_0
 eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_0", "test", "t1",
-			       "c1", "c2,c21", "c3", "c4", "c5", "PRIMARY");
+			       "c1", "c2,c21", "c3", "c4", "c5", "PRIMARY", "|");
 --replace_result $DAEMON_MEMCACHED_PORT_1 DAEMON_MEMCACHED_PORT_1
 eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_1", "test", "t2",
-			       "c11", "c1,c2", "c3", "c4", "c5", "it2c11");
+			       "c11", "c1,c2", "c3", "c4", "c5", "it2c11", "|");
 --replace_result $DAEMON_MEMCACHED_PORT_2 DAEMON_MEMCACHED_PORT_2
 eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_2", "test", "t3",
-			       "c21", "c2,c1", "c3", "c4", "c5", "it3c21");
+			       "c21", "c2,c1", "c3", "c4", "c5", "it3c21", "|");
 --replace_result $DAEMON_MEMCACHED_PORT_3 DAEMON_MEMCACHED_PORT_3
 eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_3", "test", "t4",
-			       "c1", "c2,c21,c22", "c3", "c4", "c5", "PRIMARY");
+			       "c1", "c2,c21,c22", "c3", "c4", "c5", "PRIMARY", "|");
 --replace_result $DAEMON_MEMCACHED_PORT_4 DAEMON_MEMCACHED_PORT_4
 eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_4", "test", "t5",
-			       "c1", "c2,c21,c22,c23", "c3", "c4", "c5", "PRIMARY");
+			       "c1", "c2,c21,c22,c23", "c3", "c4", "c5", "PRIMARY", "|");
 
 USE test;
 

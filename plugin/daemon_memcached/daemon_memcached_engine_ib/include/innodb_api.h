@@ -87,7 +87,7 @@ to assemble to an memcached response. As described in above mci_col,
 we must have "MCI_COL_TO_GET" (5) column values to read. In addition,
 the user table could have multiple "value" columns, and it is possible
 to map such multiple "value" columns to a single memcached key,
-such value is separated by "separator" as defined in the "config_option"
+such value is separated by "sep" as defined in the "containers"
 table. And we will assemble and disassemble the memcached value from these
 column values. And "extra_col_value" and "n_extra_col" is used to support
 multiple value columns */

@@ -1,13 +1,12 @@
 SET @tx_isolation= @@global.tx_isolation;
 SET GLOBAL TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
-INSERT INTO config_options VALUES("separator", "|");
 #
 #Bug 20400373 INNODB MEMCACHE CRASH WHEN RETRIEVING EXPIRED
 #	     RECORD WITH @@ TABLE MAPPING
 INSERT INTO containers VALUES ("tcp://127.0.0.1:DAEMON_MEMCACHED_PORT_0", "test", "t1",
-"c1", "c2",  "c3", "c4", "c5", "PRIMARY");
+"c1", "c2",  "c3", "c4", "c5", "PRIMARY", "|");
 INSERT INTO containers VALUES ('bb','test','demo','c1','c1,c22','c3',
-'c4','c5','PRIMARY');
+'c4','c5','PRIMARY', "|");
 USE test;
 DROP TABLE IF EXISTS t1;
 DROP TABLE IF EXISTS demo;

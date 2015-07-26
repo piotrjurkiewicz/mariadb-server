@@ -18,31 +18,29 @@ SET GLOBAL TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
 source include/memcache_config.inc;
 --enable_query_log
 
-INSERT INTO config_options VALUES("separator", "|");
-
 # describe table for memcache
 --replace_result $DAEMON_MEMCACHED_PORT_0 DAEMON_MEMCACHED_PORT_0
 eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_0", "test", "t1",
 			       "c1", "c2,c21,c22,c23,c24,c25,c26,c27", "c3", "c4", "c5",
-				"PRIMARY");
+				"PRIMARY", "|");
 --replace_result $DAEMON_MEMCACHED_PORT_1 DAEMON_MEMCACHED_PORT_1
 eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_1", "test", "t1",
-			       "c2", "c1, c2", "c3", "c4", "c5", "i12");
+			       "c2", "c1, c2", "c3", "c4", "c5", "i12", "|");
 --replace_result $DAEMON_MEMCACHED_PORT_2 DAEMON_MEMCACHED_PORT_2
 eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_2", "test", "t1",
-			       "c2", "c1,c21", "c3", "c4", "c5", "i12");
+			       "c2", "c1,c21", "c3", "c4", "c5", "i12", "|");
 --replace_result $DAEMON_MEMCACHED_PORT_3 DAEMON_MEMCACHED_PORT_3
 eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_3", "test", "t1",
-			       "c21", "c1,c23,c22", "c3", "c4", "c5", "i14");
+			       "c21", "c1,c23,c22", "c3", "c4", "c5", "i14", "|");
 --replace_result $DAEMON_MEMCACHED_PORT_4 DAEMON_MEMCACHED_PORT_4
 eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_4", "test", "t1",
-			       "c23", "c1,c21,c22,c24", "c3", "c4", "c5", "i15");
+			       "c23", "c1,c21,c22,c24", "c3", "c4", "c5", "i15", "|");
 --replace_result $DAEMON_MEMCACHED_PORT_5 DAEMON_MEMCACHED_PORT_5
 eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_5", "test", "t1",
-			       "c25", "c23,c24,c27,c1", "c3", "c4", "c5", "i16");
+			       "c25", "c23,c24,c27,c1", "c3", "c4", "c5", "i16", "|");
 --replace_result $DAEMON_MEMCACHED_PORT_6 DAEMON_MEMCACHED_PORT_6
 eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_6", "test", "t1",
-			       "c26", "c2, c1", "c3", "c4", "c5", "i17");
+			       "c26", "c2, c1", "c3", "c4", "c5", "i17", "|");
 
 USE test;
 

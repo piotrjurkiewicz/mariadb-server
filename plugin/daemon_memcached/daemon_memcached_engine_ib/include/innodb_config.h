@@ -33,14 +33,12 @@ typedef void*   hash_node_t;
 /* Database name and table name for our metadata "system" tables for
 InnoDB memcache. The table names are the same as those for the
 NDB memcache, to make the memcache setup compatible between the two.
-There are 2 "system tables":
+There is one "system table":
 1) containers - main configure table contains row describing which InnoDB
 		table is used to store/retrieve Memcached key/value if InnoDB
-		Memcached engine is used
-2) config_options - for miscellaneous configuration options */
+		Memcached engine is used */
 #define MCI_CFG_DB_NAME			"daemon_memcached"
 #define MCI_CFG_CONTAINER_TABLE		"containers"
-#define MCI_CFG_CONFIG_OPTIONS		"config_options"
 
 /** Max table name length as defined in univ.i */
 #define MAX_TABLE_NAME_LEN      192
@@ -76,18 +74,12 @@ typedef enum container {
 				memcached "cas" value */
 	CONTAINER_EXP,		/*!< column name for column maps to
 				"expiration" value */
+	CONTAINER_INDEX,	/*!< name of index on key column
+				used to search */
+	CONTAINER_SEP,		/*!< delimiter which separates multiple columns
+				and key values */
 	CONTAINER_NUM_COLS	/*!< number of columns */
 } container_t;
-
-/** columns in the "config_options" table */
-typedef enum config_opt {
-	CONFIG_OPT_KEY,		/*!< key column in the "config_option" table */
-	CONFIG_OPT_VALUE,	/*!< value column */
-	CONFIG_OPT_NUM_COLS	/*!< number of columns (currently 2) in table */
-} config_opt_t;
-
-/** Following are some value defines describes the options that configures
-the InnoDB Memcached */
 
 /** Values to set up "m_use_idx" field of "meta_index_t" structure,
 indicating whether we will use cluster or secondary index on the
@@ -110,55 +102,6 @@ typedef struct meta_index {
 					index for the search */
 } meta_index_t;
 
-/** The "names" in the "config_option" table to identify possible
-config options. They are optional.
-"COLUMN_SEPARATOR" is the delimiter that separates multiple columns and
-and key value */
-#define COLUMN_SEPARATOR        "separator"
-
-/* list of configure options we support */
-typedef enum option_id {
-	OPTION_ID_COL_SEP,		/*!< ID for character(s) separating
-					multiple column mapping */
-	OPTION_ID_NUM_OPTIONS		/*!< number of options */
-} option_id_t;
-
-/** Maximum delimiter length */
-#define MAX_DELIMITER_LEN	32
-
-typedef struct option_value {
-	char		value[MAX_DELIMITER_LEN + 1];
-					/* option value */
-	int		value_len;	/* value length */
-} option_value_t;
-
-/** structure to define some default "config_option" option settings */
-typedef struct option {
-	option_id_t	id;		/*!< option id as in enum option_id */
-	const char*	name;		/*!< option name for above option ID,
-					currently they can be "COLUMN_SEPARATOR"
-					and "TABLE_MAP_SEPARATOR" */
-	option_value_t	default_value;	/*!< default value */
-} option_t;
-
-/** Get configure option value. If the value is not configured by
-user, obtain its default value from "config_option_names"
-@param meta_info	metadata structure contains configure options
-@param option		option whose value to get
-@param val		value to fetch
-@param val_len		value length */
-#define GET_OPTION(meta_info, option, val, val_len)			\
-do {									\
-	val_len = meta_info->options[option].value_len;			\
-									\
-	if (val_len == 0) {						\
-		val = config_option_names[option].default_value.value;	\
-		val_len = config_option_names[option].default_value.value_len;\
-	} else {							\
-		val = meta_info->options[option].value;			\
-	}								\
-} while (0)
-
 /** In memory structure contains most necessary metadata info
 to configure an InnoDB Memcached engine */
 typedef struct meta_cfg_info {
@@ -171,9 +114,6 @@ typedef struct meta_cfg_info {
 	bool		flag_enabled;		/*!< whether flag is enabled */
 	bool		cas_enabled;		/*!< whether cas is enabled */
 	bool		exp_enabled;		/*!< whether exp is enabled */
-	option_value_t	options[OPTION_ID_NUM_OPTIONS];
-						/*!< configure options, mostly
-						are configured delimiters */
 	hash_node_t	name_hash;		/*!< name hash chain node */
 } meta_cfg_info_t;
 

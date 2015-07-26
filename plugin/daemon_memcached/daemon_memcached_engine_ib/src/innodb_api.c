@@ -39,8 +39,6 @@ Created 04/12/2011 Jimmy Yang
 /** Whether to update all columns' value or a specific column value */
 #define UPDATE_ALL_VAL_COL	-1
 
-extern option_t config_option_names[];
-
 /** InnoDB API callback functions */
 static ib_cb_t* innodb_memcached_api[] = {
 	(ib_cb_t*) &ib_cb_open_table,
@@ -1001,8 +999,8 @@ innodb_api_set_multi_cols(
 	value = my_value;
 	end = value + value_len;
 
-	/* Get the default setting if user did not config it */
-	GET_OPTION(meta_info, OPTION_ID_COL_SEP, sep, sep_len);
+	sep = meta_info->col_info[CONTAINER_SEP].col_name;
+	sep_len = meta_info->col_info[CONTAINER_SEP].col_name_len;
 	assert(sep_len > 0);
 
 	if (value[0] == *sep) {

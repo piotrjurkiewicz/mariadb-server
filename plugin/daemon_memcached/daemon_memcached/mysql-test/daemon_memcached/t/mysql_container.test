@@ -18,12 +18,10 @@ SET GLOBAL TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
 source include/memcache_config.inc;
 --enable_query_log
 
-INSERT INTO config_options VALUES("separator", "|");
-
 # describe table for memcache
 --replace_result $DAEMON_MEMCACHED_PORT_0 DAEMON_MEMCACHED_PORT_0
 eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_0", "test", "t1",
-			       "c1", "c2",  "c3", "c4", "c5", "PRIMARY");
+			       "c1", "c2",  "c3", "c4", "c5", "PRIMARY", "|");
 
 USE test;
 
@@ -135,7 +133,7 @@ DELETE FROM containers;
 # describe table for memcache
 --replace_result $DAEMON_MEMCACHED_PORT_1 DAEMON_MEMCACHED_PORT_1
 eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_1", "test", "t2",
-			       "c1", "c2",  "c3", "c4", "c5", "PRIMARY");
+			       "c1", "c2",  "c3", "c4", "c5", "PRIMARY", "|");
 
 USE test;
 
@@ -248,12 +246,12 @@ DELETE FROM containers;
 --replace_result $DAEMON_MEMCACHED_PORT_1 DAEMON_MEMCACHED_PORT_1
 --error 1048
 eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_1", NULL, "t2",
-			       "c1", "c2",  "c3", "c4", "c5", "PRIMARY");
+			       "c1", "c2",  "c3", "c4", "c5", "PRIMARY", "|");
 
 --replace_result $DAEMON_MEMCACHED_PORT_1 DAEMON_MEMCACHED_PORT_1
 --error 1048
 eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_1", "test", "t2",
-			       NULL, "c2",  "c3", "c4", "c5", "PRIMARY");
+			       NULL, "c2",  "c3", "c4", "c5", "PRIMARY", "|");
 
 #----------------------------------------------------------------
 # Non-existing Schema
@@ -265,7 +263,7 @@ DELETE FROM containers;
 # describe table for memcache
 --replace_result $DAEMON_MEMCACHED_PORT_1 DAEMON_MEMCACHED_PORT_1
 eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_1", "junk", "t2",
-			       "c1", "c2",  "c3", "c4", "c5", "PRIMARY");
+			       "c1", "c2",  "c3", "c4", "c5", "PRIMARY", "|");
 
 # even though the plugin can be installed, the initialization will fail
 INSTALL PLUGIN daemon_memcached SONAME 'daemon_memcached.so';
@@ -299,7 +297,7 @@ DELETE FROM containers;
 # describe table for memcache
 --replace_result $DAEMON_MEMCACHED_PORT_1 DAEMON_MEMCACHED_PORT_1
 eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_1", "test", "t2",
-			       "c1", "c2",  "c3", "c4", "c5", "PRIMARY");
+			       "c1", "c2",  "c3", "c4", "c5", "PRIMARY", "|");
 
 USE test;
 
@@ -381,7 +379,7 @@ DELETE FROM containers;
 # describe table for memcache
 --replace_result $DAEMON_MEMCACHED_PORT_1 DAEMON_MEMCACHED_PORT_1
 eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_1", "test", "t2",
-			       "c1", "c2",  "c3", "c4", "c5", "PRIMARY");
+			       "c1", "c2",  "c3", "c4", "c5", "PRIMARY", "|");
 
 USE test;
 
@@ -571,7 +569,7 @@ DELETE FROM containers;
 # describe table for memcache
 --replace_result $DAEMON_MEMCACHED_PORT_1 DAEMON_MEMCACHED_PORT_1
 eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_1", "test", "t2",
-			       "c1", "c2",  "c3", "c4", "c5", "PRIMARY");
+			       "c1", "c2",  "c3", "c4", "c5", "PRIMARY", "|");
 
 USE test;
 

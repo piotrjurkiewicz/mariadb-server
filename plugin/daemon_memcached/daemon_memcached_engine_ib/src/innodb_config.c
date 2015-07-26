@@ -36,12 +36,6 @@ Created 04/12/2011 Jimmy Yang
 #include "innodb_cb_api.h"
 #include "innodb_utility.h"
 
-/** Configure options enum IDs, their "names" and their default value */
-option_t	config_option_names[] =
-{
-        {OPTION_ID_COL_SEP, COLUMN_SEPARATOR, {"|", 1}}
-};
-
 /**********************************************************************//**
 Makes a NUL-terminated copy of a nonterminated string.
 @return own: a copy of the string, must be deallocated by caller */
@@ -155,137 +149,6 @@ innodb_config_parse_value_col(
 }
 
 /**********************************************************************//**
-This function opens the config_options configuration table, and find the
-table and column info that used for memcached data
-@return true if everything works out fine */
-static
-bool
-innodb_read_config_option(
-/*======================*/
-	meta_cfg_info_t*	item)	/*!< in: meta info structure */
-{
-	ib_trx_t		ib_trx;
-	ib_crsr_t		crsr = NULL;
-	ib_crsr_t		idx_crsr = NULL;
-	ib_tpl_t		tpl = NULL;
-	ib_err_t		err = DB_SUCCESS;
-	int			n_cols;
-	int			i;
-	ib_ulint_t		data_len;
-	ib_col_meta_t		col_meta;
-	int			current_option = -1;
-
-	ib_trx = ib_cb_trx_begin(IB_TRX_READ_COMMITTED, true, false);
-	err = innodb_api_begin(NULL, MCI_CFG_DB_NAME,
-			       MCI_CFG_CONFIG_OPTIONS, NULL, ib_trx,
-			       &crsr, &idx_crsr, IB_LOCK_S);
-
-	if (err != DB_SUCCESS) {
-		fprintf(stderr, " InnoDB_Memcached: Cannot open config table"
-				"'%s' in database '%s'\n",
-			MCI_CFG_CONFIG_OPTIONS, MCI_CFG_DB_NAME);
-		err = DB_ERROR;
-		goto func_exit;
-	}
-
-	tpl = innodb_cb_read_tuple_create(crsr);
-
-	err = innodb_cb_cursor_first(crsr);
-
-	if (err != DB_SUCCESS) {
-		fprintf(stderr, " InnoDB_Memcached: failed to locate entry in"
-				" config table '%s' in database '%s' \n",
-			MCI_CFG_CONFIG_OPTIONS, MCI_CFG_DB_NAME);
-		err = DB_ERROR;
-		goto func_exit;
-	}
-
-
-	do {
-		err = ib_cb_read_row(crsr, tpl, NULL, NULL);
-
-		if (err != DB_SUCCESS) {
-			fprintf(stderr, " InnoDB_Memcached: failed to read"
-					" row from config table '%s' in"
-					" database '%s' \n",
-				MCI_CFG_CONFIG_OPTIONS, MCI_CFG_DB_NAME);
-			err = DB_ERROR;
-			goto func_exit;
-		}
-
-		n_cols = innodb_cb_tuple_get_n_cols(tpl);
-
-		assert(n_cols >= CONFIG_OPT_NUM_COLS);
-
-		for (i = 0; i < CONFIG_OPT_NUM_COLS; ++i) {
-			char*	key;
-
-			data_len = innodb_cb_col_get_meta(tpl, i, &col_meta);
-
-			assert(data_len != IB_SQL_NULL);
-
-			if (i == CONFIG_OPT_KEY) {
-				int	j;
-				key = (char*)innodb_cb_col_get_value(tpl, i);
-				current_option = -1;
-
-				for (j = 0; j < OPTION_ID_NUM_OPTIONS; j++) {
-					/* Currently, we only support one
-					configure option, that is the string
-					"separator" */
-					if (strcmp(
-						key,
-						config_option_names[j].name)
-					    == 0) {
-						current_option =
-							config_option_names[j].id;
-						break;
-					}
-				}
-			}
-
-			if (i == CONFIG_OPT_VALUE && current_option >= 0) {
-				int	max_len;
-
-				/* The maximum length for delimiter is
-				MAX_DELIMITER_LEN */
-				max_len = (data_len > MAX_DELIMITER_LEN)
-					? MAX_DELIMITER_LEN
-					: data_len;
-
-				memcpy(item->options[current_option].value,
-				       innodb_cb_col_get_value(tpl, i),
-				       max_len);
-
-				item->options[current_option].value[max_len]
-					= 0;
-
-				item->options[current_option].value_len
-					= max_len;
-			}
-		}
-
-		err = ib_cb_cursor_next(crsr);
-
-	} while (err == DB_SUCCESS);
-
-func_exit:
-
-	if (crsr) {
-		innodb_cb_cursor_close(crsr);
-	}
-
-	if (tpl) {
-		innodb_cb_tuple_delete(tpl);
-	}
-
-	innodb_cb_trx_commit(ib_trx);
-	ib_cb_trx_release(ib_trx);
-
-	return(err == DB_SUCCESS || err == DB_END_OF_INDEX);
-}
-
-/**********************************************************************//**
 This function opens the "containers" configuration table, and find the
 table and column info that used for memcached data, and instantiates
 meta_cfg_info_t structure for such metadata.
@@ -307,6 +170,8 @@ innodb_config_add_item(
 	meta_cfg_info_t*	item = NULL;
 	ib_col_meta_t		col_meta;
 	int			fold;
+
+	/* TODO: Remove logic duplicated with innodb_config_container */
 
 	n_cols = innodb_cb_tuple_get_n_cols(tpl);
 
@@ -353,8 +218,8 @@ innodb_config_add_item(
 		}
 	}
 
-	/* Last column is about the unique index name on key column */
-	data_len = innodb_cb_col_get_meta(tpl, i, &col_meta);
+	/* CONTAINER_INDEX column is about the unique index name on key column */
+	data_len = innodb_cb_col_get_meta(tpl, CONTAINER_INDEX, &col_meta);
 
 	if (data_len == IB_SQL_NULL) {
 		fprintf(stderr, " InnoDB_Memcached: There must be a unique"
@@ -364,7 +229,7 @@ innodb_config_add_item(
 	}
 
 	item->index_info.idx_name = my_strdupl((char*)innodb_cb_col_get_value(
-						tpl, i), data_len);
+						tpl, CONTAINER_INDEX), data_len);
 
 	if (!innodb_verify(item)) {
 		err = DB_ERROR;
@@ -500,6 +365,8 @@ innodb_config_container(
 	ib_tpl_t		read_tpl = NULL;
 	meta_cfg_info_t*	item = NULL;
 
+	/* TODO: Remove logic duplicated with innodb_add_item */
+
 	if (name != NULL) {
 		ib_ulint_t	fold;
 
@@ -617,8 +484,8 @@ innodb_config_container(
 		}
 	}
 
-	/* Last column is about the unique index name on key column */
-	data_len = innodb_cb_col_get_meta(read_tpl, i, &col_meta);
+	/* CONTAINER_INDEX column is about the unique index name on key column */
+	data_len = innodb_cb_col_get_meta(read_tpl, CONTAINER_INDEX, &col_meta);
 
 	if (data_len == IB_SQL_NULL) {
 		fprintf(stderr, " InnoDB_Memcached: There must be a unique"
@@ -628,7 +495,7 @@ innodb_config_container(
 	}
 
 	item->index_info.idx_name = my_strdupl((char*)innodb_cb_col_get_value(
-						read_tpl, i), data_len);
+						read_tpl, CONTAINER_INDEX), data_len);
 
 	if (!innodb_verify(item)) {
 		err = DB_ERROR;
@@ -1070,7 +937,6 @@ innodb_config(
 						created and initialized */
 {
 	meta_cfg_info_t*	item;
-	bool			success;
 
 	if (*meta_hash == NULL) {
 		*meta_hash = hash_create(100);
@@ -1095,15 +961,6 @@ innodb_config(
 	}
 
 	if (!item) {
-		return(NULL);
-	}
-
-	/* Following two configure operations are optional, and can be
-	failed */
-
-	success = innodb_read_config_option(item);
-
-	if (!success) {
 		return(NULL);
 	}
 

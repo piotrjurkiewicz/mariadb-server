@@ -1,8 +1,7 @@
 SET @tx_isolation= @@global.tx_isolation;
 SET GLOBAL TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
-INSERT INTO config_options VALUES("separator", "|");
 INSERT INTO containers VALUES ("desc_v1", "test", "v1",
-"vc1", "vc2,vc21", "vc3", "vc4", "vc5", "PRIMARY");
+"vc1", "vc2,vc21", "vc3", "vc4", "vc5", "PRIMARY", "|");
 CREATE USER mysqltest1@localhost;
 connect  mysqltest1,localhost,mysqltest1,,;
 connection mysqltest1;
