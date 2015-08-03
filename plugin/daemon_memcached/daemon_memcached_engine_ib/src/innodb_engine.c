@@ -401,6 +401,7 @@ innodb_initialize(
 	struct innodb_engine*	innodb_eng = innodb_handle(handle);
 	memcached_context_t	*context;
 	pthread_attr_t          attr;
+	meta_cfg_info_t*	meta_info;
 
 	context = (memcached_context_t *) config_str;
 
@@ -445,10 +446,9 @@ innodb_initialize(
 	pthread_mutex_init(&innodb_eng->flush_mutex, NULL);
 
 	/* Fetch InnoDB specific settings */
-	innodb_eng->meta_info = innodb_config(
-		NULL, 0, &innodb_eng->meta_hash);
+	meta_info = innodb_config(NULL, 0, &innodb_eng->meta_hash);
 
-	if (!innodb_eng->meta_info) {
+	if (!meta_info) {
 		fprintf(stderr, "No containers defined\n");
 		return(ENGINE_TMPFAIL);
 	}
@@ -759,6 +759,8 @@ innodb_conn_init(
 	assert(!conn_data || !conn_data->in_use);
 
 	if (!conn_data) {
+		assert(new_meta_info);
+
 		LOCK_CONN_IF_NOT_LOCKED(has_lock, engine);
 		conn_data = engine->server.cookie->get_engine_specific(cookie);
 
@@ -785,9 +787,7 @@ innodb_conn_init(
 		UT_LIST_ADD_LAST(conn_list, engine->conn_data, conn_data);
 		engine->server.cookie->store_engine_specific(
 			cookie, conn_data);
-		conn_data->conn_meta = new_meta_info
-					 ? new_meta_info
-					 : engine->meta_info;
+		conn_data->conn_meta = new_meta_info;
 		conn_data->row_buf = malloc(1024);
 		conn_data->row_buf_len = 1024;
 

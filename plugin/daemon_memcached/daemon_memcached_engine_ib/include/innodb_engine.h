@@ -139,8 +139,6 @@ typedef struct innodb_engine {
 						/*!< background commit
 						interval in seconds */
 	int			cfg_status;	/*!< configure status */
-	meta_cfg_info_t*	meta_info;	/*!< default metadata info from
-						configuration */
 	conn_list_t		conn_data;	/*!< list of data specific for
 						connections */
 	pthread_mutex_t		conn_mutex;	/*!< mutex synchronizes
