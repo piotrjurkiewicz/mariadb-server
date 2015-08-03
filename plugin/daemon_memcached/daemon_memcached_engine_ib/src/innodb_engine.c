@@ -1495,7 +1495,6 @@ innodb_get(
 	mci_item_t*		result = NULL;
 	ENGINE_ERROR_CODE	err_ret = ENGINE_SUCCESS;
 	innodb_conn_data_t*	conn_data = NULL;
-	meta_cfg_info_t*	meta_info = innodb_eng->meta_info;
 	int			option_length;
 	const char*		option_delimiter;
 	size_t			key_len = nkey;
@@ -1555,8 +1554,8 @@ innodb_get(
 		unsigned int	total_len = 0;
 		char		int_buf[MAX_INT_CHAR_LEN];
 
-		option_delimiter = meta_info->col_info[CONTAINER_SEP].col_name;
-		option_length = meta_info->col_info[CONTAINER_SEP].col_name_len;
+		option_delimiter = conn_data->conn_meta->col_info[CONTAINER_SEP].col_name;
+		option_length = conn_data->conn_meta->col_info[CONTAINER_SEP].col_name_len;
 
 		assert(option_length > 0 && option_delimiter);
 
