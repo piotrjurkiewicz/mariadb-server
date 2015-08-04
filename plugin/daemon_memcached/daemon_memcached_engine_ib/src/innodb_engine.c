@@ -1190,7 +1190,7 @@ innodb_allocate(
 
 	it->next = it->prev = it->h_next = 0;
 	it->refcount = 1;
-	it->iflag = 0;
+	it->iflag = conn_data->conn_meta->cas_enabled ? ITEM_WITH_CAS : 0;
 	it->nkey = nkey;
 	it->nbytes = nbytes;
 	it->flags = flags;
