@@ -685,7 +685,7 @@ void
 innodb_destroy(
 /*===========*/
 	ENGINE_HANDLE*	handle,		/*!< in: Destroy the engine instance */
-	bool		force)		/*!< in: Force to destroy */
+	bool		force __attribute__((unused)))		/*!< in: Force to destroy */
 {
 	struct innodb_engine* innodb_eng = innodb_handle(handle);
 
@@ -1693,11 +1693,11 @@ static
 ENGINE_ERROR_CODE
 innodb_get_stats(
 /*=============*/
-	ENGINE_HANDLE*		handle,		/*!< in: Engine Handle */
-	const void*		cookie,		/*!< in: connection cookie */
-	const char*		stat_key,	/*!< in: statistics key */
-	int			nkey,		/*!< in: key length */
-	ADD_STAT		add_stat)	/*!< out: stats to fill */
+	ENGINE_HANDLE*		handle __attribute__((unused)),		/*!< in: Engine Handle */
+	const void*		cookie __attribute__((unused)),		/*!< in: connection cookie */
+	const char*		stat_key __attribute__((unused)),	/*!< in: statistics key */
+	int			nkey __attribute__((unused)),		/*!< in: key length */
+	ADD_STAT		add_stat __attribute__((unused)))	/*!< out: stats to fill */
 {
 	return(ENGINE_SUCCESS);
 }
@@ -1709,8 +1709,8 @@ static
 void
 innodb_reset_stats(
 /*===============*/
-	ENGINE_HANDLE*		handle,		/*!< in: Engine Handle */
-	const void*		cookie)		/*!< in: connection cookie */
+	ENGINE_HANDLE*		handle __attribute__((unused)),		/*!< in: Engine Handle */
+	const void*		cookie __attribute__((unused)))		/*!< in: connection cookie */
 {
 }
 
@@ -1793,8 +1793,8 @@ innodb_arithmetic(
 	const rel_time_t exptime,	/*!< in: expiration time */
 	uint64_t*	cas,		/*!< out: new cas value */
 	uint64_t*	result,		/*!< out: result value */
-	uint16_t	vbucket,	/*!< in: bucket, used by default
-					engine only */
+	uint16_t	vbucket __attribute__((unused)),	/*!< in: bucket, used by default
+								engine only */
 	char*		result_str)	/*!< out: result value as string */
 {
 	struct innodb_engine*	innodb_eng = innodb_handle(handle);
@@ -1887,8 +1887,8 @@ innodb_flush(
 /*=========*/
 	ENGINE_HANDLE*	handle,		/*!< in: Engine Handle */
 	const void*	cookie,		/*!< in: connection cookie */
-	time_t		when)		/*!< in: when to flush, not used by
-					InnoDB */
+	time_t		when __attribute__((unused)))		/*!< in: when to flush, not used by
+								InnoDB */
 {
 	struct innodb_engine*	innodb_eng = innodb_handle(handle);
 	ib_err_t		ib_err = DB_SUCCESS;
@@ -1957,10 +1957,10 @@ static
 ENGINE_ERROR_CODE
 innodb_unknown_command(
 /*===================*/
-	ENGINE_HANDLE*	handle,		/*!< in: Engine Handle */
-	const void*	cookie,		/*!< in: connection cookie */
-	protocol_binary_request_header *request, /*!< in: request */
-	ADD_RESPONSE	response)	/*!< out: respondse */
+	ENGINE_HANDLE*	handle __attribute__((unused)),		/*!< in: Engine Handle */
+	const void*	cookie __attribute__((unused)),		/*!< in: connection cookie */
+	protocol_binary_request_header *request __attribute__((unused)), /*!< in: request */
+	ADD_RESPONSE	response __attribute__((unused)))	/*!< out: respondse */
 {
 	return(ENGINE_FAILED);
 }
@@ -1972,10 +1972,10 @@ static
 void
 innodb_item_set_cas(
 /*===================*/
-	ENGINE_HANDLE*	handle,		/*!< in: Engine Handle */
-	const void*	cookie,		/*!< in: connection cookie */
-	const item*		item,		/*!< in: item in question */
-	uint64_t cas)	/*!< in: CAS */
+	ENGINE_HANDLE*	handle __attribute__((unused)),		/*!< in: Engine Handle */
+	const void*	cookie __attribute__((unused)),		/*!< in: connection cookie */
+	item*		item,		/*!< in: item in question */
+	uint64_t cas)			/*!< in: CAS */
 {
 	hash_item_set_cas(item, cas);
 }

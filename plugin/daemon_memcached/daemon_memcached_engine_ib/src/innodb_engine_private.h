@@ -233,8 +233,8 @@ innodb_item_set_cas(
 /*===================*/
 	ENGINE_HANDLE*	handle,		/*!< in: Engine Handle */
 	const void*	cookie,		/*!< in: connection cookie */
-	const item*		item,		/*!< in: item in question */
-	uint64_t cas);	/*!< in: CAS */
+	item*		item,		/*!< in: item in question */
+	uint64_t cas);			/*!< in: CAS */
 
 /*******************************************************************//**
 Callback functions used by Memcached's process_command() function

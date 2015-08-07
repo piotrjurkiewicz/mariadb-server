@@ -930,7 +930,7 @@ static
 uint64_t
 mci_get_cas(
 /*========*/
-	innodb_engine_t*	eng)	/*!< in: InnoDB Memcached engine */
+	innodb_engine_t*	eng __attribute__((unused)))	/*!< in: InnoDB Memcached engine */
 {
 	static uint64_t cas_id = 0;
 
