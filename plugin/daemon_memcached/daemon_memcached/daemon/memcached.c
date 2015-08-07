@@ -6514,7 +6514,8 @@ static ENGINE_ERROR_CODE internal_arithmetic(ENGINE_HANDLE* handle,
                                              const rel_time_t exptime,
                                              uint64_t *cas,
                                              uint64_t *result,
-                                             uint16_t vbucket)
+                                             uint16_t vbucket,
+                                             char* result_str)
 {
     ENGINE_HANDLE_V1 *e = (ENGINE_HANDLE_V1*)handle;
 
@@ -6601,7 +6602,7 @@ static ENGINE_ERROR_CODE internal_arithmetic(ENGINE_HANDLE* handle,
     /* We had a race condition.. just call ourself recursively to retry */
     if (ret == ENGINE_KEY_EEXISTS) {
         return internal_arithmetic(handle, cookie, key, nkey, increment, create, delta,
-                                   initial, exptime, cas, result, vbucket);
+                                   initial, exptime, cas, result, vbucket, result_str);
     }
 
     return ret;
@@ -7055,7 +7056,7 @@ daemon_memcached_make_option(char* option, char** option_copy,
     *option_argv = (char**) malloc((num_arg + 1)
                                    * sizeof(**option_argv));
 
-    (*option_argv)[i] = "memcached";
+    (*option_argv)[i] = (char *) "memcached";
     i++;
 
     if (option) {
