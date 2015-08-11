@@ -17,6 +17,7 @@
 #include "config_static.h"
 #include "memcached.h"
 #include "memcached/extension_loggers.h"
+#include "memcached/sql_print_logger.h"
 #include "utilities/engine_loader.h"
 
 #include <signal.h>
@@ -39,7 +40,8 @@
 #define DAEMON_MEMCACHED
 
 #ifdef DAEMON_MEMCACHED
-#define exit(x) fprintf(stderr, "Daemon Memcached exit(" #x ")\n"); \
+#define exit(x) settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL, \
+                                                "Called exit() with status: " #x "\n"); \
                 shutdown_server(); \
                 goto func_exit;
 #endif /* DAEMON_MEMCACHED */
@@ -113,7 +115,7 @@ do { \
         __sync_add_and_fetch(&thread_stats->op, amt); \
 } while (0)
 
-#define MEMCACHED_ATOMIC_MSG        "InnoDB MEMCACHED: Memcached uses atomic increment \n"
+#define MEMCACHED_ATOMIC_MSG "Memcached uses atomic increment"
 
 #else /* HAVE_GCC_ATOMIC_BUILTINS */
 #define STATS_NOKEY(conn, op) { \
@@ -141,7 +143,7 @@ do { \
     pthread_mutex_unlock(&thread_stats->mutex); \
 }
 
-#define MEMCACHED_ATOMIC_MSG        "InnoDB Memcached: Memcached DOES NOT use atomic increment"
+#define MEMCACHED_ATOMIC_MSG "Memcached DOES NOT use atomic increment"
 #endif /* HAVE_GCC_ATOMIC_BUILTINS */
 
 volatile sig_atomic_t memcached_shutdown;
@@ -292,7 +294,7 @@ static void settings_init(void) {
     settings.inter = NULL;
     settings.maxbytes = 64 * 1024 * 1024; /* default is 64MB */
     settings.maxconns = 1000;         /* to limit connections-related memory to about 5MB */
-    settings.verbose = 0;
+    settings.verbose = 1;
     settings.oldest_live = 0;
     settings.evict_to_free = 1;       /* push old items out of cache when memory runs out */
     settings.socketpath = NULL;       /* by default, not using a unix socket */
@@ -308,7 +310,11 @@ static void settings_init(void) {
     settings.binding_protocol = negotiating_prot;
     settings.item_size_max = 1024 * 1024; /* The famous 1MB upper limit. */
     settings.require_sasl = false;
+#ifdef DAEMON_MEMCACHED
+    settings.extensions.logger = get_sql_print_logger();
+#else
     settings.extensions.logger = get_stderr_logger();
+#endif
 }
 
 /*
@@ -7111,20 +7117,6 @@ int main (int argc, char **argv) {
     memcached_initialized = 0;
     memcached_shutdown = 0;
 
-#ifdef DAEMON_MEMCACHED
-    if (context->config.engine_library) {
-        engine = context->config.engine_library;
-        /* FIXME: We should have a better way to pass the context structure
-        point to storage engine. It is now appended in the engine configure
-        string. */
-        engine_config = (const char *) context;
-
-    } else {
-        fprintf(stderr, "Engine library do not provided\n");
-        exit(EX_OSERR);
-    }
-#endif /* DAEMON_MEMCACHED */
-
     /* make the time we started always be 2 seconds before we really
        did, so time(0) - time.started is never zero.  if so, things
        like 'settings.oldest_live' which act as booleans as well as
@@ -7141,12 +7133,38 @@ int main (int argc, char **argv) {
 
     initialize_binary_lookup_map();
 
+#ifdef DAEMON_MEMCACHED
+    if (memcached_initialize_sql_print_logger(get_server_api) != EXTENSION_SUCCESS) {
+        fprintf(stderr, "Failed to initialize sql_print log system\n");
+        goto func_exit;
+    }
+#else
     if (memcached_initialize_stderr_logger(get_server_api) != EXTENSION_SUCCESS) {
         fprintf(stderr, "Failed to initialize log system\n");
-        exit(EX_OSERR);
+        goto func_exit;
+    }
+#endif
+
+    if (settings.verbose) {
+        settings.extensions.logger->log(EXTENSION_LOG_INFO, NULL,
+                                        "Starting memcached main thread...\n");
     }
 
     if (!sanitycheck()) {
+        exit(EX_OSERR);
+    }
+
+#ifdef DAEMON_MEMCACHED
+    if (context->config.engine_library) {
+        engine = context->config.engine_library;
+        /* FIXME: We should have a better way to pass the context structure
+        point to storage engine. It is now appended in the engine configure
+        string. */
+        engine_config = (const char *) context;
+
+    } else {
+        settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
+                                        "Engine library do not provided\n");
         exit(EX_OSERR);
     }
 
@@ -7154,6 +7172,7 @@ int main (int argc, char **argv) {
                                  &option_copy,
                                  &option_argc,
                                  &option_argv);
+#endif /* DAEMON_MEMCACHED */
 
     /* Always reset the index to 1, since this function can
     be invoked multiple times with install/uninstall plugins */
@@ -7422,7 +7441,8 @@ int main (int argc, char **argv) {
 
     free(option_argv);
 
-    fprintf(stderr, MEMCACHED_ATOMIC_MSG);
+    settings.extensions.logger->log(EXTENSION_LOG_INFO, NULL,
+                                    MEMCACHED_ATOMIC_MSG);
 
     /*
      * Use one workerthread to serve each UDP port if the user specified
@@ -7731,13 +7751,13 @@ int main (int argc, char **argv) {
                 ret = server_socket(interface_ptr, port, transport, current_container, NULL);
 
             } else {
-                settings.extensions.logger->log(EXTENSION_LOG_INFO, NULL,
+                settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
                                                 "Port not specified: %s\n",
                                                 current_container->name);
             }
 
         } else {
-            settings.extensions.logger->log(EXTENSION_LOG_INFO, NULL,
+            settings.extensions.logger->log(EXTENSION_LOG_WARNING, NULL,
                                             "Invalid transport protocol specified: %s\n",
                                             current_container->name);
         }
@@ -7823,6 +7843,11 @@ int main (int argc, char **argv) {
 
     memcached_initialized = 1;
 
+    if (settings.verbose) {
+        settings.extensions.logger->log(EXTENSION_LOG_INFO, NULL,
+                                        "Memcached main thread started, entering event loop\n");
+    }
+
     if (!memcached_shutdown) {
         /* enter the event loop */
         event_base_loop(main_base, 0);
@@ -7857,6 +7882,11 @@ func_exit:
 
     if (option_copy)
         free(option_copy);
+
+    if (settings.verbose) {
+        settings.extensions.logger->log(EXTENSION_LOG_INFO, NULL,
+                                        "Shutdown complete\n");
+    }
 
     memcached_shutdown = 2;
     memcached_initialized = 2;

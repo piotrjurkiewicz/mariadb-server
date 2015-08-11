@@ -31,6 +31,7 @@ Created 04/12/2011 Jimmy Yang
 #include <ctype.h>
 #include <mysql_version.h>
 #include "sql_plugin.h"
+#include "log.h"
 
 /** Variables for configure options */
 static char *mci_engine_lib_name = NULL;
@@ -93,8 +94,8 @@ static int daemon_memcached_plugin_deinit(void *p)
     }
 
     if (!init_complete()) {
-        fprintf(stderr, " InnoDB_Memcached: Memcached plugin is still"
-                " initializing. Can't shut down it.\n");
+        sql_print_warning("Plugin daemon_memcached: %s", "Memcached plugin is still"
+                          " initializing. Can't shut down it.\n");
         return (0);
     }
 
@@ -111,9 +112,9 @@ static int daemon_memcached_plugin_deinit(void *p)
     }
 
     if (!shutdown_complete()) {
-        fprintf(stderr, " InnoDB_Memcached: Waited for 50 seconds"
-                " for memcached thread to exit. Now force terminating"
-                " the thread\n");
+        sql_print_warning("Plugin daemon_memcached: %s", "Waited for 50 seconds"
+                          " for memcached thread to exit. Now force terminating"
+                          " the thread.\n");
     }
 
     context = (memcached_context_t *) (plugin->data);
@@ -178,7 +179,7 @@ static int daemon_memcached_plugin_init(void *p)
     if (pthread_create(&context->thread, &attr,
                        daemon_memcached_main,
                        context) != 0) {
-        fprintf(stderr, "Could not create memcached daemon thread!\n");
+        sql_print_warning("Plugin daemon_memcached: %s", "Could not create memcached daemon thread!\n");
         exit(0);
     }
 

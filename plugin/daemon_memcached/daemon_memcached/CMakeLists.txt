@@ -19,20 +19,14 @@ OPTION(DAEMON_MEMCACHED_ENABLE_SASL_PWDB "Enable SASL on Daemon Memcached" OFF)
 CONFIGURE_FILE(include/config_daemon_memcached.h.in include/config_daemon_memcached.h)
 
 # Common defines and includes
-INCLUDE_DIRECTORIES(${LIBEVENT_INCLUDE_DIR}
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached
 		    ${CMAKE_SOURCE_DIR}/include
 		    ${CMAKE_SOURCE_DIR}/sql
-		    ${CMAKE_SOURCE_DIR}/bld/include
-		    ${CMAKE_SOURCE_DIR}/regex
+		    ${LIBEVENT_INCLUDE_DIR}
 		    ${CMAKE_SOURCE_DIR}/libevent
-		    ${CMAKE_SOURCE_DIR}/include/mysql
-		    ${CMAKE_C_IMPLICIT_LINK_DIRECTORIES}
 		    ${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached/include
 		    ${CMAKE_BINARY_DIR}/plugin/daemon_memcached/daemon_memcached/include
-		    ${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached/include/memcached
-		    ${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached
-
-		)
+		    ${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached/include/memcached)
 
 SET(CMAKE_CPP_FLAGS "${CMAKE_CPP_FLAGS} ${CMAKE_SHARED_LIBRARY_C_FLAGS} -I${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached/utilities")
 
@@ -60,6 +54,7 @@ SET(DAEMON_MEMCACHED_UTILITIES_SOURCES
 		utilities/engine_loader.c
 		utilities/engine_loader.h
 		utilities/extension_loggers.c
+		utilities/sql_print_logger.cc
 		utilities/util.c)
 
 ADD_LIBRARY(daemon_memcached_utilities STATIC ${DAEMON_MEMCACHED_UTILITIES_SOURCES})
