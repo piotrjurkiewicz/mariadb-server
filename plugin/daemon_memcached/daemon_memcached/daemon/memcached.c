@@ -205,8 +205,8 @@ static time_t process_started;     /* when the process was started */
 
 /** file scope variables **/
 static conn *listen_conn = NULL;
-static int  udp_socket[100];
-static int  num_udp_socket;
+static int udp_socket[100];
+static int num_udp_socket;
 static struct event_base *main_base;
 static struct thread_stats *default_thread_stats;
 
@@ -4079,11 +4079,13 @@ static inline char* process_get_command(conn *c, token_t *tokens, size_t ntokens
     token_t *key_token = &tokens[KEY_TOKEN];
     assert(c != NULL);
 
+#ifdef DAEMON_MEMCACHED
     /* We temporarily block the mgets commands till wl6650 checked in. */
     if ((key_token + 1)->length > 0) {
         out_string(c, "We temporarily don't support multiple get option.");
         return NULL;
     }
+#endif
 
     do {
         while(key_token->length != 0) {
@@ -7108,11 +7110,13 @@ int main (int argc, char **argv) {
     char old_options[1024] = { [0] = '\0' };
     char *old_opts = old_options;
 
+#ifdef DAEMON_MEMCACHED
     memcached_context_t *context = (memcached_context_t *) arg;
 
     char* option_copy = NULL;
-    int option_argc = 0;
-    char** option_argv = NULL;
+    int argc = 0;
+    char** argv = NULL;
+#endif
 
     memcached_initialized = 0;
     memcached_shutdown = 0;
@@ -7170,14 +7174,16 @@ int main (int argc, char **argv) {
 
     daemon_memcached_make_option(context->config.option,
                                  &option_copy,
-                                 &option_argc,
-                                 &option_argv);
+                                 &argc,
+                                 &argv);
 #endif /* DAEMON_MEMCACHED */
 
-    /* Always reset the index to 1, since this function can
+    /* Always reset the index to 1, since this loop can
     be invoked multiple times with install/uninstall plugins */
     optind = 1;
-    while (-1 != (c = getopt(option_argc, option_argv,
+
+    /* process arguments */
+    while (-1 != (c = getopt(argc, argv,
           "a:"  /* access mask for unix socket */
           "p:"  /* TCP port number to listen on */
           "s:"  /* unix socket path to listen on */
@@ -7439,10 +7445,11 @@ int main (int argc, char **argv) {
         }
     }
 
-    free(option_argv);
-
+#ifdef DAEMON_MEMCACHED
+    free(argv);
     settings.extensions.logger->log(EXTENSION_LOG_INFO, NULL,
                                     MEMCACHED_ATOMIC_MSG);
+#endif
 
     /*
      * Use one workerthread to serve each UDP port if the user specified
@@ -7878,10 +7885,10 @@ func_exit:
         event_base_free(main_base);
         main_base = NULL;
     }
-#endif
 
     if (option_copy)
         free(option_copy);
+#endif
 
     if (settings.verbose) {
         settings.extensions.logger->log(EXTENSION_LOG_INFO, NULL,
