@@ -46,6 +46,7 @@ Created 3/14/2011 Jimmy Yang
 #include "log_event.h"
 #include "innodb_config.h"
 #include "log.h"
+#include "print_log.h"
 
 /** Some handler functions defined in sql/sql_table.cc and sql/handler.cc etc.
 and being used here */
@@ -90,7 +91,7 @@ handler_create_thd(
 	THD*	thd;
 
 	if (enable_binlog && !binlog_enabled()) {
-		fprintf(stderr, "  InnoDB_Memcached: MySQL server"
+		print_log_error(" MySQL server"
 			 	" binlog not enabled\n");
 		return(NULL);
 	}

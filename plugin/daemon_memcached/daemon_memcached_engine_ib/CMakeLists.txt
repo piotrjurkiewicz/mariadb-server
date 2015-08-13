@@ -31,7 +31,8 @@ SET(DAEMON_MEMCACHED_ENGINE_IB_SOURCES
 		src/hash_item_util.c
 		src/innodb_engine.c
 		src/innodb_api.c
-		src/handler_api.cc)
+		src/handler_api.cc
+		src/print_log.cc)
 
 # ADD_LIBRARY(daemon_memcached_engine_ib SHARED ${DAEMON_MEMCACHED_ENGINE_IB_SOURCES})
 

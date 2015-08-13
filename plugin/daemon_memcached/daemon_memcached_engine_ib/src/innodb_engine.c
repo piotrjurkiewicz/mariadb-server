@@ -42,6 +42,7 @@ Extracted and modified from NDB memcached project
 #include "innodb_api.h"
 #include "hash_item_util.h"
 #include "innodb_cb_api.h"
+#include "print_log.h"
 
 /** Define also present in daemon/memcached.h */
 #define KEY_MAX_LENGTH	250
@@ -166,7 +167,7 @@ create_instance(
 	innodb_eng->get_server_api = get_server_api;
 
 	/* configuration, with default values*/
-	innodb_eng->info.info.description = "InnoDB Memcache " VERSION;
+	innodb_eng->info.info.description = "daemon_memcached_engine_ib " VERSION;
 	innodb_eng->info.info.num_features = 3;
 	innodb_eng->info.info.features[0].feature = ENGINE_FEATURE_CAS;
 	innodb_eng->info.info.features[1].feature =
@@ -449,7 +450,7 @@ innodb_initialize(
 	meta_info = innodb_config(NULL, 0, &innodb_eng->meta_hash);
 
 	if (!meta_info) {
-		fprintf(stderr, "No containers defined\n");
+		print_log_warning(" No containers defined\n");
 		return(ENGINE_TMPFAIL);
 	}
 

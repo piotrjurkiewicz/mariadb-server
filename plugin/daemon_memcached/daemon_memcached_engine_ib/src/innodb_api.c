@@ -35,6 +35,7 @@ Created 04/12/2011 Jimmy Yang
 #include "memcached/util.h"
 #include <innodb_cb_api.h>
 #include <innodb_config.h>
+#include "print_log.h"
 
 /** Whether to update all columns' value or a specific column value */
 #define UPDATE_ALL_VAL_COL	-1
@@ -167,7 +168,7 @@ innodb_api_begin(
 		err  = ib_cb_open_table(table_name, ib_trx, crsr);
 
 		if (err != DB_SUCCESS) {
-			fprintf(stderr, " InnoDB_Memcached: Unable to open"
+			print_log_error(" Unable to open"
 					" table '%s'\n", table_name);
 			return(err);
 		}
@@ -209,7 +210,7 @@ innodb_api_begin(
 		err = innodb_cb_cursor_lock(engine, *crsr, lock_mode);
 
 		if (err != DB_SUCCESS) {
-			fprintf(stderr, " InnoDB_Memcached: Fail to lock"
+			print_log_error(" Fail to lock"
 					" table '%s'\n", table_name);
 			return(err);
 		}
@@ -223,7 +224,7 @@ innodb_api_begin(
 					meta_info , *crsr, true);
 
 				if (err != DB_SUCCESS) {
-					fprintf(stderr, " InnoDB_Memcached:"
+					print_log_error(""
 							" Table definition"
 							" modified for"
 							" table '%s'\n",
@@ -252,7 +253,7 @@ innodb_api_begin(
 		err = innodb_cb_cursor_lock(engine, *crsr, lock_mode);
 
 		if (err != DB_SUCCESS) {
-			fprintf(stderr, " InnoDB_Memcached: Fail to lock"
+			print_log_error(" Fail to lock"
 					" table '%s'\n", name);
 			return(err);
 		}
@@ -529,8 +530,8 @@ innodb_api_setup_field_value(
 			/* If the value is not a valid string of integer,
 			we will return error. */
 			if (end_ptr == val_buf) {
-				fprintf(stderr,
-					" InnoDB_Memcached: Unable to convert"
+				print_log_error(
+					" Unable to convert"
 					" value '%s' to integer\n", value);
 				return(DB_ERROR);
 			}
@@ -544,8 +545,8 @@ innodb_api_setup_field_value(
 			/* If the value is not a valid string of integer,
 			we will return error. */
 			if (end_ptr == val_buf) {
-				fprintf(stderr,
-					" InnoDB_Memcached: Unable to convert"
+				print_log_error(
+					" Unable to convert"
 					" value '%s' to integer\n", value);
 				return(DB_ERROR);
 			}
