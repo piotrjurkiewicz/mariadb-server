@@ -6790,6 +6790,11 @@ void shutdown_server(void) {
 static void shutdown_server(void) {
 #endif /* DAEMON_MEMCACHED */
 #ifdef DAEMON_MEMCACHED
+    if (settings.verbose) {
+        settings.extensions.logger->log(EXTENSION_LOG_INFO, NULL,
+                                        "Initiating shutdown...\n");
+    }
+
     int i;
     /* Clean up connections */
     while (listen_conn) {
@@ -7858,11 +7863,6 @@ int main (int argc, char **argv) {
     if (!memcached_shutdown) {
         /* enter the event loop */
         event_base_loop(main_base, 0);
-    }
-
-    if (settings.verbose) {
-        settings.extensions.logger->log(EXTENSION_LOG_INFO, NULL,
-                                        "Initiating shutdown\n");
     }
 
 func_exit:
