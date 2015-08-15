@@ -47,7 +47,7 @@ CREATE  TABLE IF NOT EXISTS `containers` (
 -- | -> use this character as separator
 -- ------------------------------------------------------------------------
 
-INSERT INTO containers VALUES ("tcp://127.0.0.1:11211", "test", "demo_test",
+INSERT INTO containers VALUES ("tcp://*:11211", "test", "demo_test",
 			       "c1", "c2",  "c3", "c4", "c5", "PRIMARY", "|");
 
 CREATE DATABASE IF NOT EXISTS test;
