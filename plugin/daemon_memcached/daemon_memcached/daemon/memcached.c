@@ -164,6 +164,7 @@ volatile rel_time_t current_time;
  */
 static SOCKET new_socket(struct addrinfo *ai);
 static int try_read_command(conn *c);
+static inline struct thread_stats *get_independent_stats(conn *c);
 static inline struct thread_stats *get_thread_stats(conn *c);
 static void register_callback(ENGINE_HANDLE *eh,
                               ENGINE_EVENT_TYPE type,
@@ -281,7 +282,7 @@ static void stats_reset(const void *cookie) {
     stats.total_conns = 0;
     stats_prefix_clear();
     STATS_UNLOCK();
-    threadlocal_stats_reset(get_thread_stats(conn));
+    threadlocal_stats_reset(get_independent_stats(conn));
     settings.engine.v1->reset_stats(settings.engine.v0, cookie);
 }
 
@@ -3739,7 +3740,7 @@ static void server_stats(ADD_STAT add_stats, conn *c, bool aggregate) {
                                             aggregate_callback,
                                             &thread_stats);
     } else {
-        threadlocal_stats_aggregate(get_thread_stats(c),
+        threadlocal_stats_aggregate(get_independent_stats(c),
                                     &thread_stats);
     }
 
@@ -6465,7 +6466,7 @@ static void release_thread_stats(void *stats) {
     }
 }
 
-static inline struct thread_stats *get_thread_stats(conn *c) {
+static inline struct thread_stats *get_independent_stats(conn *c) {
     struct thread_stats *ts;
     if (settings.engine.v1->get_stats_struct != NULL) {
         ts = settings.engine.v1->get_stats_struct(settings.engine.v0, c);
@@ -6476,6 +6477,11 @@ static inline struct thread_stats *get_thread_stats(conn *c) {
         ts = default_thread_stats;
     }
 
+    return ts;
+}
+
+static inline struct thread_stats *get_thread_stats(conn *c) {
+    struct thread_stats *ts = get_independent_stats(c);
     assert(c->thread->index < num_thread_stats());
     return &ts[c->thread->index];
 }
