@@ -16,6 +16,7 @@ SET GLOBAL TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
 # Create the memcached tables
 --disable_query_log
 source include/memcache_config.inc;
+call mtr.add_suppression("Plugin daemon_memcached");
 --enable_query_log
 
 --replace_result $DAEMON_MEMCACHED_PORT_0 DAEMON_MEMCACHED_PORT_0

@@ -25,6 +25,7 @@ SET @@global.innodb_lock_wait_timeout=1;
 # Create the memcached tables
 --disable_query_log
 source include/memcache_config.inc;
+call mtr.add_suppression("Plugin daemon_memcached");
 --enable_query_log
 
 # describe table for memcache
