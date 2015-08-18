@@ -2079,7 +2079,9 @@ innodb_cb_cursor_lock(
 		err = ib_cb_cursor_set_lock(ib_crsr, ib_lck_mode);
 	}
 
-	err = ib_cb_cursor_set_memcached_sync(ib_crsr, true);
+	if (err == DB_SUCCESS) {
+		err = ib_cb_cursor_set_memcached_sync(ib_crsr, true);
+	}
 
 	return(err);
 }

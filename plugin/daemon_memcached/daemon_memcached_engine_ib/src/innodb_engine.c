@@ -1922,7 +1922,7 @@ innodb_flush(
 	if (!conn_data) {
 		pthread_mutex_unlock(&innodb_eng->flush_mutex);
 		pthread_mutex_unlock(&innodb_eng->conn_mutex);
-		return(ENGINE_SUCCESS);
+		return(ENGINE_TMPFAIL);
 	}
 
 	/* Commit any previous work on this connection */
