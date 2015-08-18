@@ -1,4 +1,4 @@
-# Test for InnoDB memcached support for utf8 charset
+# Test for daemon_memcached support for utf8 charset
 # To make sure it handles utf8 as same as MYSQL.
 
 source include/not_valgrind.inc;

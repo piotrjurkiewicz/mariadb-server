@@ -17,13 +17,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 ***********************************************************************/
 
-/**************************************************//**
-@file memcached_mysql.cc
-InnoDB Memcached Plugin
-
-Created 04/12/2011 Jimmy Yang
-*******************************************************/
-
 #include "config.h"
 
 #include "memcached_mysql.h"

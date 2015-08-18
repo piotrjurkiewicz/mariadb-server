@@ -34,7 +34,7 @@ eval INSERT INTO containers VALUES ("tcp://127.0.0.1:$DAEMON_MEMCACHED_PORT_0", 
 
 # Container's value_columns is 255 bytes, above insertion would be truncated.
 # The truncation left an invalid column name "c", which will be rejected
-# by InnoDB memcached configuration
+# by daemon_memcached configuration
 --replace_column 1 PLACEHOLDER
 SELECT * FROM containers;
 

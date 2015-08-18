@@ -6,15 +6,14 @@ use daemon_memcached;
 #-- Table `containers`
 #--
 #-- A container record describes an InnoDB table used for data storage by
-#-- InnoDB Memcache.
+#-- Daemon Memcached NoSQL plugin.
 #-- There must be a unique index on the `key column`, and unique index name
 #-- is specified in the `unique_idx_name_on_key` column of the table
 #-- `value_columns` are comma-separated lists of the columns that make up
 #-- the memcache key and value.
-#--
 #-- ------------------------------------------------------------------------
 
-CREATE  TABLE IF NOT EXISTS `containers` (
+CREATE TABLE IF NOT EXISTS `containers` (
 	`name` varchar(50) not null primary key,
 	`db_schema` VARCHAR(250) NOT NULL,
 	`db_table` VARCHAR(250) NOT NULL,
