@@ -49,6 +49,9 @@ ENGINE = InnoDB;
 INSERT INTO containers VALUES ("tcp://*:11211", "test", "demo_test",
 			       "c1", "c2", "c3", "c4", "c5", "PRIMARY", "|");
 
+INSERT INTO containers VALUES ("udp://*:11211", "test", "demo_test",
+			       "c1", "c2", "c3", "c4", "c5", "PRIMARY", "|");
+
 CREATE DATABASE IF NOT EXISTS test;
 USE test;
 
