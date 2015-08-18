@@ -30,8 +30,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 static char *mci_engine_lib_name = NULL;
 static char *mci_engine_lib_path = NULL;
 static char *mci_option = NULL;
-static unsigned int mci_r_batch_size = 1048576;
-static unsigned int mci_w_batch_size = 32;
+static unsigned int mci_r_batch_size = 1;
+static unsigned int mci_w_batch_size = 1;
 static my_bool mci_enable_binlog = false;
 
 static MYSQL_SYSVAR_STR(engine_lib_name, mci_engine_lib_name,
