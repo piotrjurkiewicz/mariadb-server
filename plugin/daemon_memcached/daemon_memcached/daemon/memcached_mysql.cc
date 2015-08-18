@@ -190,7 +190,7 @@ static int daemon_memcached_plugin_init(void *p)
 
 struct st_mysql_daemon daemon_memcached_plugin = {MYSQL_DAEMON_INTERFACE_VERSION};
 
-mysql_declare_plugin(daemon_memcached)
+maria_declare_plugin(daemon_memcached)
 {
     MYSQL_DAEMON_PLUGIN,
     &daemon_memcached_plugin,
@@ -198,11 +198,12 @@ mysql_declare_plugin(daemon_memcached)
     "Oracle Corporation",
     "Memcached Daemon",
     PLUGIN_LICENSE_GPL,
-    daemon_memcached_plugin_init,      /* Plugin Init */
-    daemon_memcached_plugin_deinit,    /* Plugin Deinit */
-    0x0100,                            /* 1.0 */
-    NULL,                              /* status variables */
-    daemon_memcached_sys_var,          /* system variables */
-    NULL,                              /* config options */
-    0                                  /* flags */
-} mysql_declare_plugin_end;
+    daemon_memcached_plugin_init,
+    daemon_memcached_plugin_deinit,
+    0x0100,
+    NULL,
+    daemon_memcached_sys_var,
+    "1.0",
+    MariaDB_PLUGIN_MATURITY_EXPERIMENTAL
+}
+maria_declare_plugin_end;
