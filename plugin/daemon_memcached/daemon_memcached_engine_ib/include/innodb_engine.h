@@ -75,6 +75,8 @@ struct innodb_conn_data_struct {
 	bool		is_stale;	/*!< connection closed, this is
 					stale */
 	bool		is_flushing;	/*!< if flush is running. */
+	bool		is_memcached_sync; /*!< if memcached sync count of
+					   table is set for this connection */
 	void*		conn_cookie;	/*!< connection cookie */
 	uint64_t	n_total_reads;	/*!< number of reads */
 	uint64_t	n_reads_since_commit;

@@ -207,7 +207,7 @@ innodb_api_begin(
 			}
 		}
 
-		err = innodb_cb_cursor_lock(engine, *crsr, lock_mode);
+		err = innodb_cb_cursor_lock(engine, conn_data, *crsr, lock_mode);
 
 		if (err != DB_SUCCESS) {
 			print_log_error(" Fail to lock"
@@ -242,7 +242,7 @@ innodb_api_begin(
 					*crsr, meta_index->idx_name,
 					idx_crsr, &index_type, &index_id);
 
-				err = innodb_cb_cursor_lock(engine, *idx_crsr,
+				err = innodb_cb_cursor_lock(engine, conn_data, *idx_crsr,
 						      lock_mode);
 			}
 		}
@@ -250,7 +250,7 @@ innodb_api_begin(
 	} else {
 		ib_cb_cursor_new_trx(*crsr, ib_trx);
 
-		err = innodb_cb_cursor_lock(engine, *crsr, lock_mode);
+		err = innodb_cb_cursor_lock(engine, conn_data, *crsr, lock_mode);
 
 		if (err != DB_SUCCESS) {
 			print_log_error(" Fail to lock"
@@ -265,7 +265,7 @@ innodb_api_begin(
 			/* set up secondary index cursor */
 			if (meta_index->srch_use_idx == META_USE_SECONDARY) {
 				ib_cb_cursor_new_trx(*idx_crsr, ib_trx);
-				err = innodb_cb_cursor_lock(engine, *idx_crsr,
+				err = innodb_cb_cursor_lock(engine, conn_data, *idx_crsr,
 							    lock_mode);
 			}
 		}
@@ -1951,8 +1951,9 @@ innodb_reset_conn(
 		}
 
 		/* Decrease the memcached sync counter to unblock SQL DDL.*/
-		if (conn_data->in_use) {
+		if (conn_data->is_memcached_sync) {
 			ib_cb_cursor_set_memcached_sync(ib_crsr, false);
+			conn_data->is_memcached_sync = false;
 		}
 
 		commit_trx = true;
@@ -2060,6 +2061,7 @@ ib_err_t
 innodb_cb_cursor_lock(
 /*==================*/
 	innodb_engine_t* eng,		/*!< in: InnoDB Memcached engine */
+	innodb_conn_data_t* conn_data,	/*!< in/out: connnection specific data */
 	ib_crsr_t	ib_crsr,	/*!< in/out: InnoDB cursor */
 	ib_lck_mode_t	ib_lck_mode)	/*!< in: InnoDB lock mode */
 {
@@ -2080,7 +2082,10 @@ innodb_cb_cursor_lock(
 	}
 
 	if (err == DB_SUCCESS) {
-		err = ib_cb_cursor_set_memcached_sync(ib_crsr, true);
+		if (conn_data && !conn_data->is_memcached_sync) {
+			err = ib_cb_cursor_set_memcached_sync(ib_crsr, true);
+			conn_data->is_memcached_sync = true;
+		}
 	}
 
 	return(err);

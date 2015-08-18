@@ -796,6 +796,7 @@ innodb_conn_init(
 		conn_data->cmd_buf_len = 1024;
 
 		conn_data->is_flushing = false;
+		conn_data->is_memcached_sync = false;
 
 		pthread_mutex_init(&conn_data->curr_conn_mutex, NULL);
 		UNLOCK_CONN_IF_NOT_LOCKED(has_lock, engine);
@@ -922,7 +923,7 @@ have_conn:
 			innodb_cb_cursor_new_trx(crsr, conn_data->crsr_trx);
 			trx_updated = true;
 
-			err = innodb_cb_cursor_lock(engine, crsr, lock_mode);
+			err = innodb_cb_cursor_lock(engine, conn_data, crsr, lock_mode);
 
 			if (err != DB_SUCCESS) {
 				innodb_cb_cursor_close(
@@ -945,7 +946,7 @@ have_conn:
 				innodb_cb_cursor_new_trx(
 					idx_crsr, conn_data->crsr_trx);
 				innodb_cb_cursor_lock(
-					engine, idx_crsr, lock_mode);
+					engine, conn_data, idx_crsr, lock_mode);
 			}
 		} else {
 
@@ -958,7 +959,7 @@ have_conn:
 					engine->trx_level,
 					true, false, NULL);
 			ib_cb_cursor_stmt_begin(crsr);
-			err = innodb_cb_cursor_lock(engine, crsr, lock_mode);
+			err = innodb_cb_cursor_lock(engine, conn_data, crsr, lock_mode);
 
 			if (err != DB_SUCCESS) {
 				innodb_cb_cursor_close(
@@ -1054,7 +1055,7 @@ have_conn:
 			}
 
 			err = innodb_cb_cursor_lock(
-				engine, conn_data->read_crsr, lock_mode);
+				engine, conn_data, conn_data->read_crsr, lock_mode);
 
 			if (err != DB_SUCCESS) {
 				innodb_cb_cursor_close(
@@ -1078,7 +1079,7 @@ have_conn:
 				innodb_cb_cursor_new_trx(
 					idx_crsr, conn_data->crsr_trx);
 				innodb_cb_cursor_lock(
-					engine, idx_crsr, lock_mode);
+					engine, conn_data, idx_crsr, lock_mode);
 			}
 		} else {
 			/* This is read operation, start a trx
@@ -1092,7 +1093,7 @@ have_conn:
 			ib_cb_cursor_stmt_begin(conn_data->read_crsr);
 
 			err = innodb_cb_cursor_lock(
-				engine, conn_data->read_crsr, lock_mode);
+				engine, conn_data, conn_data->read_crsr, lock_mode);
 
 			if (err != DB_SUCCESS) {
 				innodb_cb_cursor_close(
@@ -1114,7 +1115,7 @@ have_conn:
 				ib_crsr_t idx_crsr = conn_data->idx_read_crsr;
 				ib_cb_cursor_stmt_begin(idx_crsr);
 				innodb_cb_cursor_lock(
-					engine, idx_crsr, lock_mode);
+					engine, conn_data, idx_crsr, lock_mode);
 			}
 		}
 
