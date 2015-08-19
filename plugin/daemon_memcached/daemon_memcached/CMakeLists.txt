@@ -58,6 +58,8 @@ SET(DAEMON_MEMCACHED_UTILITIES_SOURCES
 		utilities/util.c)
 
 ADD_LIBRARY(daemon_memcached_utilities STATIC ${DAEMON_MEMCACHED_UTILITIES_SOURCES})
+# Needed by log.h header file
+ADD_DEPENDENCIES(daemon_memcached_utilities GenError)
 
 SET(CMAKE_CPP_FLAGS "${CMAKE_CPP_FLAGS} ${CMAKE_SHARED_LIBRARY_C_FLAGS} -I${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached/daemon")
 
