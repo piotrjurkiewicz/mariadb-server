@@ -515,21 +515,13 @@ innodb_api_setup_field_value(
 	}
 
 	if (col_info->col_meta.type == IB_INT) {
-		char*	end_ptr;
-		char	val_buf[256];
-
-		/* Need this memcpy to strip the junk */
-		memcpy(val_buf, value, val_len);
-		val_buf[val_len] = 0;
 
 		if (col_info->col_meta.attr & IB_COL_UNSIGNED) {
 			uint64_t int_value = 0;
 
-			int_value = strtoull(val_buf, &end_ptr, 10);
-
 			/* If the value is not a valid string of integer,
 			we will return error. */
-			if (end_ptr == val_buf) {
+			if (!nstrtoull(value, val_len, &int_value)) {
 				print_log_error(
 					" Unable to convert"
 					" value '%s' to integer\n", value);
@@ -541,10 +533,9 @@ innodb_api_setup_field_value(
 		} else {
 			int64_t	int_value = 0;
 
-			int_value = strtoll(val_buf, &end_ptr, 10);
 			/* If the value is not a valid string of integer,
 			we will return error. */
-			if (end_ptr == val_buf) {
+			if (!nstrtoll(value, val_len, &int_value)) {
 				print_log_error(
 					" Unable to convert"
 					" value '%s' to integer\n", value);

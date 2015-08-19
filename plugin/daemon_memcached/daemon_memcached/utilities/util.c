@@ -16,6 +16,55 @@
 /* Avoid warnings on solaris, where isspace() is an index into an array, and gcc uses signed chars */
 #define xisspace(c) isspace((unsigned char)c)
 
+bool nstrtoull(const char *str, size_t len, uint64_t *out) {
+    const char *str_end = str + len;
+    int is_negative = 0;
+    int has_digits = 0;
+
+    uint64_t result = 0;
+    uint64_t digit;
+    uint64_t shifted;
+
+    while (str < str_end && xisspace(*str)) {
+        str += 1;
+    }
+
+    if (str < str_end) {
+        if (*str == '-') {
+            str += 1;
+            is_negative = 1;
+        } else if (*str == '+') {
+            str += 1;
+        }
+    }
+
+    while (str < str_end) {
+        digit = *str - '0';
+        if (digit > 9) {
+            break;
+        }
+        shifted = 10 * result;
+        result = shifted + digit;
+        has_digits = 1;
+        str += 1;
+    }
+
+    if (is_negative) {
+        result = (uint64_t)(-((int64_t) result));
+    }
+
+    if (str != str_end || !has_digits) {
+        return false;
+    } else {
+        *out = result;
+        return true;
+    }
+}
+
+bool nstrtoll(const char *str, size_t len, int64_t *out) {
+    return nstrtoull(str, len, (uint64_t *) out);
+}
+
 bool safe_strtoull(const char *str, uint64_t *out) {
     assert(out != NULL);
     errno = 0;

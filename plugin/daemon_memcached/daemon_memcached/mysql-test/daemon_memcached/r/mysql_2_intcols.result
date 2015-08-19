@@ -90,7 +90,7 @@ Here the memcached results after set min border:
 Here the memcached results after set max border:
 9223372036854775807|Ost
 Here the memcached results after set over max border:
-9223372036854775807|Ost
+-9223372036854775808|Ost
 Here the memcached results after add:
 -1|Beijing-Signed-BIGINT
 SELECT c1,c2,c21 FROM t1;
@@ -98,7 +98,7 @@ c1	c2	c21
 B	2	Mitte
 C	3	West
 D	1	City
-E	9223372036854775807	Ost
+E	-9223372036854775808	Ost
 F	-1	Beijing-Signed-BIGINT
 H	4	Norderstedt
 SET sql_mode='NO_ENGINE_SUBSTITUTION';
@@ -164,7 +164,7 @@ Here the memcached results after set:
 Here the memcached results after set max border:
 18446744073709551615|Ost
 Here the memcached results after set over max border:
-18446744073709551615|Ost
+0|Ost
 ALTER TABLE t1 MODIFY c21 BIGINT UNSIGNED;
 Warnings:
 Warning	1366	Incorrect integer value: 'Mitte' for column 'c21' at row 1
@@ -183,16 +183,16 @@ Here the memcached results after set:
 Here the memcached results after set max border:
 18446744073709551615|18446744073709551615
 Here the memcached results after set over max border:
-18446744073709551615|18446744073709551615
+0|0
 Here the memcached results after append:
 Append to integer value is not supported.
-18446744073709551615|18446744073709551615
+0|0
 SELECT c1,c2,c21 FROM t1;
 c1	c2	c21
 B	2	0
 C	3	0
 D	1	0
-E	18446744073709551615	18446744073709551615
+E	0	0
 F	0	0
 H	4	0
 SELECT c1,c2,c21 FROM t1;
@@ -200,7 +200,7 @@ c1	c2	c21
 B	2	0
 C	3	0
 D	1	0
-E	18446744073709551615	18446744073709551615
+E	0	0
 F	0	0
 H	4	0
 DELETE FROM t1;

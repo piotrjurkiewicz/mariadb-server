@@ -16,6 +16,8 @@
 extern "C" {
 #endif
 
+MEMCACHED_PUBLIC_API bool nstrtoull(const char *str, size_t len, uint64_t *out);
+MEMCACHED_PUBLIC_API bool nstrtoll(const char *str, size_t len, int64_t *out);
 MEMCACHED_PUBLIC_API bool safe_strtoull(const char *str, uint64_t *out);
 MEMCACHED_PUBLIC_API bool safe_strtoll(const char *str, int64_t *out);
 MEMCACHED_PUBLIC_API bool safe_strtoul(const char *str, uint32_t *out);
