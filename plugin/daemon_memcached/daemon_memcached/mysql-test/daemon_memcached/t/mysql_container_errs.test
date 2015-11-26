@@ -18,7 +18,7 @@ echo #######################################################;
 echo # Test case with expected configuration;
 # Create the memcached tables
 --disable_query_log
-source include/memcache_config.inc;
+source include/memcached_config.inc;
 call mtr.add_suppression("Plugin daemon_memcached");
 --enable_query_log
 
@@ -121,7 +121,7 @@ UNINSTALL PLUGIN daemon_memcached;
 DROP DATABASE daemon_memcached;
 # Create the memcached tables
 --disable_query_log
-source include/memcache_config.inc;
+source include/memcached_config.inc;
 call mtr.add_suppression("Plugin daemon_memcached");
 --enable_query_log
 
@@ -193,7 +193,7 @@ UNINSTALL PLUGIN daemon_memcached;
 DROP DATABASE daemon_memcached;
 # Create the memcached tables
 --disable_query_log
-source include/memcache_config.inc;
+source include/memcached_config.inc;
 call mtr.add_suppression("Plugin daemon_memcached");
 --enable_query_log
 
@@ -265,7 +265,7 @@ UNINSTALL PLUGIN daemon_memcached;
 DROP DATABASE daemon_memcached;
 # Create the memcached tables
 --disable_query_log
-source include/memcache_config.inc;
+source include/memcached_config.inc;
 call mtr.add_suppression("Plugin daemon_memcached");
 --enable_query_log
 
@@ -337,7 +337,7 @@ UNINSTALL PLUGIN daemon_memcached;
 DROP DATABASE daemon_memcached;
 # Create the memcached tables
 --disable_query_log
-source include/memcache_config.inc;
+source include/memcached_config.inc;
 call mtr.add_suppression("Plugin daemon_memcached");
 --enable_query_log
 
@@ -409,7 +409,7 @@ UNINSTALL PLUGIN daemon_memcached;
 DROP DATABASE daemon_memcached;
 # Create the memcached tables
 --disable_query_log
-source include/memcache_config.inc;
+source include/memcached_config.inc;
 call mtr.add_suppression("Plugin daemon_memcached");
 --enable_query_log
 
@@ -481,7 +481,7 @@ UNINSTALL PLUGIN daemon_memcached;
 DROP DATABASE daemon_memcached;
 # Create the memcached tables
 --disable_query_log
-source include/memcache_config.inc;
+source include/memcached_config.inc;
 call mtr.add_suppression("Plugin daemon_memcached");
 --enable_query_log
 
@@ -554,7 +554,7 @@ UNINSTALL PLUGIN daemon_memcached;
 DROP DATABASE daemon_memcached;
 # Create the memcached tables
 --disable_query_log
-source include/memcache_config.inc;
+source include/memcached_config.inc;
 call mtr.add_suppression("Plugin daemon_memcached");
 --enable_query_log
 

@@ -31,8 +31,7 @@ Created 03/15/2011      Jimmy Yang
 typedef void*   hash_node_t;
 
 /* Database name and table name for our metadata "system" tables for
-InnoDB memcache. The table names are the same as those for the
-NDB memcache, to make the memcache setup compatible between the two.
+Daemon Memcached NoSQL plugin.
 There is one "system table":
 1) containers - main configure table contains row describing which InnoDB
 		table is used to store/retrieve Memcached key/value if InnoDB

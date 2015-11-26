@@ -10,7 +10,7 @@ use daemon_memcached;
 #-- There must be a unique index on the `key column`, and unique index name
 #-- is specified in the `unique_idx_name_on_key` column of the table
 #-- `value_columns` are comma-separated lists of the columns that make up
-#-- the memcache key and value.
+#-- the memcached key and value.
 #-- ------------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS `containers` (

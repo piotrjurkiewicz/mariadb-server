@@ -272,8 +272,8 @@ innodb_config_meta_hash_init(
 
 	if (err != DB_SUCCESS) {
 		print_log_error(" Please create config table"
-				"'%s' in database '%s' by running"
-				" 'daemon_memcached_config.sql. error %s'\n",
+				" '%s' in database '%s' by running"
+				" 'daemon_memcached_config.sql'. Error '%s'\n",
 			MCI_CFG_CONTAINER_TABLE, MCI_CFG_DB_NAME,
 			ib_cb_ut_strerr(err));
 		err = DB_ERROR;
@@ -391,8 +391,8 @@ innodb_config_container(
 
 	if (err != DB_SUCCESS) {
 		print_log_error(" Please create config table"
-				"'%s' in database '%s' by running"
-				" 'daemon_memcached_config.sql. error %d'\n",
+				" '%s' in database '%s' by running"
+				" 'daemon_memcached_config.sql'. Error '%d'\n",
 			MCI_CFG_CONTAINER_TABLE, MCI_CFG_DB_NAME,
 			err);
 		err = DB_ERROR;
