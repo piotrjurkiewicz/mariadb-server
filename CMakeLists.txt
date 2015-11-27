@@ -142,7 +142,6 @@ INCLUDE(wsrep)
 INCLUDE(character_sets)
 INCLUDE(cpu_info)
 INCLUDE(zlib)
-INCLUDE(libevent)
 INCLUDE(ssl)
 INCLUDE(readline)
 INCLUDE(libutils)
@@ -323,8 +322,6 @@ MYSQL_CHECK_ZLIB_WITH_COMPRESS()
 MYSQL_CHECK_SSL()
 # Add readline or libedit.
 MYSQL_CHECK_READLINE()
-# Add libevent
-MYSQL_CHECK_LIBEVENT()
 
 SET(MALLOC_LIBRARY "system")
 CHECK_JEMALLOC()

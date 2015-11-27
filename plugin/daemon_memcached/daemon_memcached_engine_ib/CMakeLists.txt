@@ -15,28 +15,25 @@
 
 # Common defines and includes
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached_engine_ib
-		    ${CMAKE_SOURCE_DIR}/include
-		    ${CMAKE_SOURCE_DIR}/sql
-		    ${CMAKE_SOURCE_DIR}/storage/innobase/include
-		    ${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached_engine_ib/include
-		    ${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached/include)
+                    ${CMAKE_SOURCE_DIR}/include
+                    ${CMAKE_SOURCE_DIR}/sql
+                    ${CMAKE_SOURCE_DIR}/storage/innobase/include
+                    ${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached_engine_ib/include
+                    ${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached/include)
 
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_SHARED_LIBRARY_C_FLAGS} -std=gnu99")
 
 SET(CMAKE_CPP_FLAGS "${CMAKE_CPP_FLAGS}")
 
 SET(DAEMON_MEMCACHED_ENGINE_IB_SOURCES
-		src/innodb_config.c
-		src/innodb_utility.c
-		src/hash_item_util.c
-		src/innodb_engine.c
-		src/innodb_api.c
-		src/handler_api.cc
-		src/print_log.cc)
-
-# ADD_LIBRARY(daemon_memcached_engine_ib SHARED ${DAEMON_MEMCACHED_ENGINE_IB_SOURCES})
+    src/innodb_config.c
+    src/innodb_utility.c
+    src/hash_item_util.c
+    src/innodb_engine.c
+    src/innodb_api.c
+    src/handler_api.cc
+    src/print_log.cc)
 
 MYSQL_ADD_PLUGIN(daemon_memcached_engine_ib ${DAEMON_MEMCACHED_ENGINE_IB_SOURCES}
-		 MODULE_ONLY MODULE_OUTPUT_NAME "daemon_memcached_engine_ib")
-
-TARGET_LINK_LIBRARIES(daemon_memcached_engine_ib daemon_memcached_utilities)
+                 MODULE_ONLY MODULE_OUTPUT_NAME "daemon_memcached_engine_ib"
+                 LINK_LIBRARIES daemon_memcached_utilities)

@@ -13,22 +13,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-OPTION(DAEMON_MEMCACHED_ENABLE_SASL "Enable SASL on Daemon Memcached" OFF)
-OPTION(DAEMON_MEMCACHED_ENABLE_SASL_PWDB "Enable SASL on Daemon Memcached" OFF)
-
 CONFIGURE_FILE(include/config_daemon_memcached.h.in include/config_daemon_memcached.h)
 
 # Common defines and includes
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached
-		    ${CMAKE_SOURCE_DIR}/include
-		    ${CMAKE_SOURCE_DIR}/sql
-		    ${LIBEVENT_INCLUDE_DIR}
-		    ${CMAKE_SOURCE_DIR}/libevent
-		    ${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached/include
-		    ${CMAKE_BINARY_DIR}/plugin/daemon_memcached/daemon_memcached/include
-		    ${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached/include/memcached)
-
-SET(CMAKE_CPP_FLAGS "${CMAKE_CPP_FLAGS} ${CMAKE_SHARED_LIBRARY_C_FLAGS} -I${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached/utilities")
+                    ${CMAKE_SOURCE_DIR}/include
+                    ${CMAKE_SOURCE_DIR}/sql
+                    ${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached/include
+                    ${CMAKE_BINARY_DIR}/plugin/daemon_memcached/daemon_memcached/include
+                    ${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached/include/memcached)
 
 # If current CMAKE_C_FLAGS is with Werror, turn it off to compile successfully
 IF(CMAKE_C_FLAGS MATCHES "-Werror")
@@ -47,46 +40,49 @@ STRING(REGEX REPLACE "-Wwrite-strings" "" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_D
 
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_SHARED_LIBRARY_C_FLAGS} -std=gnu99")
 
-SET(DAEMON_MEMCACHED_UTILITIES_SOURCES
-		include/memcached/config_parser.h
-		include/memcached/util.h
-		utilities/config_parser.c
-		utilities/engine_loader.c
-		utilities/engine_loader.h
-		utilities/extension_loggers.c
-		utilities/sql_print_logger.cc
-		utilities/util.c)
+SET(CMAKE_CPP_FLAGS "${CMAKE_CPP_FLAGS} ${CMAKE_SHARED_LIBRARY_C_FLAGS} -I${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached/utilities")
 
-ADD_LIBRARY(daemon_memcached_utilities STATIC ${DAEMON_MEMCACHED_UTILITIES_SOURCES})
+SET(DAEMON_MEMCACHED_UTILITIES_SOURCES
+    include/memcached/config_parser.h
+    include/memcached/util.h
+    utilities/config_parser.c
+    utilities/engine_loader.c
+    utilities/engine_loader.h
+    utilities/extension_loggers.c
+    utilities/sql_print_logger.cc
+    utilities/util.c)
+
+ADD_CONVENIENCE_LIBRARY(daemon_memcached_utilities ${DAEMON_MEMCACHED_UTILITIES_SOURCES})
+
 # Needed by log.h header file
 ADD_DEPENDENCIES(daemon_memcached_utilities GenError)
+
+SET(DAEMON_MEMCACHED_LIBRARIES ${DAEMON_MEMCACHED_LIBRARIES} daemon_memcached_utilities)
+
+IF(DAEMON_MEMCACHED_ENABLE_SASL)
+  SET(DAEMON_MEMCACHED_LIBRARIES ${DAEMON_MEMCACHED_LIBRARIES} sasl2)
+ENDIF()
 
 SET(CMAKE_CPP_FLAGS "${CMAKE_CPP_FLAGS} ${CMAKE_SHARED_LIBRARY_C_FLAGS} -I${CMAKE_SOURCE_DIR}/plugin/daemon_memcached/daemon_memcached/daemon")
 
 SET(DAEMON_MEMCACHED_SOURCES
-		daemon/memcached_mysql.h
-		daemon/memcached_mysql.cc
-		daemon/cache.h
-		daemon/cache.c
-		config_static.h
-		daemon/daemon.c
-		daemon/hash.c
-		daemon/hash.h
-		daemon/memcached.c
-		daemon/memcached.h
-		daemon/sasl_defs.c
-		daemon/sasl_defs.h
-		daemon/stats.c
-		daemon/stats.h
-		daemon/thread.c
-		trace.h)
+    daemon/memcached_mysql.h
+    daemon/memcached_mysql.cc
+    daemon/cache.h
+    daemon/cache.c
+    config_static.h
+    daemon/daemon.c
+    daemon/hash.c
+    daemon/hash.h
+    daemon/memcached.c
+    daemon/memcached.h
+    daemon/sasl_defs.c
+    daemon/sasl_defs.h
+    daemon/stats.c
+    daemon/stats.h
+    daemon/thread.c
+    trace.h)
 
 MYSQL_ADD_PLUGIN(daemon_memcached ${DAEMON_MEMCACHED_SOURCES}
-		MODULE_ONLY MODULE_OUTPUT_NAME "daemon_memcached")
-
-TARGET_LINK_LIBRARIES(daemon_memcached ${LIBEVENT_LIBRARY})
-TARGET_LINK_LIBRARIES(daemon_memcached daemon_memcached_utilities)
-
-IF(DAEMON_MEMCACHED_ENABLE_SASL)
-  TARGET_LINK_LIBRARIES(daemon_memcached sasl2)
-ENDIF()
+                 MODULE_ONLY MODULE_OUTPUT_NAME "daemon_memcached"
+                 LINK_LIBRARIES ${DAEMON_MEMCACHED_LIBRARIES})
