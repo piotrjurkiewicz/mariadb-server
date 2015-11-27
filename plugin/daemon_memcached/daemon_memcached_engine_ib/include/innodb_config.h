@@ -31,7 +31,7 @@ Created 03/15/2011      Jimmy Yang
 typedef void*   hash_node_t;
 
 /* Database name and table name for our metadata "system" tables for
-Daemon Memcached NoSQL plugin.
+daemon_memcached NoSQL plugin.
 There is one "system table":
 1) containers - main configure table contains row describing which InnoDB
 		table is used to store/retrieve Memcached key/value if InnoDB

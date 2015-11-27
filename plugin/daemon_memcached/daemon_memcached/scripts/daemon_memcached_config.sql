@@ -4,14 +4,14 @@ USE daemon_memcached;
 
 -- ------------------------------------------------------------------------
 -- Following are set of "configuration tables" that used to configure
--- the Daemon Memcached NoSQL interface plugin.
+-- the daemon_memcached NoSQL interface plugin.
 -- ------------------------------------------------------------------------
 
 -- ------------------------------------------------------------------------
 -- Table `containers`
 --
 -- A container record describes an InnoDB table used for data storage by
--- the Daemon Memcached NoSQL plugin.
+-- the daemon_memcached NoSQL plugin.
 -- There must be a unique index on the `key column`, and unique index name
 -- is specified in the `unique_idx_name_on_key` column of the table
 -- `value_columns` are comma-separated lists of the columns that make up
@@ -35,8 +35,8 @@ ENGINE = InnoDB;
 -- This is an example
 --
 -- We create a InnoDB table `demo_test` is the `test` database
--- and insert an entry into contrainers' table to tell Daemon Memcached
--- that we has such InnoDB table as back store:
+-- and insert an entry into contrainers' table to tell daemon_memcached
+-- plugin that we has such InnoDB table as back store:
 -- c1 -> key
 -- c2 -> value
 -- c3 -> flags
