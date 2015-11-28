@@ -483,7 +483,7 @@ static PSI_file_info	all_innodb_files[] = {
 #endif /* __WIN__ */
 
 /** Set up InnoDB API callback function array */
-ib_cb_t innodb_api_cb[] = {
+__attribute__ ((visibility ("default"))) ib_cb_t innodb_api_cb[] = {
 	(ib_cb_t) ib_cursor_open_table,
 	(ib_cb_t) ib_cursor_read_row,
 	(ib_cb_t) ib_cursor_insert_row,
@@ -3160,8 +3160,6 @@ innobase_init(
           innobase_hton->tablefile_extensions = ha_innobase_exts;
 
 	innobase_hton->table_options = innodb_table_option_list;
-
-	innobase_hton->data = &innodb_api_cb;
 
 	innodb_remember_check_sysvar_funcs();
 

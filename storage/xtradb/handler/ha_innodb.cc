@@ -548,7 +548,7 @@ static PSI_file_info	all_innodb_files[] = {
 #endif /* __WIN__ */
 
 /** Set up InnoDB API callback function array */
-ib_cb_t innodb_api_cb[] = {
+__attribute__ ((visibility ("default"))) ib_cb_t innodb_api_cb[] = {
 	(ib_cb_t) ib_cursor_open_table,
 	(ib_cb_t) ib_cursor_read_row,
 	(ib_cb_t) ib_cursor_insert_row,
@@ -3528,8 +3528,6 @@ innobase_init(
         innobase_hton->get_checkpoint=innobase_wsrep_get_checkpoint;
         innobase_hton->fake_trx_id=wsrep_fake_trx_id;
 #endif /* WITH_WSREP */
-
-	innobase_hton->data = &innodb_api_cb;
 
 	innodb_remember_check_sysvar_funcs();
 

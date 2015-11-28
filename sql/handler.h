@@ -1338,7 +1338,6 @@ struct handlerton
    */
    int (*discover_table_structure)(handlerton *hton, THD* thd,
                                    TABLE_SHARE *share, HA_CREATE_INFO *info);
-   void *data; /* Location for engines to keep personal structures */
 };
 
 

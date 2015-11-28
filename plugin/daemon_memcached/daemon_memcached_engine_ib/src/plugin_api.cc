@@ -10,13 +10,22 @@
 
 #include "plugin_api.h"
 
+extern ib_cb_t* innodb_api_cb;
+
 static my_bool get_innodb_cb(THD *unused, plugin_ref plugin, void *arg)
 {
 	ib_cb_t*** innodb_cb_ptr = (ib_cb_t***) arg;
 
 	if (strcmp(plugin_name(plugin)->str, "InnoDB") == 0)
 	{
-		*innodb_cb_ptr = (ib_cb_t**) plugin_data(plugin, handlerton*)->data;
+		if (plugin_dlib(plugin) != NULL)
+		{
+			*innodb_cb_ptr = (ib_cb_t**) dlsym(plugin_dlib(plugin)->handle, "innodb_api_cb");
+		}
+		else
+		{
+			*innodb_cb_ptr = &innodb_api_cb;
+		}
 		return 1;
 	}
 	return 0;
