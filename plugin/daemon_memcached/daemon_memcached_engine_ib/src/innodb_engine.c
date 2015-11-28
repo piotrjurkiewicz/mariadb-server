@@ -39,6 +39,7 @@ Extracted and modified from NDB memcached project
 
 #include "innodb_engine.h"
 #include "innodb_engine_private.h"
+#include "plugin_api.h"
 #include "innodb_api.h"
 #include "hash_item_util.h"
 #include "innodb_cb_api.h"
@@ -403,20 +404,23 @@ innodb_initialize(
 	memcached_context_t	*context;
 	pthread_attr_t          attr;
 	meta_cfg_info_t*	meta_info;
+	ib_cb_t**		innodb_cb;
 
 	context = (memcached_context_t *) config_str;
 
 	pthread_mutex_init(&plugin_shutdown_mutex, NULL);
 	pthread_cond_init(&plugin_shutdown_cv, NULL);
 
+	innodb_cb = obtain_innodb_cb();
+
 	/* If no call back function registered (InnoDB engine failed to load),
 	load InnoDB Memcached engine should fail too */
-	if (!(context->config.innodb_api_cb)) {
+	if (!(innodb_cb)) {
 		return(ENGINE_TMPFAIL);
 	}
 
 	/* Register the call back function */
-	register_innodb_cb((void*) context->config.innodb_api_cb);
+	register_innodb_cb((void*) innodb_cb);
 
 	innodb_eng->read_batch_size = (context->config.r_batch_size
 					? context->config.r_batch_size

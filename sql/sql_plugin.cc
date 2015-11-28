@@ -127,9 +127,9 @@ plugin_type_init plugin_type_deinitialize[MYSQL_MAX_PLUGIN_TYPE_NUM]=
 */
 static int plugin_type_initialization_order[MYSQL_MAX_PLUGIN_TYPE_NUM]=
 {
-  MYSQL_DAEMON_PLUGIN,
   MariaDB_ENCRYPTION_PLUGIN,
   MYSQL_STORAGE_ENGINE_PLUGIN,
+  MYSQL_DAEMON_PLUGIN,
   MYSQL_INFORMATION_SCHEMA_PLUGIN,
   MYSQL_FTPARSER_PLUGIN,
   MYSQL_AUTHENTICATION_PLUGIN,
@@ -155,8 +155,6 @@ static const char *maria_plugin_declarations_sym=
 static int min_maria_plugin_interface_version=
                    MARIA_PLUGIN_INTERFACE_VERSION & ~0xFF;
 #endif
-
-static void *innodb_callback_data;
 
 /* Note that 'int version' must be the first field of every plugin
    sub-structure (plugin->info).
@@ -1408,21 +1406,9 @@ static int plugin_initialize(MEM_ROOT *tmp_root, struct st_plugin_int *plugin,
                       plugin->name.str, plugin_type_names[plugin->plugin->type].str);
       goto err;
     }
-
-    /* FIXME: Need better solution to transfer the callback function
-    array to memcached */
-    if (strcmp(plugin->name.str, "InnoDB") == 0)
-    {
-      innodb_callback_data = ((handlerton*)plugin->data)->data;
-    }
   }
   else if (plugin->plugin->init)
   {
-    if (strcmp(plugin->name.str, "daemon_memcached") == 0)
-    {
-      plugin->data = (void*)innodb_callback_data;
-    }
-
     if (plugin->plugin->init(plugin))
     {
       sql_print_error("Plugin '%s' init function returned error.",
@@ -1534,7 +1520,6 @@ int plugin_init(int *argc, char **argv, int flags)
   struct st_maria_plugin **builtins;
   struct st_maria_plugin *plugin;
   struct st_plugin_int tmp, *plugin_ptr, **reap;
-  struct st_plugin_int *memcached_plugin_ptr = NULL;
   MEM_ROOT tmp_root;
   bool reaped_mandatory_plugin= false;
   bool mandatory= true;
@@ -1671,7 +1656,6 @@ int plugin_init(int *argc, char **argv, int flags)
 
   /*
     Now we initialize all remaining plugins
-    (except memcached plugin)
   */
 
   mysql_mutex_lock(&LOCK_plugin);
@@ -1688,34 +1672,13 @@ int plugin_init(int *argc, char **argv, int flags)
         plugin_ptr= (struct st_plugin_int *) my_hash_element(hash, idx);
         if (plugin_ptr->state == PLUGIN_IS_UNINITIALIZED)
         {
-          if (strcmp(plugin_ptr->name.str, "daemon_memcached") == 0)
+          if (plugin_initialize(&tmp_root, plugin_ptr, argc, argv,
+                                (flags & PLUGIN_INIT_SKIP_INITIALIZATION)))
           {
-            memcached_plugin_ptr = plugin_ptr;
-          }
-          else
-          {
-            if (plugin_initialize(&tmp_root, plugin_ptr, argc, argv,
-                                  (flags & PLUGIN_INIT_SKIP_INITIALIZATION)))
-            {
-              plugin_ptr->state = PLUGIN_IS_DYING;
-              *(reap++) = plugin_ptr;
-            }
+            plugin_ptr->state= PLUGIN_IS_DYING;
+            *(reap++)= plugin_ptr;
           }
         }
-      }
-    }
-
-    /*
-      Now we initialize memcached plugin
-    */
-    if (memcached_plugin_ptr != NULL)
-    {
-      plugin_ptr = memcached_plugin_ptr;
-      if (plugin_initialize(&tmp_root, plugin_ptr, argc, argv,
-                            (flags & PLUGIN_INIT_SKIP_INITIALIZATION)))
-      {
-        plugin_ptr->state = PLUGIN_IS_DYING;
-        *(reap++) = plugin_ptr;
       }
     }
 

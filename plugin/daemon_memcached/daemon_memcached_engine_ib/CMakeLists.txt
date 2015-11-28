@@ -32,6 +32,7 @@ SET(DAEMON_MEMCACHED_ENGINE_IB_SOURCES
     src/innodb_engine.c
     src/innodb_api.c
     src/handler_api.cc
+    src/plugin_api.cc
     src/print_log.cc)
 
 MYSQL_ADD_PLUGIN(daemon_memcached_engine_ib ${DAEMON_MEMCACHED_ENGINE_IB_SOURCES}

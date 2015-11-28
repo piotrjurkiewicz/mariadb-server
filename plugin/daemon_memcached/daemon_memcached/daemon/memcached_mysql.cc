@@ -157,7 +157,6 @@ static int daemon_memcached_plugin_init(void *p)
     }
 
     context->config.option = mci_option;
-    context->config.innodb_api_cb = plugin->data;
     context->config.r_batch_size = mci_r_batch_size;
     context->config.w_batch_size = mci_w_batch_size;
     context->config.enable_binlog = mci_enable_binlog;

@@ -11,7 +11,6 @@ struct memcached_config
 {
     char *option;
     char *engine_library;
-    void *innodb_api_cb;
     unsigned int r_batch_size;
     unsigned int w_batch_size;
     bool enable_binlog;
