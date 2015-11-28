@@ -8,7 +8,7 @@ Following are simple steps to get everything started:
 
 3) Create the configure table and a demo table by running daemon_memcached_config.sql:
 
-    mysql < scripts/daemon_memcached_config.sql
+    mysql < /usr/share/mysql/daemon_memcached_config.sql
 
 4) Install the memcached daemon plugin:
 

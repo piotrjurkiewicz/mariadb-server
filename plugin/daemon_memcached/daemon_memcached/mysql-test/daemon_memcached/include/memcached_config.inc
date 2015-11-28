@@ -7,10 +7,30 @@ use daemon_memcached;
 #--
 #-- A container record describes an InnoDB table used for data storage by
 #-- daemon_memcached NoSQL plugin.
-#-- There must be a unique index on the `key column`, and unique index name
-#-- is specified in the `unique_idx_name_on_key` column of the table
-#-- `value_columns` are comma-separated lists of the columns that make up
-#-- the memcached key and value.
+#--
+#-- Column `name` should contain the protocol type, interface address and
+#-- port number on which this container should be listen. Supported
+#-- protocols are:
+#--
+#--     TCP - for example: tcp://192.168.1.100:11211
+#--     UDP - for example: udp://*:11211 (* - listen on all interfaces)
+#--     Unix stream sockets - for example: unix:/patch/to/socket.sock
+#--
+#-- Columns `db_schema` and `db_table` should contain names of database and
+#-- table for this container.
+#--
+#-- Column `key_columns` should contain the name of column which makes up
+#-- the memcached key.
+#--
+#-- There must be a unique index on the `key column` and this unique index
+#-- name must be specified in the `unique_idx_name_on_key` column of the
+#-- table.
+#--
+#-- Column `value_columns` is comma-separated lists of the columns that make
+#-- up the memcached value.
+#--
+#-- Column `sep` should contain a character which will be used to separate
+#-- values from individual columns in concatenated memcached value.
 #-- ------------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS `containers` (
