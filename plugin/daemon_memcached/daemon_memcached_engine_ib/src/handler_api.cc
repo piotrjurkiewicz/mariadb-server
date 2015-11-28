@@ -34,6 +34,7 @@ Created 3/14/2011 Jimmy Yang
 #include "my_sys.h"
 #include "m_string.h"
 #include "sql_plugin.h"
+#include "sql_table.h"
 #include "table.h"
 #include "sql_class.h"
 #include <sql_base.h>
@@ -48,20 +49,11 @@ Created 3/14/2011 Jimmy Yang
 #include "log.h"
 #include "print_log.h"
 
-/** Some handler functions defined in sql/sql_table.cc and sql/handler.cc etc.
-and being used here */
-
-/** function, defined in sql/handler.cc */
-extern int write_bin_log(THD *thd, bool clear_error,
-			 const char *query, size_t query_length,
-			 bool is_trans /*= false*/);
+/** Some handler functions defined in sql/handler.cc are being used here */
 
 /** Log_func function type, defined in sql/handler.cc */
 typedef bool Log_func(THD*, TABLE*, bool, MY_BITMAP*,
 		      uint, const uchar*, const uchar*);
-
-/** function to close a connection and thd, defined in sql/handler.cc */
-extern void ha_close_connection(THD* thd);
 
 /** binlog a row operation, defined in sql/handler.cc */
 extern int binlog_log_row(TABLE*          table,
