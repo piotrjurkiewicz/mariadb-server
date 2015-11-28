@@ -112,19 +112,13 @@
 #cmakedefine HAVE_SYS_WAIT_H 1
 #cmakedefine HAVE_SYS_PARAM_H 1
 
-/* For memcached */
+/* For daemon_memcached */
 #cmakedefine HAVE_NETINET_TCP_H 1
 #cmakedefine HAVE_NETDB_H 1
 #cmakedefine HAVE_SASL_SASL_H 1
 #cmakedefine HAVE_SYSEXITS_H 1
 #cmakedefine HAVE_SYS_UIO_H 1
 #cmakedefine HAVE_SIGIGNORE 1
-
-/* For libevent */
-#cmakedefine HAVE_DEVPOLL 1
-#cmakedefine HAVE_SYS_DEVPOLL_H 1
-#cmakedefine HAVE_SYS_EPOLL_H 1
-#cmakedefine HAVE_TAILQFOREACH 1
 
 /* Libraries */
 #cmakedefine HAVE_LIBPTHREAD 1
